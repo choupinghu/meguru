@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Meguru — Gotochi Hello Kitty, mapped across Japan</title>
 <meta name="description" content="Meguru maps a personal collection of regional (gotochi) Hello Kitty charms onto the Japan they came from — an interactive map, region drill-down, and condition-labelled catalogue.">
-<style>html,body{margin:0;padding:0}body{background:#F0EBDE}@media(prefers-color-scheme:dark){body{background:#14161D}}</style>
+<style>html,body{margin:0;padding:0}body{background:#F0EBDE}</style>
 </head>
 <body>
 <style>
@@ -42,45 +42,7 @@
   --font-display: "Hiragino Mincho ProN","Yu Mincho","YuMincho","Songti SC","Iowan Old Style",Palatino,Georgia,serif;
   --font-sans: "Hiragino Sans","Helvetica Neue","Segoe UI",system-ui,-apple-system,"Yu Gothic",sans-serif;
 }
-@media (prefers-color-scheme: dark){
-  :root{
-    --bg:        #14161D;
-    --bg-2:      #191C25;
-    --surface:   #1E222C;
-    --surface-2: #242936;
-    --land:      #2B303D;
-    --ink:       #ECE5D6;
-    --ink-soft:  #ADA48F;
-    --ink-faint: #7C7362;
-    --indigo:    #8AA6D4;
-    --vermilion: #F0654E;
-    --gold:      #D6AC66;
-    --line:      rgba(236,229,214,.15);
-    --line-soft: rgba(236,229,214,.08);
-    --shadow:    0 1px 2px rgba(0,0,0,.4), 0 14px 34px -18px rgba(0,0,0,.7);
-    --shadow-lg: 0 2px 4px rgba(0,0,0,.5), 0 34px 64px -28px rgba(0,0,0,.8);
-    --ok:    #86B27F;
-    --warn:  #D6AC66;
-    --clay:  #CE8C63;
-  }
-}
-/* explicit toggles must win over the media query in both directions */
-:root[data-theme="light"]{
-  --bg:#F0EBDE;--bg-2:#E9E2D0;--surface:#F8F4EA;--surface-2:#FBF8F0;--land:#DAD0B8;
-  --ink:#2B2621;--ink-soft:#6C6255;--ink-faint:#938976;--indigo:#2C4B7C;--vermilion:#CF432B;--gold:#A9812F;
-  --line:rgba(43,38,33,.16);--line-soft:rgba(43,38,33,.09);
-  --shadow:0 1px 2px rgba(43,38,33,.06),0 12px 30px -18px rgba(43,38,33,.35);
-  --shadow-lg:0 2px 4px rgba(43,38,33,.08),0 30px 60px -28px rgba(43,38,33,.45);
-  --ok:#5E8A5B;--warn:#B98A2E;--clay:#B06E48;
-}
-:root[data-theme="dark"]{
-  --bg:#14161D;--bg-2:#191C25;--surface:#1E222C;--surface-2:#242936;--land:#2B303D;
-  --ink:#ECE5D6;--ink-soft:#ADA48F;--ink-faint:#7C7362;--indigo:#8AA6D4;--vermilion:#F0654E;--gold:#D6AC66;
-  --line:rgba(236,229,214,.15);--line-soft:rgba(236,229,214,.08);
-  --shadow:0 1px 2px rgba(0,0,0,.4),0 14px 34px -18px rgba(0,0,0,.7);
-  --shadow-lg:0 2px 4px rgba(0,0,0,.5),0 34px 64px -28px rgba(0,0,0,.8);
-  --ok:#86B27F;--warn:#D6AC66;--clay:#CE8C63;
-}
+/* Meguru commits to a single paper / day identity — no dark theme by design. */
 
 *{box-sizing:border-box}
 .meguru{
@@ -109,11 +71,8 @@
 }
 .brand h1{font-family:var(--font-display);font-size:26px;font-weight:600;margin:0;letter-spacing:.01em;line-height:1}
 .brand .sub{font-size:11px;letter-spacing:.28em;text-transform:uppercase;color:var(--ink-faint);margin-top:5px}
-.theme-btn{
-  font:inherit;font-size:13px;color:var(--ink-soft);background:var(--surface);border:1px solid var(--line);
-  border-radius:999px;padding:8px 16px;cursor:pointer;display:inline-flex;align-items:center;gap:8px;transition:.2s;
-}
-.theme-btn:hover{color:var(--ink);border-color:var(--ink-faint)}
+.tagline{font-family:var(--font-display);font-size:14px;color:var(--ink-soft);letter-spacing:.02em}
+@media(max-width:560px){.tagline{display:none}}
 
 /* ---------- hero intro ---------- */
 .hero{max-width:var(--maxw);margin:6px auto 4px;padding:26px 24px 8px}
@@ -240,12 +199,23 @@
 .sec-head .ja{font-family:var(--font-display);color:var(--ink-faint);font-size:14px;margin-left:2px;font-weight:400}
 .sec-head p{font-size:14px;color:var(--ink-soft);margin:6px 0 0;max-width:46ch}
 
-/* carousel */
-.rail{display:flex;gap:14px;overflow-x:auto;padding:6px 4px 16px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch}
-.rail::-webkit-scrollbar{height:8px}
-.rail::-webkit-scrollbar-thumb{background:var(--line);border-radius:8px}
-.rail .card{min-width:230px;max-width:230px;scroll-snap-align:start}
-.rail .thumb{aspect-ratio:4/3}
+/* revolving shelf — coverflow */
+.coverflow{position:relative;margin-top:4px;outline:none}
+.cf-viewport{position:relative;height:320px;overflow:hidden;perspective:1200px;touch-action:pan-y}
+.cf-stage{position:absolute;inset:0;transform-style:preserve-3d}
+.cf-item{position:absolute;left:50%;top:50%;width:188px;height:224px;margin:-112px 0 0 -94px;padding:0;border:none;background:none;cursor:pointer;transition:transform .5s cubic-bezier(.22,.61,.36,1),opacity .5s;will-change:transform}
+.cf-item .frame{width:100%;height:100%;border-radius:16px;border:1px solid var(--line);box-shadow:var(--shadow);display:grid;place-items:center;overflow:hidden;
+  background:radial-gradient(120% 100% at 50% 6%, color-mix(in srgb,var(--rc) 28%,var(--surface)), color-mix(in srgb,var(--rc) 8%, var(--surface)))}
+.cf-item.center .frame{box-shadow:var(--shadow-lg);border-color:color-mix(in srgb,var(--rc) 55%,transparent)}
+.cf-item .frame svg{width:60%;height:auto;filter:drop-shadow(0 8px 12px rgba(43,38,33,.18))}
+.cf-caption{text-align:center;margin-top:16px;min-height:46px}
+.cf-caption .nm{font-family:var(--font-display);font-size:23px;font-weight:600;line-height:1.1}
+.cf-caption .jp{font-family:var(--font-display);color:var(--ink-faint);font-size:13px;margin-top:3px}
+.cf-nav{position:absolute;top:calc(50% - 46px);z-index:200;width:44px;height:44px;border-radius:50%;border:1px solid var(--line);
+  background:var(--surface);color:var(--ink);font-size:22px;line-height:1;cursor:pointer;box-shadow:var(--shadow);transition:.18s;display:grid;place-items:center}
+.cf-nav:hover{border-color:var(--ink-faint);transform:scale(1.07)}
+.cf-nav.prev{left:4px}.cf-nav.next{right:4px}
+@media(max-width:560px){.cf-item{width:150px;margin-left:-75px}.cf-nav.prev{left:0}.cf-nav.next{right:0}}
 
 .collab-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:14px}
 .card .brand-tag{position:absolute;top:12px;right:12px;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft);background:var(--surface);border:1px solid var(--line);padding:3px 8px;border-radius:999px}
@@ -277,7 +247,7 @@ footer .mark{font-family:var(--font-display);color:var(--vermilion)}
         <div class="sub">Gotochi Hello Kitty · 全国めぐり</div>
       </div>
     </div>
-    <button class="theme-btn" id="themeBtn" aria-label="Toggle light or dark theme"><span id="themeIcon">☾</span><span id="themeLbl">Night</span></button>
+    <div class="tagline">巡る — collect the country</div>
   </header>
 
   <section class="hero">
@@ -361,14 +331,19 @@ footer .mark{font-family:var(--font-display);color:var(--vermilion)}
     </div>
   </section>
 
-  <section class="section" id="specialSec">
+  <section class="section" id="shelfSec">
     <div class="sec-head">
       <div>
-        <h3>The special shelf <span class="ja">特別</span></h3>
-        <p>Grails, first editions, and the ones that are hard to let go of.</p>
+        <h3>The revolving shelf <span class="ja">廻る棚</span></h3>
+        <p>A fresh handful each visit — drift through the collection, one charm at a time.</p>
       </div>
     </div>
-    <div class="rail" id="specialRail"></div>
+    <div class="coverflow" id="coverflow" tabindex="0" aria-label="Revolving charm carousel — use arrow keys">
+      <button class="cf-nav prev" id="cfPrev" aria-label="Previous charm">&lsaquo;</button>
+      <div class="cf-viewport" id="cfViewport"><div class="cf-stage" id="cfStage"></div></div>
+      <button class="cf-nav next" id="cfNext" aria-label="Next charm">&rsaquo;</button>
+      <div class="cf-caption" id="cfCaption" aria-live="polite"></div>
+    </div>
   </section>
 
   <section class="section" id="collabSec">
@@ -409,27 +384,8 @@ footer .mark{font-family:var(--font-display);color:var(--vermilion)}
 
 <script>
 (function(){
-  const root = document.documentElement;
   const $ = (s,el)=> (el||document).querySelector(s);
   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-  /* ---------- theme toggle ---------- */
-  const themeBtn = $('#themeBtn');
-  function currentDark(){
-    const t = root.getAttribute('data-theme');
-    if(t) return t==='dark';
-    return window.matchMedia('(prefers-color-scheme: dark)').matches;
-  }
-  function syncThemeBtn(){
-    const d = currentDark();
-    $('#themeIcon').textContent = d ? '☀' : '☾';
-    $('#themeLbl').textContent  = d ? 'Day' : 'Night';
-  }
-  themeBtn.addEventListener('click',()=>{
-    root.setAttribute('data-theme', currentDark() ? 'light' : 'dark');
-    syncThemeBtn();
-  });
-  syncThemeBtn();
 
   /* ---------- data model ---------- */
   const REGIONS = {
@@ -756,10 +712,62 @@ footer .mark{font-family:var(--font-display);color:var(--vermilion)}
     [grails,'Rare & grail'],
   ].map(([n,l])=>`<div class="stat"><b>${n}</b><span>${l}</span></div>`).join('');
 
-  /* ---------- special + collab shelves ---------- */
-  $('#specialRail').innerHTML  = CHARMS.filter(c=>c.special).map(card).join('');
-  $('#collabGrid').innerHTML   = collabCharms.map(card).join('');
-  wireEnquire($('#specialRail')); wireEnquire($('#collabGrid'));
+  /* ---------- collab shelf ---------- */
+  $('#collabGrid').innerHTML = collabCharms.map(card).join('');
+  wireEnquire($('#collabGrid'));
+
+  /* ---------- revolving shelf (coverflow, circular) ---------- */
+  (function coverflow(){
+    const stage=$('#cfStage'), cap=$('#cfCaption'), cf=$('#coverflow');
+    // fresh shuffle each load → ~12 charms surface
+    const pool=CHARMS.slice();
+    for(let i=pool.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[pool[i],pool[j]]=[pool[j],pool[i]];}
+    const items=pool.slice(0,Math.min(12,pool.length)), len=items.length;
+    if(!len) return;
+    let active=Math.floor(Math.random()*len);
+    const els=items.map((c,i)=>{
+      const color=c.collab?collabRegion.color:REGIONS[regionKeyOf(c.code)].color;
+      const b=document.createElement('button');
+      b.className='cf-item'; b.style.setProperty('--rc',color);
+      b.innerHTML=`<div class="frame">${pouch(color)}</div>`;
+      b.setAttribute('aria-label',c.name);
+      b.addEventListener('click',()=>{ active=i; layout(); });
+      stage.appendChild(b); return b;
+    });
+    const wrapped=(i)=>{ let d=i-active; if(d>len/2)d-=len; if(d<-len/2)d+=len; return d; };
+    const gap=()=> Math.max(78, Math.min(128, (stage.clientWidth||760)/6));
+    function layout(){
+      const g=gap();
+      els.forEach((el,i)=>{
+        const d=wrapped(i), ad=Math.abs(d);
+        const s=d===0?1.16:Math.max(.55,1-ad*.13);
+        el.style.transform=`translateX(${d*g}px) rotateY(${Math.max(-48,Math.min(48,-d*20))}deg) scale(${s})`;
+        el.style.opacity=ad>4?0:1-ad*.17;
+        el.style.zIndex=String(100-ad);
+        el.style.pointerEvents=ad>4?'none':'auto';
+        el.classList.toggle('center',d===0);
+      });
+      const c=items[active];
+      cap.innerHTML=`<div class="nm">${c.name}</div><div class="jp">${c.ja}${c.collab?' · '+c.brand:''}</div>`;
+    }
+    const go=(n)=>{ active=(active+n+len)%len; layout(); };
+    $('#cfNext').addEventListener('click',()=>go(1));
+    $('#cfPrev').addEventListener('click',()=>go(-1));
+    cf.addEventListener('keydown',e=>{ if(e.key==='ArrowRight'){e.preventDefault();go(1);} if(e.key==='ArrowLeft'){e.preventDefault();go(-1);} });
+    // drag / swipe
+    const vp=$('#cfViewport'); let sx=null;
+    vp.addEventListener('pointerdown',e=>{ sx=e.clientX; stopAuto(); });
+    window.addEventListener('pointerup',e=>{ if(sx===null)return; const dx=e.clientX-sx; if(dx>40)go(-1); else if(dx<-40)go(1); sx=null; });
+    // gentle autoplay, pauses on interaction, off under reduced-motion
+    let timer=null;
+    const startAuto=()=>{ if(reduce)return; stopAuto(); timer=setInterval(()=>go(1),3400); };
+    function stopAuto(){ if(timer){clearInterval(timer);timer=null;} }
+    cf.addEventListener('pointerenter',stopAuto); cf.addEventListener('pointerleave',startAuto);
+    cf.addEventListener('focusin',stopAuto);      cf.addEventListener('focusout',startAuto);
+    window.addEventListener('resize',layout);
+    window.addEventListener('load',layout);
+    layout(); startAuto();
+  })();
 
   /* ---------- boot (after layout so getScreenCTM is valid) ---------- */
   function boot(){ buildPins(); renderOverview(); }
