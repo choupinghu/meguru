@@ -418,11 +418,16 @@ const SPECIFIC: Record<string, Emblem> = {
 };
 
 /** Three-level lookup: specific emblem -> motif emblem -> null (plain frame). */
-export function lookupEmblem(charm: CharmView): Emblem | null {
+/**
+ * The emblem for a charm, already rendered. Returns the element rather than the
+ * component so callers never assign a component during render, which would
+ * create a fresh component identity on every pass (react-hooks/static-components).
+ */
+export function renderEmblem(charm: CharmView): React.ReactElement | null {
   const slug = slugifyName(charm.name);
-  if (SPECIFIC[slug]) return SPECIFIC[slug];
-  if (charm.motif && MOTIF[charm.motif]) return MOTIF[charm.motif];
-  return null;
+  const emblem: Emblem | undefined =
+    SPECIFIC[slug] ?? (charm.motif ? MOTIF[charm.motif] : undefined);
+  return emblem ? emblem() : null;
 }
 
 /**
@@ -431,7 +436,7 @@ export function lookupEmblem(charm: CharmView): Emblem | null {
  * the plain frame (no badge) when nothing is found for this charm.
  */
 export default function CharmArt({ charm }: { charm: CharmView }) {
-  const Icon = lookupEmblem(charm);
+  const emblem = renderEmblem(charm);
 
   return (
     <svg viewBox="0 0 64 82" aria-hidden="true">
@@ -444,10 +449,10 @@ export default function CharmArt({ charm }: { charm: CharmView }) {
         <path d="M0 0 L11 -6 L11 6 Z" fill="var(--vermilion)" />
         <circle r={3.4} fill="var(--vermilion)" stroke="rgba(255,255,255,.65)" strokeWidth={1} />
       </g>
-      {Icon ? (
+      {emblem ? (
         <g transform="translate(32 48)">
           <circle r={16} fill="rgba(255,255,255,.30)" stroke="rgba(255,255,255,.55)" strokeWidth={1} />
-          <Icon />
+          {emblem}
         </g>
       ) : (
         <ellipse cx={24} cy={40} rx={7} ry={9} fill="rgba(255,255,255,.28)" />
