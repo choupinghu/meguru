@@ -6,10 +6,11 @@ import { REGIONS, regionForCode } from "@/lib/regions";
 import JapanMapSvg from "./JapanMapSvg";
 
 /**
- * Wraps the static <JapanMapSvg> in the prototype's mapcard frame and tints
- * every prefecture the collection actually reaches with its region colour.
- * Prefectures with nothing in them keep the neutral --land tone, so the map
- * reads as a picture of how far the collection travels.
+ * Wraps the static <JapanMapSvg> in the prototype's mapcard frame and colours
+ * every prefecture by its region: full strength where the collection reaches,
+ * a pale wash of the same hue where it doesn't. The map therefore reads as a
+ * picture of how far the collection travels while keeping the regional
+ * grouping legible everywhere.
  *
  * There are deliberately no pins. Tinting already carries "there are charms
  * here", and in 0003b the prefecture itself becomes the click target -- a far
@@ -19,15 +20,7 @@ import JapanMapSvg from "./JapanMapSvg";
  * Static for now: hover, selection, zoom, the side panel and "Discover" all
  * land in 0003b.
  */
-export default function MapExplorer({
-  charms,
-  tintAll = false,
-}: {
-  charms: CharmView[];
-  /** QA (?tint=all): colour every prefecture by region, not just the ones
-   *  with charms, so region groupings can be reviewed at a glance. */
-  tintAll?: boolean;
-}) {
+export default function MapExplorer({ charms }: { charms: CharmView[] }) {
   const svgRef = useRef<SVGSVGElement>(null);
 
   // Prefecture codes the collection reaches. Collabs (prefectureCode === null)
@@ -46,19 +39,13 @@ export default function MapExplorer({
     if (!svg) return;
     svg.querySelectorAll<SVGGElement>(".prefecture[data-code]").forEach((g) => {
       const code = Number(g.getAttribute("data-code"));
-      const has = reached.has(code);
-      if (has || tintAll) {
-        const regionKey = regionForCode(code);
-        if (regionKey) g.style.setProperty("--rc", REGIONS[regionKey].color);
-        g.classList.add("has");
-      } else {
-        g.classList.remove("has");
-        g.style.removeProperty("--rc");
-      }
-      // In QA mode, still distinguish the ones with nothing in them.
-      g.classList.toggle("qa-empty", tintAll && !has);
+      // Every prefecture gets its region colour; the `has` class decides
+      // whether it renders at full strength or as a pale wash.
+      const regionKey = regionForCode(code);
+      if (regionKey) g.style.setProperty("--rc", REGIONS[regionKey].color);
+      g.classList.toggle("has", reached.has(code));
     });
-  }, [charms, tintAll]);
+  }, [charms]);
 
   return (
     <section className="explore">

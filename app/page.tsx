@@ -9,17 +9,7 @@ import MapExplorer from "@/components/MapExplorer";
 // rendering so `next build` never tries to connect to the database.
 export const dynamic = "force-dynamic";
 
-export default async function Home({
-  searchParams,
-}: {
-  searchParams: Promise<{ tint?: string }>;
-}) {
-  // ?tint=all tints every prefecture by its region colour, including ones the
-  // collection doesn't reach, so the region groupings and the full palette can
-  // be checked at a glance. Opt-in, so the default view stays an honest picture
-  // of where the collection actually goes.
-  const tintAll = (await searchParams).tint === "all";
-
+export default async function Home() {
   const rows = await db.select().from(charms);
   const charmViews = rows.map(toCharmView);
 
@@ -73,7 +63,7 @@ export default async function Home({
         </div>
       </section>
 
-      <MapExplorer charms={charmViews} tintAll={tintAll} />
+      <MapExplorer charms={charmViews} />
 
       <section className="section">
         <div className="sec-head">

@@ -14,8 +14,9 @@
   --bg-2: #e9e2d0;
   --surface: #f8f4ea;
   --surface-2: #fbf8f0;
-  --land: #d2cfc8; /* map prefectures with no charms — desaturated warm grey so
-                      absence reads as absence and doesn't compete with the tints */
+  --land: #d2cfc8; /* fallback map fill, used only if a prefecture has no region
+                      colour set; empties normally show a pale wash of their own
+                      region hue instead */
   --ink: #2b2621; /* sumi */
   --ink-soft: #6c6255;
   --ink-faint: #938976;
@@ -221,7 +222,16 @@ body {
   display: block;
 }
 #jpmap .prefecture {
-  fill: var(--land);
+  /* Every prefecture carries its region's colour. Ones the collection hasn't
+     reached show it as a pale wash, so the regional language stays legible
+     across the whole map and a blank reads as "nothing from here yet" rather
+     than missing data.
+     Mixed toward WHITE in OKLAB, not toward the cream surface in sRGB: the
+     paper's warm cast cancels the chroma of the blues, which dropped Hokkaido
+     and Chubu to a chroma of ~2 and made them read as plain grey. Mixing
+     toward white in a perceptual space raises lightness while keeping the hue.
+     Mixed rather than faded with opacity, so borders stay crisp. */
+  fill: color-mix(in oklab, var(--rc, var(--land)) 42%, #fff);
   transition: fill 0.25s;
 }
 #jpmap .prefecture polygon,
@@ -231,12 +241,14 @@ body {
   vector-effect: non-scaling-stroke;
 }
 #jpmap .prefecture.has {
-  /* 64% rather than a paler mix: the whole point of the map is that reached
-     prefectures read as coloured against grey ones. */
-  fill: color-mix(in srgb, var(--rc) 64%, var(--surface));
+  /* Near-full strength. Keeping the empty wash colourful enough to avoid
+     reading grey squeezes the two states together, so the reached state has to
+     move up to compensate: 88% against the 42% wash holds the worst-case
+     separation at ~18 dE across all eight regions. */
+  fill: color-mix(in oklab, var(--rc) 88%, var(--surface));
 }
 #jpmap .prefecture.has:hover {
-  fill: color-mix(in srgb, var(--rc) 86%, transparent);
+  fill: var(--rc);
 }
 #jpmap .boundary-line line {
   stroke: var(--line);
@@ -485,10 +497,3 @@ footer .mark {
     transition-duration: 0.001ms !important;
   }
 }
-
-  /* QA only (?tint=all): every prefecture coloured by region so the groupings
-     can be reviewed. Prefectures the collection doesn't reach are dimmed, so
-     the honest signal is still legible underneath. */
-  #jpmap .prefecture.qa-empty {
-    opacity: 0.45;
-  }
