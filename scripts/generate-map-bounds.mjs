@@ -1,0 +1,137 @@
+/**
+ * Precomputes zoom bounds for every prefecture and every region from the static
+ * SVG geometry in components/JapanMapSvg.tsx, writing lib/map-bounds.ts.
+ *
+ * Why not measure the DOM? Two APIs look right and aren't:
+ *   - getBoundingClientRect() is screen space, so it depends on layout+scroll.
+ *   - getCTM() maps to the nearest *viewport*, which for an <svg> with a viewBox
+ *     includes the viewBox transform — so the result is in rendered units, not
+ *     the 0..1000 user space we need to assign back to viewBox. It also changes
+ *     while the viewBox is being animated, so bounds measured mid-zoom compound
+ *     the error.
+ * The geometry never moves, so the bounds are constants. Deterministic, no
+ * timing, and correct while zoomed.
+ *
+ * Islands are excluded from a prefecture's own bounds: Kagoshima's Amami
+ * islands and Tokyo's Ogasawara chain would otherwise blow the box out to sea
+ * and zoom to empty water. Region bounds union the mainlands of their members.
+ *
+ * Re-run with: node scripts/generate-map-bounds.mjs
+ */
+import { readFileSync, writeFileSync } from "node:fs";
+
+const SRC = "components/JapanMapSvg.tsx";
+const REG = "lib/regions.ts";
+const OUT = "lib/map-bounds.ts";
+
+const S = 1.028807, TX = -47.544239, TY = -28.806583; // g.svg-map
+const PX = 6, PY = 18;                                 // g.prefectures
+
+const src = readFileSync(SRC, "utf8");
+const groupRe =
+  /<g className="[^"]*prefecture" data-code="(\d+)"[^>]*transform="translate\(([\d.]+), ?([\d.]+)\)"[^>]*>([\s\S]*?)<\/g>/g;
+
+function subpaths(body) {
+  const subs = [];
+  for (const m of body.matchAll(/<polygon points="([^"]+)"/g)) {
+    const n = m[1].replace(/,/g, " ").trim().split(/\s+/).map(Number);
+    const p = [];
+    for (let i = 0; i < n.length; i += 2) p.push([n[i], n[i + 1]]);
+    if (p.length > 2) subs.push(p);
+  }
+  for (const m of body.matchAll(/<path d="([^"]+)"/g)) {
+    let cur = [];
+    for (const c of m[1].matchAll(/([MLZ])([^MLZ]*)/g)) {
+      if (c[1] === "Z") { if (cur.length > 2) subs.push(cur); cur = []; continue; }
+      const n = c[2].replace(/,/g, " ").trim().split(/\s+/).filter(Boolean).map(Number);
+      for (let i = 0; i < n.length; i += 2) cur.push([n[i], n[i + 1]]);
+    }
+    if (cur.length > 2) subs.push(cur);
+  }
+  return subs;
+}
+const area = (p) => {
+  let a = 0;
+  for (let i = 0; i < p.length; i++) {
+    const [x0, y0] = p[i], [x1, y1] = p[(i + 1) % p.length];
+    a += x0 * y1 - x1 * y0;
+  }
+  return Math.abs(a / 2);
+};
+const toRoot = ([x, y], tx, ty) => [(x + tx + PX) * S + TX, (y + ty + PY) * S + TY];
+
+/**
+ * Bounds of a prefecture's main island — the largest subpath, ignoring every
+ * other one.
+ *
+ * Two subtler approaches were tried and both framed water. Selecting by area
+ * share fails because Kagoshima's mainland is only 73% of its total area, so any
+ * sensible threshold drags in the Amami islands, which this map draws beside the
+ * Okinawa inset. Clustering by proximity fails more mildly: Tanegashima and
+ * Yakushima sit close enough to Kagoshima to pass, stretching the box out to
+ * sea. People mean the main island when they name a prefecture, so use exactly
+ * that — predictable, and always framed on land.
+ */
+function mainBounds(subs, tx, ty) {
+  const main = subs.reduce((a, b) => (area(a) >= area(b) ? a : b));
+  let x1 = Infinity, y1 = Infinity, x2 = -Infinity, y2 = -Infinity;
+  for (const pt of main) {
+    const [X, Y] = toRoot(pt, tx, ty);
+    x1 = Math.min(x1, X); y1 = Math.min(y1, Y);
+    x2 = Math.max(x2, X); y2 = Math.max(y2, Y);
+  }
+  return [x1, y1, x2, y2].map((v) => +Math.max(0, Math.min(1000, v)).toFixed(1));
+}
+
+const pref = {};
+for (const m of src.matchAll(groupRe)) {
+  const code = Number(m[1]);
+  const subs = subpaths(m[4]);
+  if (!subs.length) continue;
+  pref[code] = mainBounds(subs, Number(m[2]), Number(m[3]));
+}
+
+// region bounds = union of member prefectures
+const regionSrc = readFileSync(REG, "utf8");
+const regions = {};
+for (const m of regionSrc.matchAll(/"?([a-z-]+)"?:\s*\{[^}]*?codes:\s*\[([\d,\s]*)\]/g)) {
+  const codes = m[2].split(",").map((c) => Number(c.trim())).filter(Boolean);
+  if (!codes.length) continue;
+  // Okinawa (47) is drawn as an inset in the top-left, far from Kyushu. Including
+  // it in the region box would frame mostly open ocean, so it is left out of the
+  // region's zoom bounds; clicking Okinawa itself still zooms to Okinawa.
+  const zoomCodes = codes.length > 1 ? codes.filter((c) => c !== 47) : codes;
+  let x1 = Infinity, y1 = Infinity, x2 = -Infinity, y2 = -Infinity;
+  for (const c of zoomCodes) {
+    const b = pref[c];
+    if (!b) continue;
+    x1 = Math.min(x1, b[0]); y1 = Math.min(y1, b[1]);
+    x2 = Math.max(x2, b[2]); y2 = Math.max(y2, b[3]);
+  }
+  if (Number.isFinite(x1)) regions[m[1]] = [x1, y1, x2, y2].map((v) => +v.toFixed(1));
+}
+
+const fmt = (o) => Object.entries(o)
+  .map(([k, v]) => `  ${/^\d+$/.test(k) ? k : JSON.stringify(k)}: [${v.join(", ")}],`)
+  .join("\n");
+
+writeFileSync(OUT, `// GENERATED by scripts/generate-map-bounds.mjs — do not edit by hand.
+// Zoom bounds as [x1, y1, x2, y2] in the root SVG viewBox (0 0 1000 1000).
+// Derived from the static geometry, so they are correct regardless of layout,
+// scroll, or the viewBox currently being animated. Distant islands are excluded
+// so zooming to Kagoshima or Tokyo doesn't frame open water.
+// Regenerate with: node scripts/generate-map-bounds.mjs
+
+export type Bounds = [number, number, number, number];
+
+/** Per-prefecture bounds, keyed by prefecture code. */
+export const PREFECTURE_BOUNDS: Record<number, Bounds> = {
+${fmt(pref)}
+};
+
+/** Per-region bounds, keyed by region key. */
+export const REGION_BOUNDS: Record<string, Bounds> = {
+${fmt(regions)}
+};
+`);
+console.log(`wrote ${OUT}: ${Object.keys(pref).length} prefectures, ${Object.keys(regions).length} regions`);

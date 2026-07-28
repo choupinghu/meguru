@@ -8,14 +8,14 @@ import type { ReactNode } from "react";
  * `#jpmap` inline SVG (viewBox 0 0 1000 1000). Geometry, `data-code`
  * attributes and `<title>` elements are unchanged from the source, so pin
  * placement (measured against this exact geometry in MapExplorer) and
- * prefecture name lookups stay correct. Map geometry \u00a9 Geolonia (MIT).
+ * prefecture name lookups stay correct. Map geometry © Geolonia (MIT).
  *
- * Forwards its ref to the <svg> element so the parent can measure each
- * `.prefecture` group via getBoundingClientRect() + getScreenCTM() once the
- * map has been laid out (see MapExplorer). `children` are rendered as
- * siblings of the prefecture geometry, inside the same root <svg> -- this
- * is where MapExplorer mounts its measured pins, in the same coordinate
- * space `getScreenCTM()` resolves against.
+ * Forwards its ref to the <svg> element so MapExplorer can look up each
+ * `.prefecture` group by `data-code` (for class toggling and event
+ * delegation) and animate the root's `viewBox`. Zoom targets themselves come
+ * from the precomputed constants in `lib/map-bounds`, not from measuring this
+ * DOM. `children` render as siblings of the prefecture geometry inside the
+ * same root <svg>, i.e. in the root viewBox coordinate system.
  */
 const JapanMapSvg = forwardRef<SVGSVGElement, { children?: ReactNode }>(function JapanMapSvg(
   { children },
