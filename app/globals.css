@@ -195,6 +195,17 @@ body {
   margin: 22px auto 0;
   padding: 0 24px;
 }
+.explore-grid {
+  display: grid;
+  grid-template-columns: 1.32fr 0.95fr;
+  gap: 26px;
+  align-items: start;
+}
+@media (max-width: 900px) {
+  .explore-grid {
+    grid-template-columns: 1fr;
+  }
+}
 .mapcard {
   position: relative;
   background: var(--surface);
@@ -213,6 +224,66 @@ body {
   margin: 6px;
   pointer-events: none;
 }
+
+/* region legend chips -- their swatch colours come from the --rc custom
+   property set inline from lib/regions.ts data, the same convention
+   CharmCard/CharmThumb use; no literal colours live here. */
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-bottom: 10px;
+  position: relative;
+  z-index: 2;
+}
+.chip {
+  font: inherit;
+  font-size: 12.5px;
+  cursor: pointer;
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+  color: var(--ink-soft);
+  border-radius: 999px;
+  padding: 6px 11px 6px 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  transition: 0.18s;
+  line-height: 1;
+}
+.chip:hover {
+  color: var(--ink);
+  border-color: var(--ink-faint);
+  transform: translateY(-1px);
+}
+.chip .sw {
+  width: 11px;
+  height: 11px;
+  border-radius: 3px;
+  flex: none;
+  background: var(--rc, var(--land));
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.15);
+}
+.chip .cnt {
+  font-size: 10.5px;
+  color: var(--ink-faint);
+  font-variant-numeric: tabular-nums;
+}
+.chip.active {
+  background: var(--ink);
+  color: var(--surface);
+  border-color: var(--ink);
+}
+.chip.active .cnt {
+  color: rgba(255, 255, 255, 0.65);
+}
+.chip.all {
+  font-weight: 600;
+}
+.chip.all .sw {
+  background: linear-gradient(135deg, var(--vermilion), var(--indigo));
+}
+
 .mapstage {
   position: relative;
 }
@@ -220,6 +291,7 @@ body {
   width: 100%;
   height: auto;
   display: block;
+  touch-action: manipulation;
 }
 #jpmap .prefecture {
   /* Every prefecture carries its region's colour. Ones the collection hasn't
@@ -246,13 +318,213 @@ body {
      move up to compensate: 88% against the 42% wash holds the worst-case
      separation at ~18 dE across all eight regions. */
   fill: color-mix(in oklab, var(--rc) 88%, var(--surface));
+  /* There are no pins any more -- the prefecture shape itself is the click
+     target, so the pointer cursor + hover swap below are the only signal
+     that a shape is interactive. */
+  cursor: pointer;
 }
 #jpmap .prefecture.has:hover {
   fill: var(--rc);
 }
+#jpmap .prefecture.selected {
+  fill: var(--vermilion);
+}
+#jpmap .prefecture.selected polygon,
+#jpmap .prefecture.selected path {
+  stroke: var(--ink);
+  stroke-width: 1.2px;
+}
+#jpmap.filtered .prefecture:not(.in-region) {
+  opacity: 0.28;
+}
 #jpmap .boundary-line line {
   stroke: var(--line);
   stroke-width: 10px;
+}
+
+.maptools {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 6px;
+  position: relative;
+  z-index: 2;
+}
+.discover {
+  font: inherit;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  color: #fff;
+  background: var(--vermilion);
+  border: none;
+  border-radius: 999px;
+  padding: 9px 16px;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  box-shadow: var(--shadow);
+  transition: transform 0.15s, filter 0.15s;
+}
+.discover:hover {
+  filter: brightness(1.06);
+}
+.discover .st {
+  width: 18px;
+  height: 18px;
+  border: 1.5px solid rgba(255, 255, 255, 0.7);
+  border-radius: 4px;
+  display: grid;
+  place-items: center;
+  font-family: var(--font-display);
+  font-size: 12px;
+}
+.discover.spin {
+  animation: press 0.5s ease;
+}
+@keyframes press {
+  0%,
+  100% {
+    transform: scale(1) rotate(0);
+  }
+  30% {
+    transform: scale(0.92) rotate(-4deg);
+  }
+  60% {
+    transform: scale(1.04) rotate(3deg);
+  }
+}
+
+/* ---------- side panel ---------- */
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 20px;
+  min-height: 340px;
+}
+.panel-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  border-bottom: 1px solid var(--line-soft);
+  padding-bottom: 14px;
+  margin-bottom: 16px;
+}
+.crumb {
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  /* Defaults to the vermilion accent for the All-Japan overview; region and
+     prefecture panels set --rc inline (from lib/regions.ts data) to tint it
+     with that region's hue instead. */
+  color: var(--rc, var(--vermilion));
+  font-weight: 600;
+  margin-bottom: 7px;
+}
+.panel-head h3 {
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 600;
+  margin: 0;
+  line-height: 1.1;
+}
+.panel-head .ja {
+  font-size: 14px;
+  color: var(--ink-soft);
+  font-family: var(--font-display);
+  margin-top: 3px;
+}
+.reset {
+  font: inherit;
+  font-size: 12px;
+  color: var(--ink-soft);
+  background: none;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 6px 12px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: 0.18s;
+}
+.reset:hover {
+  color: var(--ink);
+  border-color: var(--ink-faint);
+}
+.panel-note {
+  font-size: 13.5px;
+  color: var(--ink-soft);
+  margin: 0 0 8px;
+}
+
+/* region overview grid (default panel state) */
+.reg-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.reg-cell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 11px;
+  border: 1px solid var(--line-soft);
+  border-radius: 10px;
+  background: var(--surface-2);
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+  transition: 0.18s;
+  color: var(--ink);
+}
+.reg-cell:hover {
+  border-color: var(--ink-faint);
+  transform: translateY(-1px);
+}
+.reg-cell:disabled {
+  opacity: 0.45;
+  cursor: default;
+  transform: none;
+}
+.reg-cell .sw {
+  width: 14px;
+  height: 14px;
+  border-radius: 4px;
+  flex: none;
+  background: var(--rc);
+}
+.reg-cell .rn {
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+.reg-cell .rj {
+  font-size: 11px;
+  color: var(--ink-faint);
+  font-family: var(--font-display);
+}
+.reg-cell .rc {
+  margin-left: auto;
+  font-size: 13px;
+  color: var(--ink-soft);
+  font-variant-numeric: tabular-nums;
+}
+
+/* region/prefecture panel charm listing -- cards themselves are the shared
+   .card styling above (from CharmCard), this just lays them out in the
+   narrower panel column. */
+.cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+@media (max-width: 520px) {
+  .cards {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* ---------- section shell ---------- */
