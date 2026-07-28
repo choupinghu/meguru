@@ -187,6 +187,59 @@ body {
   color: var(--ink-faint);
 }
 
+/* ---------- map ---------- */
+.explore {
+  max-width: var(--maxw);
+  margin: 22px auto 0;
+  padding: 0 24px;
+}
+.mapcard {
+  position: relative;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 16px 16px 12px;
+  overflow: hidden;
+}
+.mapcard::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius);
+  margin: 6px;
+  pointer-events: none;
+}
+.mapstage {
+  position: relative;
+}
+#jpmap {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+#jpmap .prefecture {
+  fill: var(--land);
+  transition: fill 0.25s;
+}
+#jpmap .prefecture polygon,
+#jpmap .prefecture path {
+  stroke: color-mix(in srgb, var(--ink) 32%, transparent);
+  stroke-width: 0.8px;
+  vector-effect: non-scaling-stroke;
+}
+#jpmap .prefecture.has {
+  fill: color-mix(in srgb, var(--rc) 46%, var(--surface));
+}
+#jpmap .prefecture.has:hover {
+  fill: color-mix(in srgb, var(--rc) 78%, transparent);
+}
+#jpmap .boundary-line line {
+  stroke: var(--line);
+  stroke-width: 10px;
+}
+
 /* ---------- section shell ---------- */
 .section {
   max-width: var(--maxw);
@@ -429,3 +482,10 @@ footer .mark {
     transition-duration: 0.001ms !important;
   }
 }
+
+  /* QA only (?tint=all): every prefecture coloured by region so the groupings
+     can be reviewed. Prefectures the collection doesn't reach are dimmed, so
+     the honest signal is still legible underneath. */
+  #jpmap .prefecture.qa-empty {
+    opacity: 0.45;
+  }

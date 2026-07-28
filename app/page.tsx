@@ -3,12 +3,23 @@ import { charms } from "@/db/schema";
 import { toCharmView } from "@/lib/charms";
 import { REGION_LIST } from "@/lib/regions";
 import CharmCard from "@/components/CharmCard";
+import MapExplorer from "@/components/MapExplorer";
 
 // This page queries Neon via Drizzle at request time. Force dynamic
 // rendering so `next build` never tries to connect to the database.
 export const dynamic = "force-dynamic";
 
-export default async function Home() {
+export default async function Home({
+  searchParams,
+}: {
+  searchParams: Promise<{ tint?: string }>;
+}) {
+  // ?tint=all tints every prefecture by its region colour, including ones the
+  // collection doesn't reach, so the region groupings and the full palette can
+  // be checked at a glance. Opt-in, so the default view stays an honest picture
+  // of where the collection actually goes.
+  const tintAll = (await searchParams).tint === "all";
+
   const rows = await db.select().from(charms);
   const charmViews = rows.map(toCharmView);
 
@@ -62,6 +73,8 @@ export default async function Home() {
         </div>
       </section>
 
+      <MapExplorer charms={charmViews} tintAll={tintAll} />
+
       <section className="section">
         <div className="sec-head">
           <div>
@@ -91,6 +104,7 @@ export default async function Home() {
           of Sanrio Co., Ltd. Meguru is an independent collector&apos;s
           catalogue and is not affiliated with or endorsed by Sanrio.
         </span>
+        <span>Map geometry &copy; Geolonia (MIT).</span>
       </footer>
     </div>
   );
