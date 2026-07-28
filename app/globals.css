@@ -14,7 +14,8 @@
   --bg-2: #e9e2d0;
   --surface: #f8f4ea;
   --surface-2: #fbf8f0;
-  --land: #dad0b8; /* map prefectures with no charms */
+  --land: #d2cfc8; /* map prefectures with no charms — desaturated warm grey so
+                      absence reads as absence and doesn't compete with the tints */
   --ink: #2b2621; /* sumi */
   --ink-soft: #6c6255;
   --ink-faint: #938976;
@@ -230,10 +231,12 @@ body {
   vector-effect: non-scaling-stroke;
 }
 #jpmap .prefecture.has {
-  fill: color-mix(in srgb, var(--rc) 46%, var(--surface));
+  /* 64% rather than a paler mix: the whole point of the map is that reached
+     prefectures read as coloured against grey ones. */
+  fill: color-mix(in srgb, var(--rc) 64%, var(--surface));
 }
 #jpmap .prefecture.has:hover {
-  fill: color-mix(in srgb, var(--rc) 78%, transparent);
+  fill: color-mix(in srgb, var(--rc) 86%, transparent);
 }
 #jpmap .boundary-line line {
   stroke: var(--line);
