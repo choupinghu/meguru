@@ -2,6 +2,8 @@
 
 **Gotochi Hello Kitty, mapped across Japan.**
 
+> The catalogue is now a Next.js + Neon + Drizzle app at the repo root; `prototype/index.html` is kept as the original self-contained reference build.
+
 Meguru (巡る — *to make the rounds*) turns a personal collection of regional
 (ご当地 / *gotochi*) Hello Kitty charms into an interactive map of the country
 they came from. It's built **listing-first**: the point is to catalogue and
@@ -24,7 +26,7 @@ dependencies, no backend. Currently seeded with ~24 *representative* charms
 Just open the file — it's fully self-contained:
 
 ```
-open index.html
+open prototype/index.html
 ```
 
 (A live preview is also published privately as a Claude Artifact.)
@@ -46,7 +48,7 @@ open index.html
 ## Adding a charm
 
 Everything renders from the `CHARMS` array near the top of the `<script>` in
-`index.html`. Listing a charm = adding one line:
+`prototype/index.html`. Listing a charm = adding one line:
 
 ```js
 {code:26, name:'Maiko', ja:'舞妓', city:'Kyoto 京都',
