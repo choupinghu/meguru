@@ -16,7 +16,8 @@ export type RegionKey =
   | "kinki"
   | "chugoku"
   | "shikoku"
-  | "kyushu-okinawa";
+  | "kyushu"
+  | "okinawa";
 
 export interface RegionInfo {
   key: RegionKey;
@@ -41,12 +42,25 @@ export const REGIONS: Record<RegionKey, RegionInfo> = {
   kinki: { key: "kinki", ja: "近畿", en: "Kinki", color: "#96568A", codes: [24, 25, 26, 27, 28, 29, 30] },
   chugoku: { key: "chugoku", ja: "中国", en: "Chūgoku", color: "#AD8639", codes: [31, 32, 33, 34, 35] },
   shikoku: { key: "shikoku", ja: "四国", en: "Shikoku", color: "#4F9E89", codes: [36, 37, 38, 39] },
-  "kyushu-okinawa": {
-    key: "kyushu-okinawa",
-    ja: "九州・沖縄",
-    en: "Kyūshū · Okinawa",
+  kyushu: {
+    key: "kyushu",
+    ja: "九州",
+    en: "Kyūshū",
     color: "#C25B4E",
-    codes: [40, 41, 42, 43, 44, 45, 46, 47],
+    codes: [40, 41, 42, 43, 44, 45, 46],
+  },
+  // Okinawa stands on its own rather than being folded into Kyushu. The
+  // eight-region scheme groups them, but the Ryukyu Kingdom was independent
+  // until 1879 and its charms are distinctly Ryukyuan -- shisa, ryuso,
+  // Yaeyama water buffalo, yanbaru kuina. It is also drawn as a detached
+  // inset, so sharing Kyushu's bounds made every zoom to the region a
+  // special case.
+  okinawa: {
+    key: "okinawa",
+    ja: "沖縄",
+    en: "Okinawa",
+    color: "#BE5C86",
+    codes: [47],
   },
 };
 

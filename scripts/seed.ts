@@ -27,7 +27,8 @@ type Region =
   | "kinki"
   | "chugoku"
   | "shikoku"
-  | "kyushu-okinawa";
+  | "kyushu"
+  | "okinawa";
 
 // Region prefecture-code ranges, ported from prototype/index.html's REGIONS.
 const REGION_RANGES: Record<Region, number[]> = {
@@ -38,7 +39,8 @@ const REGION_RANGES: Record<Region, number[]> = {
   kinki: [24, 25, 26, 27, 28, 29, 30],
   chugoku: [31, 32, 33, 34, 35],
   shikoku: [36, 37, 38, 39],
-  "kyushu-okinawa": [40, 41, 42, 43, 44, 45, 46, 47],
+  kyushu: [40, 41, 42, 43, 44, 45, 46],
+  okinawa: [47],
 };
 
 function regionForCode(code: number): Region {

@@ -18,7 +18,8 @@ export const regionEnum = pgEnum("region", [
   "kinki",
   "chugoku",
   "shikoku",
-  "kyushu-okinawa",
+  "kyushu",
+  "okinawa",
   "collab",
 ]);
 
