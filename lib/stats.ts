@@ -1,10 +1,16 @@
 /**
  * The header stat row's four live figures. Pulled out of app/page.tsx so
- * `/` and `/browse` (both of which already have the full charm list in hand
- * for their own content) can derive identical numbers from one place rather
- * than each re-deriving its own counting logic.
+ * `/` and `/browse` (both of which already have the full design list in
+ * hand for their own content) can derive identical numbers from one place
+ * rather than each re-deriving its own counting logic.
+ *
+ * Every figure here counts designs, not items — owning three copies of one
+ * design must not extend "prefectures reached" or inflate the catalogue
+ * count. Since `designs` is already one row per design, counting the array
+ * itself (rather than anything nested under `.items`) is what keeps that
+ * true.
  */
-import type { CharmView } from "./charms";
+import type { DesignView } from "./charms";
 import { REGION_LIST } from "./regions";
 
 export interface StatEntry {
@@ -12,16 +18,16 @@ export interface StatEntry {
   label: string;
 }
 
-export function buildStats(charms: CharmView[]): StatEntry[] {
+export function buildStats(designs: DesignView[]): StatEntry[] {
   const prefecturesReached = new Set(
-    charms.filter((c) => c.prefectureCode != null).map((c) => c.prefectureCode)
+    designs.filter((d) => d.prefectureCode != null).map((d) => d.prefectureCode)
   ).size;
-  const rareAndGrail = charms.filter(
-    (c) => c.rarity === "rare" || c.rarity === "grail"
+  const rareAndGrail = designs.filter(
+    (d) => d.rarity === "rare" || d.rarity === "grail"
   ).length;
 
   return [
-    { value: charms.length, label: "Charms catalogued" },
+    { value: designs.length, label: "Charms catalogued" },
     { value: prefecturesReached, label: "Prefectures reached" },
     { value: REGION_LIST.length, label: "Regions" },
     { value: rareAndGrail, label: "Rare & grail" },

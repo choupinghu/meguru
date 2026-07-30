@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import type { CSSProperties } from "react";
-import type { CharmView } from "@/lib/charms";
+import type { DesignView } from "@/lib/charms";
 import { REGIONS, REGION_LIST, regionForCode, type RegionKey } from "@/lib/regions";
 import { PREFECTURES } from "@/lib/prefectures";
 import { PREFECTURE_BOUNDS, REGION_BOUNDS, type Bounds } from "@/lib/map-bounds";
@@ -11,6 +11,12 @@ import MapPanel, { type PanelView } from "./MapPanel";
 
 /** The map's native coordinate space -- JapanMapSvg's `viewBox="0 0 1000 1000"`,
  * already in `[x, y, width, height]` viewBox-attribute form. */
+/* The two transforms wrapping every prefecture group in JapanMapSvg. The selection
+   outline is rendered at the SVG root (after all geometry, so nothing paints over it),
+   so it has to re-apply this chain to land in the same place as the prefecture. */
+const OUTER_TRANSFORM =
+  "matrix(1.028807, 0, 0, 1.028807, -47.544239, -28.806583) matrix(1, 0, 0, 1, 6, 18)";
+
 const FULL_VIEW_BOX: [number, number, number, number] = [0, 0, 1000, 1000];
 /** Matches the prototype's `animateVB` easing/duration. */
 const ZOOM_DURATION_MS = 650;
@@ -157,9 +163,16 @@ function clickPrefecture(state: ExplorerState, code: number, hasCharms: boolean)
  * All 47 prefecture click/keyboard handlers are attached once via event
  * delegation on the SVG root (rather than one listener per shape), since the
  * SVG itself is a static, unchanging blob of markup.
+ *
+ * `charms` is one entry per design (never per item, see spec 0005) — every
+ * count derived from it below (per-prefecture, per-region, the map-wide
+ * total) is therefore design-based: owning a second copy of one design
+ * never changes how many prefectures/regions/charms the map reports.
  */
-export default function MapExplorer({ charms }: { charms: CharmView[] }) {
+export default function MapExplorer({ charms }: { charms: DesignView[] }) {
   const svgRef = useRef<SVGSVGElement>(null);
+  // Geometry of the selected prefecture, re-drawn on top as an outline.
+  const [selOutline, setSelOutline] = useState<{ transform: string; html: string } | null>(null);
   const prefEls = useRef<Map<number, SVGGElement>>(new Map());
   const curViewBox = useRef<[number, number, number, number]>(FULL_VIEW_BOX);
   const animationFrame = useRef<number | null>(null);
@@ -168,10 +181,10 @@ export default function MapExplorer({ charms }: { charms: CharmView[] }) {
 
   const [state, setState] = useState<ExplorerState>({ level: "japan" });
 
-  // Prefecture codes the collection reaches, grouped into their charms.
+  // Prefecture codes the collection reaches, grouped into their designs.
   // Collabs (prefectureCode === null) don't belong to the map.
   const byCode = useMemo(() => {
-    const map = new Map<number, CharmView[]>();
+    const map = new Map<number, DesignView[]>();
     for (const charm of charms) {
       if (charm.prefectureCode == null) continue;
       const list = map.get(charm.prefectureCode);
@@ -279,6 +292,17 @@ export default function MapExplorer({ charms }: { charms: CharmView[] }) {
     svg.querySelectorAll(".prefecture.selected").forEach((g) => g.classList.remove("selected"));
     if (state.level === "prefecture") {
       prefEls.current.get(state.code)?.classList.add("selected");
+      const sel = prefEls.current.get(state.code);
+      setSelOutline(
+        sel
+          ? {
+              transform: `${OUTER_TRANSFORM} ${sel.getAttribute("transform") ?? ""}`.trim(),
+              html: sel.innerHTML,
+            }
+          : null
+      );
+    } else {
+      setSelOutline(null);
     }
   }, [state]);
 
@@ -468,7 +492,16 @@ export default function MapExplorer({ charms }: { charms: CharmView[] }) {
             ))}
           </div>
           <div className="mapstage">
-            <JapanMapSvg ref={svgRef} />
+            <JapanMapSvg ref={svgRef}>
+              {selOutline ? (
+                <g
+                  className="sel-outline"
+                  transform={selOutline.transform}
+                  aria-hidden="true"
+                  dangerouslySetInnerHTML={{ __html: selOutline.html }}
+                />
+              ) : null}
+            </JapanMapSvg>
           </div>
           <div className="maptools">
             <div className="maptools-nav">

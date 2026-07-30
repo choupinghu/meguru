@@ -1,6 +1,5 @@
 import { db } from "@/db";
-import { charms } from "@/db/schema";
-import { toCharmView } from "@/lib/charms";
+import { toDesignView } from "@/lib/charms";
 import { buildStats } from "@/lib/stats";
 import CharmCard from "@/components/CharmCard";
 import SiteHeader from "@/components/SiteHeader";
@@ -12,16 +11,16 @@ import SiteFooter from "@/components/SiteFooter";
 export const dynamic = "force-dynamic";
 
 /**
- * The standalone catalogue: every charm (including off-the-map collabs) as
+ * The standalone catalogue: every design (including off-the-map collabs) as
  * a CharmCard in the responsive grid, for scanning and comparing condition
  * against price, rarity, status and motif. Deliberately no story text here
  * — that's the one thing this surface never shows (see spec 0004/0008) —
  * and cards are not yet links (they become `/charm/[id]` links in 0008).
  */
 export default async function BrowsePage() {
-  const rows = await db.select().from(charms);
-  const charmViews = rows.map(toCharmView);
-  const stats = buildStats(charmViews);
+  const rows = await db.query.designs.findMany({ with: { items: true } });
+  const designViews = rows.map((row) => toDesignView(row, row.items));
+  const stats = buildStats(designViews);
 
   return (
     <div className="meguru">
@@ -40,8 +39,8 @@ export default async function BrowsePage() {
           </div>
         </div>
         <div className="charm-grid">
-          {charmViews.map((charm) => (
-            <CharmCard charm={charm} key={charm.id} />
+          {designViews.map((design) => (
+            <CharmCard design={design} key={design.id} />
           ))}
         </div>
       </section>

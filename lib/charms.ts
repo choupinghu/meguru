@@ -1,11 +1,18 @@
 /**
- * The shared charm vocabulary: a serialisable view type mapped from the
- * Drizzle row, plus condition / rarity / status / colour helpers. Every
- * component that renders a charm (CharmCard, CharmThumb, and later the map
- * / coverflow / collab shelf) reads through this module rather than the raw
- * DB row or the prototype's ad hoc field names.
+ * The shared charm vocabulary: joined design/item view types mapped from
+ * the Drizzle rows, plus condition / rarity / status / colour helpers.
+ * Every component that renders a charm (CharmCard, CharmThumb, charm-art,
+ * the map / panel) reads through this module rather than the raw DB rows.
+ *
+ * A `charms` row used to mix a design's identity (name, prefecture, motif,
+ * rarity — true of every copy) with a single item's shelf state
+ * (condition, status, price). Spec 0005 splits that into `designs` +
+ * `items`; this module is the seam: `DesignView` is a design plus its
+ * (possibly several) items, and `toCharmView` flattens a design down to the
+ * single-item-shaped `CharmView` that CharmThumb / charm-art — ported
+ * unchanged from before the split — still render from.
  */
-import type { Charm } from "@/db/schema";
+import type { Design, Item } from "@/db/schema";
 import { COLLAB_REGION, REGIONS, regionForCode } from "./regions";
 import { PREFECTURES } from "./prefectures";
 
@@ -13,8 +20,69 @@ export type Condition = "bnib" | "boxed-notag" | "nobox-tag" | "nobox-notag";
 export type Rarity = "common" | "uncommon" | "rare" | "grail";
 export type Status = "available" | "reserved" | "sold" | "keepsake";
 
-/** A charm shaped for rendering — plain data, safe to pass from a server
- * component to a client component without leaking Drizzle internals. */
+/** One physical copy of a design — its shelf state. */
+export interface ItemView {
+  id: number;
+  condition: Condition;
+  status: Status;
+  priceSgd: number | null;
+  note: string | null;
+  imageUrl: string | null;
+}
+
+/** A design plus every item currently on the shelf for it. The unit every
+ * page and (almost) every component works with. */
+export interface DesignView {
+  id: number;
+  name: string;
+  nameJa: string | null;
+  isCollab: boolean;
+  prefectureCode: number | null;
+  region: string;
+  city: string | null;
+  brand: string | null;
+  /** First tag is treated as the charm's motif (food / landmark / animal / ...). */
+  motif: string | null;
+  rarity: Rarity;
+  special: boolean;
+  items: ItemView[];
+}
+
+export function toItemView(row: Item): ItemView {
+  return {
+    id: row.id,
+    condition: row.condition as Condition,
+    status: row.status as Status,
+    priceSgd: row.priceSgd,
+    note: row.note,
+    imageUrl: row.imageUrl,
+  };
+}
+
+export function toDesignView(design: Design, items: Item[]): DesignView {
+  return {
+    id: design.id,
+    name: design.name,
+    nameJa: design.nameJa,
+    isCollab: design.isCollab,
+    prefectureCode: design.prefectureCode,
+    region: design.region,
+    city: design.city,
+    brand: design.brand,
+    motif: design.motif,
+    rarity: design.rarity as Rarity,
+    special: design.special,
+    items: items.map(toItemView),
+  };
+}
+
+/**
+ * A design flattened down to one representative item — the shape
+ * CharmThumb / charm-art (unchanged since before the designs/items split)
+ * still render from: a thumbnail only ever needs one image. Every seeded
+ * design today has exactly one item, so this is lossless; a design with
+ * several items just shows the first one's photo.
+ */
 export interface CharmView {
   id: number;
   name: string;
@@ -24,35 +92,23 @@ export interface CharmView {
   region: string;
   city: string | null;
   brand: string | null;
-  condition: Condition;
-  rarity: Rarity;
-  status: Status;
-  priceSgd: number | null;
-  special: boolean;
-  note: string | null;
-  imageUrl: string | null;
-  /** First tag is treated as the charm's motif (food / landmark / animal / ...). */
   motif: string | null;
+  imageUrl: string | null;
 }
 
-export function toCharmView(row: Charm): CharmView {
+export function toCharmView(design: DesignView): CharmView {
+  const item = design.items[0];
   return {
-    id: row.id,
-    name: row.name,
-    nameJa: row.nameJa,
-    isCollab: row.isCollab,
-    prefectureCode: row.prefectureCode,
-    region: row.region,
-    city: row.city,
-    brand: row.brand,
-    condition: row.condition as Condition,
-    rarity: row.rarity as Rarity,
-    status: row.status as Status,
-    priceSgd: row.priceSgd,
-    special: row.special,
-    note: row.note,
-    imageUrl: row.imageUrl,
-    motif: row.tags?.[0] ?? null,
+    id: design.id,
+    name: design.name,
+    nameJa: design.nameJa,
+    isCollab: design.isCollab,
+    prefectureCode: design.prefectureCode,
+    region: design.region,
+    city: design.city,
+    brand: design.brand,
+    motif: design.motif,
+    imageUrl: item?.imageUrl ?? null,
   };
 }
 
@@ -92,8 +148,17 @@ export function motifLabel(motif: string | null): string | null {
   return motif.charAt(0).toUpperCase() + motif.slice(1);
 }
 
+/** The design fields `locationLabel`/`charmColor` need — satisfied by both
+ * `DesignView` and the flattened `CharmView`. */
+type Locatable = {
+  isCollab: boolean;
+  prefectureCode: number | null;
+  brand: string | null;
+  city: string | null;
+};
+
 /** "Prefecture · City" for gotochi charms, or the brand for collabs. */
-export function locationLabel(charm: CharmView): string {
+export function locationLabel(charm: Locatable): string {
   if (charm.isCollab) return charm.brand ?? COLLAB_REGION.en;
   const prefecture = charm.prefectureCode != null ? PREFECTURES[charm.prefectureCode] : undefined;
   const prefLabel = prefecture?.en ?? "Unknown prefecture";
@@ -101,13 +166,13 @@ export function locationLabel(charm: CharmView): string {
 }
 
 /** The region hue this charm should be tinted with (applied via --rc). */
-export function charmColor(charm: CharmView): string {
+export function charmColor(charm: Pick<Locatable, "isCollab" | "prefectureCode">): string {
   if (charm.isCollab) return COLLAB_REGION.color;
   const key = charm.prefectureCode != null ? regionForCode(charm.prefectureCode) : null;
   return key ? REGIONS[key].color : COLLAB_REGION.color;
 }
 
-/** Price as "S$N", or "Not for sale" when the charm has no listed price. */
-export function priceLabel(charm: CharmView): string {
-  return charm.priceSgd != null ? `S$${charm.priceSgd}` : "Not for sale";
+/** Price as "S$N", or "Not for sale" when the item has no listed price. */
+export function priceLabel(item: Pick<ItemView, "priceSgd">): string {
+  return item.priceSgd != null ? `S$${item.priceSgd}` : "Not for sale";
 }

@@ -1,6 +1,6 @@
 import type { CSSProperties } from "react";
 import CharmCard from "./CharmCard";
-import type { CharmView } from "@/lib/charms";
+import type { DesignView } from "@/lib/charms";
 import { REGIONS, REGION_LIST, type RegionKey } from "@/lib/regions";
 import { PREFECTURES } from "@/lib/prefectures";
 
@@ -8,10 +8,11 @@ import { PREFECTURES } from "@/lib/prefectures";
  * The three states of the drill-down side panel, ported from the
  * prototype's `renderOverview` / `selectRegion` / `selectPref`:
  *  - `overview`  -- All Japan: headline + a clickable region grid with counts.
- *  - `region`    -- that region's charms, with a back-to-all-Japan control.
- *  - `prefecture`-- that prefecture's charms, with a back-to-region control.
+ *  - `region`    -- that region's designs, with a back-to-all-Japan control.
+ *  - `prefecture`-- that prefecture's designs, with a back-to-region control.
  * MapExplorer derives this from its selection state and hands it down;
- * MapPanel itself owns no state.
+ * MapPanel itself owns no state. `charms` is one entry per design (see
+ * spec 0005), so every count below is design-based.
  */
 export type PanelView =
   | {
@@ -20,8 +21,8 @@ export type PanelView =
       prefecturesReached: number;
       regionCounts: Record<RegionKey, number>;
     }
-  | { kind: "region"; region: RegionKey; charms: CharmView[] }
-  | { kind: "prefecture"; region: RegionKey; code: number; charms: CharmView[] };
+  | { kind: "region"; region: RegionKey; charms: DesignView[] }
+  | { kind: "prefecture"; region: RegionKey; code: number; charms: DesignView[] };
 
 interface MapPanelProps {
   view: PanelView;
@@ -120,7 +121,7 @@ function RegionPanel({
       </div>
       <div className="cards">
         {view.charms.length ? (
-          view.charms.map((charm) => <CharmCard charm={charm} key={charm.id} />)
+          view.charms.map((design) => <CharmCard design={design} key={design.id} />)
         ) : (
           <p className="panel-note">No charms from this region yet.</p>
         )}
@@ -156,7 +157,7 @@ function PrefecturePanel({
       </div>
       <div className="cards">
         {view.charms.length ? (
-          view.charms.map((charm) => <CharmCard charm={charm} key={charm.id} />)
+          view.charms.map((design) => <CharmCard design={design} key={design.id} />)
         ) : (
           <p className="panel-note">No charms from this prefecture yet.</p>
         )}

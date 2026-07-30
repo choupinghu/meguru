@@ -1,13 +1,14 @@
 /**
- * Idempotent seed: truncates `charms` and re-inserts a representative set of
- * REAL, documented Gotochi Kitty (ご当地キティ) designs — one per prefecture,
- * spread across all 8 regions, plus a couple of off-the-map collabs.
+ * Idempotent seed: truncates `designs`/`items` and re-inserts a
+ * representative set of REAL, documented Gotochi Kitty (ご当地キティ)
+ * designs — one per prefecture, spread across all 8 regions, plus a couple
+ * of off-the-map collabs. Each design gets exactly one item.
  *
  * Design names/motifs are sourced from public Gotochi Kitty catalogues
  * (ja.wikipedia.org/wiki/ご当地キティ and castel.jp/p/2850).
  *
- * NOTE: `condition`, `rarity`, `status` and `price` describe a *specific item*,
- * not the design — the values here are still placeholders to be replaced with
+ * NOTE: `condition`, `status` and `price` describe a *specific item*, not
+ * the design — the values here are still placeholders to be replaced with
  * the real collection.
  *
  * Run with: npm run db:seed
@@ -17,7 +18,7 @@ dotenv.config({ path: ".env.local" });
 
 import { neon } from "@neondatabase/serverless";
 import { drizzle } from "drizzle-orm/neon-http";
-import { charms, type NewCharm } from "../db/schema";
+import { designs, items, type NewDesign, type NewItem } from "../db/schema";
 
 type Region =
   | "hokkaido"
@@ -50,7 +51,7 @@ function regionForCode(code: number): Region {
   throw new Error(`No region found for prefecture code ${code}`);
 }
 
-/** What the charm depicts — a second axis for browsing/filtering. */
+/** What the design depicts — a second axis for browsing/filtering. */
 type Motif =
   | "food"        // regional dish or produce
   | "landmark"    // place, building, natural landmark
@@ -126,23 +127,29 @@ const CHARMS: ProtoCharm[] = [
   { collab: true, brand: "Sanrio Puroland", name: "Puroland Exclusive", ja: "ピューロランド限定", motif: "landmark", cond: "bnib", rarity: "rare", status: "keepsake", price: null, note: "Park-exclusive edition." },
 ];
 
-function toRow(c: ProtoCharm): NewCharm {
+function toDesignRow(c: ProtoCharm): NewDesign {
   const isCollab = !!c.collab;
   return {
     name: c.name,
     nameJa: c.ja,
     isCollab,
+    brand: isCollab ? c.brand ?? null : null,
     prefectureCode: isCollab ? null : c.code!,
     region: isCollab ? "collab" : regionForCode(c.code!),
     city: isCollab ? null : c.city ?? null,
-    brand: isCollab ? c.brand ?? null : null,
-    condition: c.cond,
+    motif: c.motif,
     rarity: c.rarity,
+    special: !!c.special,
+  };
+}
+
+function toItemRow(c: ProtoCharm, designId: number): NewItem {
+  return {
+    designId,
+    condition: c.cond,
     status: c.status,
     priceSgd: c.price,
-    special: !!c.special,
     note: c.note ?? null,
-    tags: [c.motif],
   };
 }
 
@@ -156,18 +163,25 @@ async function main() {
   const sql = neon(process.env.DATABASE_URL);
   const db = drizzle(sql);
 
-  console.log("Truncating charms ...");
-  await sql`TRUNCATE TABLE charms RESTART IDENTITY`;
+  console.log("Truncating items and designs ...");
+  await sql`TRUNCATE TABLE items, designs RESTART IDENTITY`;
 
-  const rows = CHARMS.map(toRow);
-  console.log(`Inserting ${rows.length} charms ...`);
-  await db.insert(charms).values(rows);
+  const designRows = CHARMS.map(toDesignRow);
+  console.log(`Inserting ${designRows.length} designs ...`);
+  const insertedDesigns = await db
+    .insert(designs)
+    .values(designRows)
+    .returning({ id: designs.id });
+
+  const itemRows = CHARMS.map((c, i) => toItemRow(c, insertedDesigns[i].id));
+  console.log(`Inserting ${itemRows.length} items ...`);
+  await db.insert(items).values(itemRows);
 
   const prefectures = new Set(
     CHARMS.filter((c) => !c.collab).map((c) => c.code)
   );
   console.log(
-    `Seeded ${rows.length} charms across ${prefectures.size} prefectures.`
+    `Seeded ${designRows.length} designs (each with 1 item) across ${prefectures.size} prefectures.`
   );
 }
 

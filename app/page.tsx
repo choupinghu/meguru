@@ -1,6 +1,5 @@
 import { db } from "@/db";
-import { charms } from "@/db/schema";
-import { toCharmView } from "@/lib/charms";
+import { toDesignView } from "@/lib/charms";
 import { buildStats } from "@/lib/stats";
 import MapExplorer from "@/components/MapExplorer";
 import SiteHeader from "@/components/SiteHeader";
@@ -12,15 +11,15 @@ import SiteFooter from "@/components/SiteFooter";
 export const dynamic = "force-dynamic";
 
 export default async function Home() {
-  const rows = await db.select().from(charms);
-  const charmViews = rows.map(toCharmView);
-  const stats = buildStats(charmViews);
+  const rows = await db.query.designs.findMany({ with: { items: true } });
+  const designViews = rows.map((row) => toDesignView(row, row.items));
+  const stats = buildStats(designViews);
 
   return (
     <div className="meguru">
       <SiteHeader active="map" />
       <SiteHero stats={stats} />
-      <MapExplorer charms={charmViews} />
+      <MapExplorer charms={designViews} />
       <SiteFooter />
     </div>
   );
