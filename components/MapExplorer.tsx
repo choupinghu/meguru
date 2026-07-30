@@ -471,7 +471,18 @@ export default function MapExplorer({ charms }: { charms: CharmView[] }) {
             <JapanMapSvg ref={svgRef} />
           </div>
           <div className="maptools">
-            <span className="hint">{hint}</span>
+            <div className="maptools-nav">
+              {state.level !== "japan" ? (
+                <button
+                  type="button"
+                  className="back-btn"
+                  onClick={state.level === "prefecture" ? backToRegion : resetToOverview}
+                >
+                  {state.level === "prefecture" ? "\u2190 Region" : "\u2190 All Japan"}
+                </button>
+              ) : null}
+              <span className="hint">{hint}</span>
+            </div>
             <button
               type="button"
               className="discover"

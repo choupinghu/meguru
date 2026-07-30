@@ -131,6 +131,35 @@ body {
   }
 }
 
+/* view switcher -- Map / Browse. The current route is marked both visually
+   (.active) and semantically (aria-current="page", set in SiteHeader). */
+.switcher {
+  display: flex;
+  gap: 3px;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 4px;
+  flex: none;
+}
+.switch-link {
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink-soft);
+  text-decoration: none;
+  padding: 7px 16px;
+  border-radius: 999px;
+  transition: 0.18s;
+}
+.switch-link:hover {
+  color: var(--ink);
+}
+.switch-link.active {
+  background: var(--ink);
+  color: var(--surface);
+}
+
 /* ---------- hero intro ---------- */
 .hero {
   max-width: var(--maxw);
@@ -303,11 +332,17 @@ body {
      and Chubu to a chroma of ~2 and made them read as plain grey. Mixing
      toward white in a perceptual space raises lightness while keeping the hue.
      Mixed rather than faded with opacity, so borders stay crisp. */
+  /* Fallback first: color-mix() needs iOS Safari 16.4+ / Chrome 111+, and an
+     unsupported declaration is dropped entirely — which would expose the SVG's own
+     fill="#EEEEEE" on all 47 prefectures and render the map colourless. Older
+     browsers therefore get the earlier flat scheme, which still reads correctly. */
+  fill: var(--land);
   fill: color-mix(in oklab, var(--rc, var(--land)) 42%, #fff);
   transition: fill 0.25s;
 }
 #jpmap .prefecture polygon,
 #jpmap .prefecture path {
+  stroke: var(--line); /* fallback — without it the SVG's own stroke="#000000" shows */
   stroke: color-mix(in srgb, var(--ink) 32%, transparent);
   stroke-width: 0.8px;
   vector-effect: non-scaling-stroke;
@@ -317,12 +352,29 @@ body {
      reading grey squeezes the two states together, so the reached state has to
      move up to compensate: 88% against the 42% wash holds the worst-case
      separation at ~18 dE across all eight regions. */
+  fill: var(--rc); /* fallback — see the note above on color-mix support */
   fill: color-mix(in oklab, var(--rc) 88%, var(--surface));
   /* There are no pins any more -- the prefecture shape itself is the click
      target, so the pointer cursor + hover swap below are the only signal
      that a shape is interactive. */
   cursor: pointer;
 }
+/* Prefectures are focusable for keyboard use, but a rectangular outline around an
+   irregular shape reads as a stray box — and Chromium shows a ring on click where
+   WebKit does not, so Edge boxed every selection. Suppress the generic outline here
+   and indicate focus by emphasising the prefecture's OWN border instead, which
+   follows the shape. Keyboard users still get a clear indicator; mouse and touch
+   users get none, since the selected fill is already the feedback. */
+#jpmap .prefecture:focus,
+#jpmap .prefecture:focus-visible {
+  outline: none;
+}
+#jpmap .prefecture:focus-visible polygon,
+#jpmap .prefecture:focus-visible path {
+  stroke: var(--vermilion);
+  stroke-width: 2.2px;
+}
+
 #jpmap .prefecture.has:hover {
   fill: var(--rc);
 }
@@ -346,10 +398,55 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
   gap: 10px;
+  row-gap: 8px;
   margin-top: 6px;
   position: relative;
   z-index: 2;
+}
+.maptools-nav {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+/* Persistent back control (region / all-Japan) -- on a phone the map fills
+   the width, so there's almost no empty space left to tap to zoom out;
+   this sits in the toolbar rather than relying on that gesture. */
+.back-btn {
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  color: var(--ink);
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 6px 13px;
+  white-space: nowrap;
+  transition: 0.18s;
+}
+.back-btn:hover {
+  border-color: var(--ink-faint);
+  transform: translateY(-1px);
+}
+/* On touch there's no hover and no cursor: pointer to show the map is
+   interactive, so on small screens the hint line has to carry that signal
+   on its own -- promoted from a quiet footnote to a visible chip. */
+@media (max-width: 640px) {
+  .maptools .hint {
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--ink);
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 7px 13px;
+    display: inline-flex;
+    align-items: center;
+  }
 }
 .discover {
   font: inherit;
@@ -560,8 +657,8 @@ body {
   max-width: 46ch;
 }
 
-/* ---------- full charm grid (interim, until 0003/0004 add the
-   map/coverflow/collab-shelf composition) ---------- */
+/* ---------- charm grid (Browse route, and the map panel's narrower
+   region/prefecture card lists reuse the same .card styling) ---------- */
 .charm-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
