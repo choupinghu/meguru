@@ -21,7 +21,7 @@
  * stable; the human-readable name is not.
  */
 import { readFileSync, existsSync, copyFileSync, statSync, readdirSync, mkdirSync } from "node:fs";
-import { join, basename } from "node:path";
+import { join } from "node:path";
 
 const DRIVE =
   "/Users/aaronchou/Library/CloudStorage/GoogleDrive-aaronchouhx@gmail.com/.shortcut-targets-by-id/17rgedbgi_VhzMwRtAKVeuCbZbc0LMc22/Hello Kitty Gotochis";
