@@ -4,11 +4,14 @@
  * hand for their own content) can derive identical numbers from one place
  * rather than each re-deriving its own counting logic.
  *
- * Every figure here counts designs, not items — owning three copies of one
- * design must not extend "prefectures reached" or inflate the catalogue
- * count. Since `designs` is already one row per design, counting the array
- * itself (rather than anything nested under `.items`) is what keeps that
- * true.
+ * Since 0006, `designs` mixes the documented cultural record (no items,
+ * never owned) with the real, owned collection (one item each) — so not
+ * every figure can count the design array itself anymore. "Charms
+ * catalogued" still counts every design passed in (the caller decides
+ * whether that's all 54 or a subset). "Prefectures reached" specifically
+ * counts only designs with at least one item — a design nobody owns hasn't
+ * "reached" its prefecture, it's just documented as being from there. Rare
+ * & grail still counts every design passed in, same as the catalogue count.
  */
 import type { DesignView } from "./charms";
 import { REGION_LIST } from "./regions";
@@ -20,7 +23,9 @@ export interface StatEntry {
 
 export function buildStats(designs: DesignView[]): StatEntry[] {
   const prefecturesReached = new Set(
-    designs.filter((d) => d.prefectureCode != null).map((d) => d.prefectureCode)
+    designs
+      .filter((d) => d.items.length > 0 && d.prefectureCode != null)
+      .map((d) => d.prefectureCode)
   ).size;
   const rareAndGrail = designs.filter(
     (d) => d.rarity === "rare" || d.rarity === "grail"

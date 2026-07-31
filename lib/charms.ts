@@ -161,7 +161,7 @@ type Locatable = {
 export function locationLabel(charm: Locatable): string {
   if (charm.isCollab) return charm.brand ?? COLLAB_REGION.en;
   const prefecture = charm.prefectureCode != null ? PREFECTURES[charm.prefectureCode] : undefined;
-  const prefLabel = prefecture?.en ?? "Unknown prefecture";
+  const prefLabel = prefecture?.en ?? "Place unknown";
   return charm.city ? `${prefLabel} · ${charm.city}` : prefLabel;
 }
 
