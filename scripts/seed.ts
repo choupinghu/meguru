@@ -17,7 +17,7 @@
  * Akabeko appears in both sources — the manifest's real copy (Fukushima /
  * Aizu, an actual owned item) wins; the researched entry is dropped.
  *
- * Run with: npm run db:seed
+ * Run with: npm run db:seed (dev) or npm run db:seed:prod (the live branch).
  */
 import * as dotenv from "dotenv";
 dotenv.config({ path: ".env.local" });
@@ -274,14 +274,42 @@ function toOwnedItemRow(d: OwnedDesign, designId: number): NewItem {
   };
 }
 
+/**
+ * Two targets, matching scripts/migrate.ts:
+ *   npm run db:seed        -> DATABASE_URL            (the dev branch)
+ *   npm run db:seed:prod   -> PRODUCTION_DATABASE_URL (the live site)
+ *
+ * Production is a *named* target rather than something you reach by editing
+ * DATABASE_URL, for the same reason migrating is: this script TRUNCATEs before
+ * inserting, so a forgotten variable swap would wipe live data on the next
+ * routine `npm run db:seed`. The endpoint is printed before anything runs.
+ */
+const toProduction = process.env.SEED_TARGET === "production";
+
 async function main() {
-  if (!process.env.DATABASE_URL) {
+  const varName = toProduction ? "PRODUCTION_DATABASE_URL" : "DATABASE_URL";
+  const url = process.env[varName];
+
+  if (!url) {
     throw new Error(
-      "DATABASE_URL is not set. Add the pooled Neon connection string to .env.local before seeding."
+      toProduction
+        ? "PRODUCTION_DATABASE_URL is not set. Add the live branch's pooled connection string to .env.local to seed production."
+        : "DATABASE_URL is not set. Add the pooled Neon connection string to .env.local before seeding."
     );
   }
 
-  const sql = neon(process.env.DATABASE_URL);
+  const endpoint = url.match(/@(ep-[a-z0-9-]+)/)?.[1] ?? "unknown endpoint";
+  console.log(
+    `Target: ${toProduction ? "PRODUCTION" : "dev"}  (${varName} -> ${endpoint})`
+  );
+  if (toProduction) {
+    console.log(
+      "This is the live database, and seeding TRUNCATEs first. Ctrl-C within 5s to abort."
+    );
+    await new Promise((r) => setTimeout(r, 5000));
+  }
+
+  const sql = neon(url);
   const db = drizzle(sql);
 
   console.log("Truncating items and designs ...");
