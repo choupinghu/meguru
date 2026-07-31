@@ -107,6 +107,8 @@ type OwnedDesign = {
   price: number;
   /** Manifest `notes` column, copied verbatim. */
   note: string;
+  /** Researched write-up (0007a). Null where it could not be sourced. */
+  story: string | null;
 };
 
 const DOCUMENTED: DocumentedDesign[] = [
@@ -209,6 +211,79 @@ const OWNED_RAW: {
   { no: "0025", code: 6, city: "Haguro 羽黒", name: "Mt Haguro", ja: "羽黒山", motif: "landmark", note: "Kitty as a yamabushi ascetic; one of the Dewa Sanzan" },
 ];
 
+/**
+ * Write-ups for the owned 25 (spec 0007a). Two to four sentences each: what
+ * the motif is, and why this place is the one associated with it.
+ *
+ * These are researched, not generated to fill the field. Where a design could
+ * not be sourced it is absent from this map and `story` stays null — 0007
+ * requires that a null beat an invention, because a plausible-sounding piece
+ * of folklore attached to a real charm is worse than an empty paragraph.
+ *
+ * Deliberately omitted:
+ *   0008  the aquarium exclusive — the card does not name its venue, so there
+ *         is no subject to research. Nothing true can be said about which
+ *         aquarium sold it or why it shows a ray.
+ *
+ * Hedged on purpose:
+ *   0006  written about Shinshū miso rather than the company, because the
+ *         manifest's attribution to Miyasaka Jozo is not something this
+ *         write-up needs to assert to be worth reading.
+ *   0020  written about Hokkaidō adzuki generally — the manifest flags the
+ *         Tokachi reading as probable, not certain, so the caveat stays in
+ *         the item's note and out of the design's story.
+ */
+const STORIES: Record<string, string> = {
+  "0001":
+    "Nankinmachi grew up beside Kobe's harbour after the port opened to foreign trade in 1868, built by Chinese merchants who were barred from the designated foreign quarter and settled just outside it instead. It is now one of Japan's three great Chinatowns, with Yokohama and Nagasaki, and it is a place you eat standing up — the steamed pork buns sold from its stalls are what the queues are for.",
+  "0002":
+    "Yosakoi is a young festival. It was invented in Kōchi in 1954 to lift a flagging local economy, and its dancers carry naruko, the wooden clappers once used to scare birds off the rice. It spread as a form any neighbourhood could adopt, and Arakawa's summer event is one of those adoptions — which is why a Tokyo ward's charm dances a Tosa dance, with the Toden Arakawa Line, the last of the city's streetcars, running behind it.",
+  "0003":
+    "Hamanako is brackish rather than fresh: an earthquake in 1498 broke the sandbar that had closed it and let the sea in. That half-salt water is why Japan's eel farming began here around 1900, and unagi is still what the lake is known for — hence the fish hood and the woven creel.",
+  "0004":
+    "Minamoto no Yoshitsune won the Genpei War for his half-brother and was hunted down by him for it. Benkei, the warrior monk who by legend lost a duel to him on Kyoto's Gojō Bridge and followed him ever after, is said to have died on his feet at Koromogawa in 1189 — shot full of arrows holding a bridge long enough for Yoshitsune to die by his own hand inside. They have been inseparable in Japanese storytelling since, which is why this charm names two characters and no place at all.",
+  "0005":
+    "Kegon Falls is where Lake Chūzenji empties. Lava from Mt. Nantai dammed the valley, the lake gathered behind it, and the water now leaves over a ninety-seven-metre drop. It is counted among Japan's three great waterfalls, and an elevator cut down through the rock puts you level with the plunge pool; the name comes from the Kegon Sutra, like much else in Nikkō.",
+  "0006":
+    "Nagano — Shinshū, in the older name this label uses — makes more miso than any other prefecture in Japan: a rice miso fermented in cold mountain air and sold pale gold rather than dark. This is a maker's promotional charm rather than a regional one, which is why it carries a company's name where the others carry a place's.",
+  "0007":
+    "Eisa is danced at Obon, when the dead are said to come home; neighbourhood youth associations parade through the streets with drums to see them off again at the end of the visit. It is a moving dance rather than a staged one, and the drum patterns and costumes still differ from village to village. The gate on the card is Shureimon, the approach to Shuri Castle, seat of the Ryūkyū kings whose court dress the charm borrows.",
+  "0009":
+    "The okojo is a stoat, and in the Japan Alps it lives above the treeline, hunting voles through the rocks. It moults brown in summer and near-white in winter, keeping only a black tail-tip, which is why hikers count a sighting as a small event. This one was a Nagano-only release, dated 2002.",
+  "0010":
+    "Mt. Daisen is the highest mountain in the Chūgoku region and was a centre of Shugendō, the mountain asceticism whose practitioners trained along its ridges. Tengu belong to that world — mountain spirits, part guardian and part trickster — and the karasu-tengu is the crow-billed, winged kind rather than the long-nosed one. Kitty carries the staff and wings of the ascetics who were said to become them.",
+  "0011":
+    "A sandbar three and a half kilometres long crosses Miyazu Bay, held together by some eight thousand pines. Its name means bridge to heaven, and the traditional way to look at it is matanozoki: bend forward and view it upside down between your legs, so the bar appears to hang in the sky. It has been one of the Three Views of Japan since the 1640s, named alongside Matsushima and Miyajima.",
+  "0012":
+    "Toba Aquarium keeps the only dugong in Japan, and one of very few anywhere in captivity. Dugongs graze seagrass instead of hunting it, which is thought to lie behind the mermaid stories that followed them, and they breed slowly enough that nets alone can empty a coastline. Toba is fitting ground for it — this is ama country, where women have free-dived the same water for shellfish for centuries.",
+  "0013":
+    "The Tosa was made in Kōchi during the Meiji era by crossing the native Shikoku dog with imported mastiffs, bulldogs and Great Danes, bred for a fighting style that rewards silence: a dog that growls or cries has lost. Bouts survive in Kōchi as a licensed tradition and borrow sumo's furniture wholesale — ranks, ceremonial aprons, a champion's tiered rope. Kitty is wearing the rope.",
+  "0014":
+    "Ōkuma Shigenobu founded the school that became Waseda University in 1882, while out of government, as a private counterweight to the imperial universities training state officials. The name belonged to the district first: waseda means a paddy of early-ripening rice. The Toden Arakawa Line terminates here, the last of Tokyo's streetcars, which is why the same tram turns up on this card and on the Arakawa one.",
+  "0015":
+    "Gama no abura — toad oil — was sold at the foot of Mt. Tsukuba by pitchmen whose patter was the real product: a blade drawn, an arm apparently opened, the salve applied, the wound gone. The spiel outlived any belief in the ointment and survives as a performance genre in its own right. Tsukuba itself rises alone off the Kantō plain with two summits, one male and one female, and a ropeway strung between them.",
+  "0016":
+    "Niimi Nankichi wrote Gon-gitsune at eighteen, in Handa where he was born, and died of tuberculosis at twenty-nine. In it a lone fox steals an eel from a villager, learns the man's mother has died, guesses what the eel was for, and starts leaving chestnuts and mushrooms at his door in secret — and is shot before the man understands who his benefactor was. Japanese schoolchildren all read it, which is why a fox holding a fish needs no caption here.",
+  "0017":
+    "Awaji has grown onions since the 1880s, and its mild winters and sandy, well-drained ground produce a bulb sweet enough to eat raw. They are cured slowly in slatted wooden huts left standing out in the fields, and those drying sheds are as much a part of the island's look as the onions are of its cooking.",
+  "0018":
+    "A lord out hawking in Meguro eats grilled pike mackerel at a farmhouse and cannot forget it. Back home he asks for sanma; his kitchen, thinking an oily fish beneath him, steams the fat out and serves it ruined, and he concludes that sanma is no good unless it comes from Meguro. The joke is that Meguro is inland and lands no fish whatever — and Meguro now holds a sanma festival every autumn on the strength of the joke.",
+  "0019":
+    "When Enzō-ji was built at Yanaizu in the ninth century, red oxen are said to have hauled the timber, and one refused to leave when the work was finished and turned to stone. The papier-mâché akabeko copies that ox: a red cow with a nodding head, made in Aizu ever since. It was given to children as a guard against illness, smallpox above all, and the black spots painted on some of them are the marks of the disease it was meant to take instead.",
+  "0020":
+    "Hokkaidō grows the large majority of Japan's adzuki, and nearly every traditional sweet in the country passes through it: the beans are boiled down with sugar into anko, the paste inside dorayaki, taiyaki, daifuku and monaka. They carry meaning beyond sweetness too — sekihan, rice steamed with adzuki until it stains red, is what gets served for a birth, a wedding or a graduation.",
+  "0021":
+    "Hiroshi Hara's Umeda Sky Building, finished in 1993, is two towers joined only at the very top, where a ring-shaped roof deck sits open to the weather a hundred and seventy-three metres up. Reaching it means an escalator crossing the gap between the towers with glass underfoot and nothing below. The original design called for four towers; two were built.",
+  "0022":
+    "Benzaiten arrived in Japan from the river goddess Saraswati and kept both the water and the music: she is worshipped on islands and beside ponds, and she carries a biwa. Enoshima is one of her three great sites, and its Myōon Benzaiten is an unusual figure — seated, carved nude, lute in hand, from the Kamakura period. On a clear day Fuji stands across the bay behind the torii, which is the view the card draws.",
+  "0023":
+    "Kondō Isami led the Shinsengumi, the swordsmen the shogunate kept in Kyoto through its final years to police a city full of men who wanted it gone. He was a farmer's son from Musashi who reached that command through a sword school rather than by birth, which those few years briefly allowed. Their pale haori carried a single character — 誠, makoto, sincerity — and he was beheaded in 1868, once the side he policed for had lost.",
+  "0024":
+    "Tazawa-ko is the deepest lake in Japan at four hundred and twenty-three metres, deep enough that it never freezes over. The story says a girl named Tatsuko prayed to keep her beauty and was told to drink from the lake; she drank, and became the dragon that lives in it. A gilded statue of her stands at the shore, facing the water she went into.",
+  "0025":
+    "Haguro is the lowest and most visited of the Dewa Sanzan, the three mountains Shugendō ascetics walk as a passage through death and rebirth, with Haguro standing for the present world. The way up is two thousand four hundred and forty-six stone steps through cedar, past a five-storey pagoda that has stood in some form since the tenth century. The yamabushi who make the circuit wear white, the colour of the dead, because that is the whole point of the walk.",
+};
+
 const OWNED: OwnedDesign[] = OWNED_RAW.map((r) => {
   const unplaced = UNPLACED[r.no];
   const special = SPECIAL_NOS.has(r.no);
@@ -227,6 +302,7 @@ const OWNED: OwnedDesign[] = OWNED_RAW.map((r) => {
     special,
     price,
     note: r.note,
+    story: STORIES[r.no] ?? null,
   };
 });
 
@@ -259,7 +335,7 @@ function toOwnedDesignRow(d: OwnedDesign): NewDesign {
     motif: d.motif,
     rarity: d.rarity,
     special: d.special,
-    story: null,
+    story: d.story,
   };
 }
 
@@ -335,8 +411,12 @@ async function main() {
   const ownedPrefectures = new Set(
     OWNED.filter((d) => d.prefectureCode != null).map((d) => d.prefectureCode)
   );
+  const withStory = allDesignRows.filter((d) => d.story != null).length;
   console.log(
     `Seeded ${allDesignRows.length} designs (${itemRows.length} with an item) across ${ownedPrefectures.size} owned prefectures.`
+  );
+  console.log(
+    `${withStory} of ${allDesignRows.length} designs carry a write-up; ${allDesignRows.length - withStory} are deliberately null.`
   );
 }
 
