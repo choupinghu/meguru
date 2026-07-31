@@ -9,7 +9,10 @@
     "lint": "eslint",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "tsx scripts/migrate.ts",
-    "db:seed": "tsx scripts/seed.ts"
+    "db:seed": "tsx scripts/seed.ts",
+    "db:migrate:prod": "MIGRATE_TARGET=production tsx scripts/migrate.ts",
+    "photos:sync": "node scripts/sync-photos.mjs",
+    "db:seed:prod": "SEED_TARGET=production tsx scripts/seed.ts"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.0.0",

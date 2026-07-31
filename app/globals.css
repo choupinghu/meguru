@@ -369,22 +369,52 @@ body {
 #jpmap .prefecture:focus-visible {
   outline: none;
 }
+/* Keyboard focus uses the same sumi ink as selection, one step lighter. It was
+   vermilion, but clicking also focuses, and Chromium treats click-focus as
+   ring-worthy where WebKit does not — so on Edge the red stroke painted over the
+   selection outline and the stark red came back on one browser only. Ink for both
+   keeps the map free of it everywhere. */
 #jpmap .prefecture:focus-visible polygon,
 #jpmap .prefecture:focus-visible path {
-  stroke: var(--vermilion);
-  stroke-width: 2.2px;
-}
-
-#jpmap .prefecture.has:hover {
-  fill: var(--rc);
-}
-#jpmap .prefecture.selected {
-  fill: var(--vermilion);
-}
-#jpmap .prefecture.selected polygon,
-#jpmap .prefecture.selected path {
   stroke: var(--ink);
   stroke-width: 1.2px;
+}
+
+/* Hover deepens the fill toward ink rather than just going to full saturation.
+   The old flat var(--rc) was only 88% -> 100% of the same hue: measured at dE 4.5
+   on the weakest region, under the threshold where it reliably reads. Since the
+   pins were removed, hover plus the pointer cursor is the only thing telling a
+   desktop visitor the map is interactive, so it has to be perceptible. Darkening
+   lands at dE ~9 and, importantly, shifts consistently across all nine region
+   hues instead of being obvious on some and invisible on others.
+   Unreached prefectures deliberately have no hover — they are not clickable. */
+#jpmap .prefecture.has:hover {
+  fill: var(--rc); /* fallback where color-mix is unsupported */
+  fill: color-mix(in oklab, var(--rc) 90%, var(--ink));
+}
+/* Selection is drawn as a separate outline ON TOP of every prefecture, not as a
+   thicker border on the prefecture itself.
+   Two reasons. A solid vermilion fill (the original) overwrote the region colour,
+   so the moment you focused on a prefecture it stopped telling you which region it
+   belonged to. And simply thickening its own border looked uneven: prefectures sit
+   in document order 47 -> 1, SVG has no z-index, so every lower-numbered neighbour
+   paints its thin border over the thick one, shaving some edges and not others.
+   Re-drawing the geometry last fixes both — the fill stays, the outline is uniform.
+   Sumi ink rather than vermilion: legible across all nine region hues (vermilion on
+   Kyushu's coral would be muddy) and distinct from the focus ring. */
+#jpmap .sel-outline {
+  pointer-events: none;
+}
+#jpmap .sel-outline polygon,
+#jpmap .sel-outline path {
+  fill: none;
+  /* 1.6px against the 0.8px default: read as deliberate at a glance without
+     drawing a heavy frame around the shape. Because the outline is drawn last,
+     the whole width is visible, so it needs less weight than a border competing
+     with neighbours would. */
+  stroke: var(--ink);
+  stroke-width: 1.6px;
+  vector-effect: non-scaling-stroke;
 }
 #jpmap.filtered .prefecture:not(.in-region) {
   opacity: 0.28;
