@@ -45,6 +45,9 @@ export interface DesignView {
   motif: string | null;
   rarity: Rarity;
   special: boolean;
+  /** The design's story text (spec 0007). Rendered only on `/charm/[id]`
+   * (spec 0008) — never on Browse or the map panel's cards. */
+  story: string | null;
   items: ItemView[];
 }
 
@@ -72,6 +75,7 @@ export function toDesignView(design: Design, items: Item[]): DesignView {
     motif: design.motif,
     rarity: design.rarity as Rarity,
     special: design.special,
+    story: design.story,
     items: items.map(toItemView),
   };
 }

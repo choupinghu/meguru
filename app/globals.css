@@ -715,6 +715,17 @@ body {
 .card.is-sold {
   opacity: 0.72;
 }
+/* Wraps everything on a card except the price/Enquire footer (see CharmCard) —
+   the part of the card that links to /charm/[id]. Plain flex column so the
+   thumbnail + text stack exactly as they did before the link existed, with
+   no anchor underline/colour of its own (it inherits the card's ink). */
+.card-link {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  color: inherit;
+  text-decoration: none;
+}
 .thumb {
   position: relative;
   aspect-ratio: 5 / 4;
@@ -870,6 +881,154 @@ body {
   border: 1px solid var(--line);
   padding: 3px 8px;
   border-radius: 999px;
+}
+
+/* ---------- charm depth page (spec 0008) ---------- */
+.charm-page {
+  max-width: var(--maxw);
+  margin: 32px auto 0;
+  padding: 0 24px 8px;
+}
+
+/* Identity block: large artwork + name/place/meta, side by side on desktop.
+   This stands in for the generic hero on this route -- a per-charm "hero"
+   rather than the site-wide one, so the story below is what actually
+   dominates the page. */
+.charm-hero {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  gap: 28px;
+  align-items: start;
+  margin-bottom: 44px;
+}
+.charm-hero-art .thumb {
+  aspect-ratio: 5 / 4;
+}
+.charm-head h1 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: clamp(26px, 4vw, 38px);
+  line-height: 1.15;
+  margin: 2px 0 4px;
+}
+.charm-name-ja {
+  font-family: var(--font-display);
+  font-size: 15px;
+  color: var(--ink-faint);
+  margin-bottom: 10px;
+}
+.charm-loc {
+  font-size: 13.5px;
+  color: var(--ink-soft);
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 12px;
+}
+.charm-loc .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex: none;
+  background: var(--rc);
+}
+.charm-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+@media (max-width: 640px) {
+  .charm-hero {
+    grid-template-columns: 1fr;
+  }
+  .charm-hero-art {
+    max-width: 280px;
+    margin: 0 auto;
+  }
+}
+
+/* The story: full reading width, mincho display face, the dominant element
+   on the page -- never truncated. Rendered only when a design has one (D1);
+   absent entirely otherwise, with no placeholder left in its place. */
+.charm-story {
+  max-width: 62ch;
+  margin: 0 auto 56px;
+}
+.charm-story p {
+  font-family: var(--font-display);
+  font-size: 19px;
+  line-height: 1.9;
+  color: var(--ink);
+  margin: 0;
+  white-space: pre-line;
+}
+
+/* Availability: placed well below the story with real whitespace, styled as
+   a quiet supporting fact rather than a call to action -- a plain rule
+   above it and small type, not another card. Present only for a design
+   with at least one item (D3); a documented-only design shows none of it. */
+.charm-availability {
+  max-width: 480px;
+  margin: 0 auto 56px;
+  padding-top: 26px;
+  border-top: 1px solid var(--line-soft);
+}
+.charm-availability h2 {
+  font-family: var(--font-display);
+  font-size: 12px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: var(--ink-faint);
+  margin: 0 0 14px;
+}
+.avail-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 0;
+  border-bottom: 1px solid var(--line-soft);
+}
+.avail-row:last-child {
+  border-bottom: none;
+}
+.avail-row .price {
+  margin-left: auto;
+}
+/* The item's own note (D8) -- a dealer's remark about one physical copy,
+   set apart from the story: small, soft, on its own line under that row's
+   condition + price rather than mixed into the reading-width prose above. */
+.item-note {
+  flex-basis: 100%;
+  margin: 0;
+  font-size: 12.5px;
+  color: var(--ink-soft);
+  font-style: italic;
+}
+
+/* "More like this" -- reuses .section/.sec-head from the Browse heading for
+   a consistent section rhythm; only the grid below is new. */
+.related-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 14px;
+}
+.related-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  color: inherit;
+  text-decoration: none;
+}
+.related-card .thumb {
+  aspect-ratio: 5 / 4;
+}
+.related-name {
+  font-size: 12.5px;
+  color: var(--ink-soft);
+  text-align: center;
+  line-height: 1.3;
 }
 
 /* ---------- footer ---------- */

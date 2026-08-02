@@ -1,3 +1,4 @@
+import Link from "next/link";
 import CharmThumb from "./CharmThumb";
 import type { DesignView } from "@/lib/charms";
 import {
@@ -20,6 +21,11 @@ import {
  * did; a design with several items just repeats the pair. A design whose
  * items are all sold gets the muted/struck treatment. "Enquire" is a stub —
  * no payment. Still no story text here.
+ *
+ * The thumbnail + identity block (everything but the price/Enquire footer)
+ * link to `/charm/[id]` (spec 0008) — the footer stays outside the anchor so
+ * the "Enquire" button remains an ordinary, independently clickable button
+ * rather than an interactive element nested inside another.
  */
 export default function CharmCard({ design }: { design: DesignView }) {
   const color = charmColor(design);
@@ -35,29 +41,31 @@ export default function CharmCard({ design }: { design: DesignView }) {
       style={{ "--rc": color } as React.CSSProperties}
     >
       {design.isCollab && design.brand ? <span className="brand-tag">{design.brand}</span> : null}
-      <CharmThumb charm={thumbCharm} />
-      <div className="card-body">
-        <h4>{design.name}</h4>
-        {design.nameJa ? <div className="cja">{design.nameJa}</div> : null}
-        <div className="loc">
-          <span className="dot" />
-          {locationLabel(design)}
+      <Link href={`/charm/${design.id}`} className="card-link">
+        <CharmThumb charm={thumbCharm} />
+        <div className="card-body">
+          <h4>{design.name}</h4>
+          {design.nameJa ? <div className="cja">{design.nameJa}</div> : null}
+          <div className="loc">
+            <span className="dot" />
+            {locationLabel(design)}
+          </div>
+          {items.map((item) => {
+            const status = statusLabel(item.status);
+            return (
+              <div className="chips" key={item.id}>
+                <span className="tag">
+                  <span className="cd" style={{ background: CONDITION_COLOR_VARS[item.condition] }} />
+                  {CONDITION_LABELS[item.condition]}
+                </span>
+                {rarity ? <span className={`tag ${design.rarity}`}>{rarity}</span> : null}
+                {status ? <span className={`tag ${item.status}`}>{status}</span> : null}
+                {motif ? <span className="tag motif">{motif}</span> : null}
+              </div>
+            );
+          })}
         </div>
-        {items.map((item) => {
-          const status = statusLabel(item.status);
-          return (
-            <div className="chips" key={item.id}>
-              <span className="tag">
-                <span className="cd" style={{ background: CONDITION_COLOR_VARS[item.condition] }} />
-                {CONDITION_LABELS[item.condition]}
-              </span>
-              {rarity ? <span className={`tag ${design.rarity}`}>{rarity}</span> : null}
-              {status ? <span className={`tag ${item.status}`}>{status}</span> : null}
-              {motif ? <span className="tag motif">{motif}</span> : null}
-            </div>
-          );
-        })}
-      </div>
+      </Link>
       <div className="card-foot">
         {items.map((item) => (
           <span className={`price${item.priceSgd == null ? " na" : ""}`} key={item.id}>
