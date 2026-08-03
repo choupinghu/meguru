@@ -715,6 +715,12 @@ body {
 .card.is-sold {
   opacity: 0.72;
 }
+/* A design nobody owns: outlined rather than filled in, like a blank in a stamp
+   book. Deliberately not .is-sold's fade — that means sold, this means never held. */
+.card.is-documented {
+  border-style: dashed;
+  background: var(--surface);
+}
 /* Wraps everything on a card except the price/Enquire footer (see CharmCard) —
    the part of the card that links to /charm/[id]. Plain flex column so the
    thumbnail + text stack exactly as they did before the link existed, with
@@ -801,6 +807,10 @@ body {
   height: 7px;
   border-radius: 50%;
 }
+/* Rarity badge withdrawn pending evidence (0008b / D9) — not gone. `rare` and
+   `grail` currently encode "is this an off-map collab", not scarcity, so
+   nothing renders these classes today; kept for the day there is a real
+   measurement behind them. */
 .tag.rare {
   color: var(--gold);
   border-color: color-mix(in srgb, var(--gold) 45%, transparent);
@@ -810,6 +820,10 @@ body {
   background: var(--gold);
   border-color: var(--gold);
   font-weight: 600;
+}
+.tag.documented {
+  color: var(--ink-faint);
+  border-style: dashed;
 }
 .tag.reserved {
   color: var(--warn);

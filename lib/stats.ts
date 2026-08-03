@@ -10,8 +10,11 @@
  * catalogued" still counts every design passed in (the caller decides
  * whether that's all 54 or a subset). "Prefectures reached" specifically
  * counts only designs with at least one item — a design nobody owns hasn't
- * "reached" its prefecture, it's just documented as being from there. Rare
- * & grail still counts every design passed in, same as the catalogue count.
+ * "reached" its prefecture, it's just documented as being from there. The
+ * "Rare & grail" figure was withdrawn in 0008b/D9: the underlying rarity
+ * values are unverified, so it must not headline a stat any more than it
+ * may badge a card. "In the collection" counts designs with at least one
+ * item — the same owned-only filter "Prefectures reached" already uses.
  */
 import type { DesignView } from "./charms";
 import { REGION_LIST } from "./regions";
@@ -27,14 +30,12 @@ export function buildStats(designs: DesignView[]): StatEntry[] {
       .filter((d) => d.items.length > 0 && d.prefectureCode != null)
       .map((d) => d.prefectureCode)
   ).size;
-  const rareAndGrail = designs.filter(
-    (d) => d.rarity === "rare" || d.rarity === "grail"
-  ).length;
+  const inCollection = designs.filter((d) => d.items.length > 0).length;
 
   return [
     { value: designs.length, label: "Charms catalogued" },
+    { value: inCollection, label: "In the collection" },
     { value: prefecturesReached, label: "Prefectures reached" },
     { value: REGION_LIST.length, label: "Regions" },
-    { value: rareAndGrail, label: "Rare & grail" },
   ];
 }

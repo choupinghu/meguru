@@ -11,22 +11,26 @@ import SiteFooter from "@/components/SiteFooter";
 export const dynamic = "force-dynamic";
 
 /**
- * The standalone catalogue: every *owned* design (including off-the-map
- * collabs) as a CharmCard in the responsive grid, for scanning and
- * comparing condition against price, rarity, status and motif. Since 0006,
- * `designs` also holds documented-but-unowned designs with no item and so
- * no condition/price/status to show — this page only ever lists what's
- * actually on the shelf, so it filters down to designs with an item before
- * rendering (buildStats still sees the full set for "Charms catalogued").
- * Deliberately no story text here — that's the one thing this surface
- * never shows (see spec 0004/0008) — and cards are not yet links (they
- * become `/charm/[id]` links in 0008).
+ * The hybrid catalogue (0008b): all 54 designs — the 25 owned and the 29
+ * documented-but-unowned — as a CharmCard in one responsive grid. Owned
+ * cards render condition/price/status alongside motif; a documented design
+ * has no item and so no condition/price/status to show, and `CharmCard`
+ * renders it as an explicit "Documented" state rather than omitting it
+ * (buildStats has always seen the full set for "Charms catalogued" — see
+ * D6). Sorted owned-first, then documented, `id` ascending within each
+ * block (D2) so the collection's on-page order does not shuffle. Deliberately
+ * no story text here — that's the one thing this surface never shows (see
+ * spec 0004/0008).
  */
 export default async function BrowsePage() {
   const rows = await db.query.designs.findMany({ with: { items: true } });
   const designViews = rows.map((row) => toDesignView(row, row.items));
   const stats = buildStats(designViews);
-  const ownedDesignViews = designViews.filter((d) => d.items.length > 0);
+  const ordered = [...designViews].sort((a, b) => {
+    const aOwned = a.items.length > 0 ? 0 : 1;
+    const bOwned = b.items.length > 0 ? 0 : 1;
+    return aOwned - bOwned || a.id - b.id;
+  });
 
   return (
     <div className="meguru">
@@ -39,13 +43,13 @@ export default async function BrowsePage() {
               Browse <span className="ja">一覧</span>
             </h3>
             <p>
-              Every charm in the collection, specs at a glance — condition
-              paired with price, rarity, status and motif.
+              Every charm catalogued — the 25 in the collection, and 29 more
+              documented but not owned.
             </p>
           </div>
         </div>
         <div className="charm-grid">
-          {ownedDesignViews.map((design) => (
+          {ordered.map((design) => (
             <CharmCard design={design} key={design.id} />
           ))}
         </div>

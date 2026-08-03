@@ -12,7 +12,6 @@ import {
   locationLabel,
   motifLabel,
   priceLabel,
-  rarityLabel,
   statusLabel,
   toCharmView,
   toDesignView,
@@ -91,7 +90,6 @@ export default async function CharmPage({
 
   const color = charmColor(design);
   const thumbCharm = toCharmView(design);
-  const rarity = rarityLabel(design.rarity);
   const motif = motifLabel(design.motif);
   const region = regionLabel(design.region);
   const related = relatedDesigns(design, designs);
@@ -112,10 +110,9 @@ export default async function CharmPage({
               <span className="dot" />
               {locationLabel(design)}
             </div>
-            {rarity || motif ? (
+            {motif ? (
               <div className="charm-meta">
-                {rarity ? <span className={`tag ${design.rarity}`}>{rarity}</span> : null}
-                {motif ? <span className="tag motif">{motif}</span> : null}
+                <span className="tag motif">{motif}</span>
               </div>
             ) : null}
           </div>
