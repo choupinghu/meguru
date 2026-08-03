@@ -687,6 +687,86 @@ body {
   max-width: 46ch;
 }
 
+/* ---------- revolving shelf -- coverflow (spec 0009; ported from
+   prototype/index.html:202-218, minus the .cf-nav prev/next circles, which
+   0009/D5 drops). CharmThumb supplies .cf-item's artwork (0009/D7) in place
+   of the prototype's pouch(color)+.frame, so the one addition beyond a
+   straight port is scoping .thumb's aspect-ratio to this component only --
+   `app/globals.css:735`'s shared 5/4 rule for Browse/the map panel is never
+   touched. ---------- */
+.coverflow {
+  position: relative;
+  margin-top: 4px;
+  outline: none;
+}
+.cf-viewport {
+  position: relative;
+  height: 320px;
+  overflow: hidden;
+  perspective: 1200px;
+  touch-action: pan-y;
+}
+.cf-stage {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+}
+.cf-item {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  display: block;
+  width: 188px;
+  height: 224px;
+  margin: -112px 0 0 -94px;
+  padding: 0;
+  border: none;
+  background: none;
+  color: inherit;
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform 0.5s cubic-bezier(0.22, 0.61, 0.36, 1), opacity 0.5s;
+  will-change: transform;
+}
+.cf-item .thumb {
+  aspect-ratio: 188 / 224;
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+}
+.cf-item.center .thumb {
+  box-shadow: var(--shadow-lg);
+  border-color: color-mix(in srgb, var(--rc) 55%, transparent);
+}
+.cf-caption {
+  text-align: center;
+  margin-top: 16px;
+  min-height: 46px;
+}
+.cf-caption .nm {
+  font-family: var(--font-display);
+  font-size: 23px;
+  font-weight: 600;
+  line-height: 1.1;
+}
+.cf-caption .jp {
+  font-family: var(--font-display);
+  color: var(--ink-faint);
+  font-size: 13px;
+  margin-top: 3px;
+}
+@media (max-width: 560px) {
+  .cf-item {
+    width: 150px;
+    margin-left: -75px;
+  }
+  /* Drop the 3D depth cue on narrow viewports -- CharmStrip also stops
+     computing a rotateY() term below this breakpoint, so the effect
+     degrades to scale + opacity only (0009 spec, mobile paragraph). */
+  .cf-viewport {
+    perspective: none;
+  }
+}
+
 /* ---------- charm grid (Browse route, and the map panel's narrower
    region/prefecture card lists reuse the same .card styling) ---------- */
 .charm-grid {

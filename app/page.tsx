@@ -2,6 +2,7 @@ import { db } from "@/db";
 import { toDesignView } from "@/lib/charms";
 import { buildStats } from "@/lib/stats";
 import MapExplorer from "@/components/MapExplorer";
+import CharmStrip from "@/components/CharmStrip";
 import SiteHeader from "@/components/SiteHeader";
 import SiteHero from "@/components/SiteHero";
 import SiteFooter from "@/components/SiteFooter";
@@ -24,6 +25,7 @@ export default async function Home() {
       <SiteHeader active="map" />
       <SiteHero stats={stats} />
       <MapExplorer charms={ownedDesignViews} />
+      <CharmStrip charms={ownedDesignViews} />
       <SiteFooter />
     </div>
   );
