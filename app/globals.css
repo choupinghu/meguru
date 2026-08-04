@@ -654,6 +654,51 @@ body {
   }
 }
 
+/* Discover's charm panel (spec 0010) -- a preview, not the /charm/[id] page:
+   .panel-head, .crumb, .loc, .chips and .item-note above are all reused
+   as-is; only the pieces unique to this state (the framed artwork, the
+   clamped story, the "Full record" link) get their own rules. --rc is set
+   once here (as .charm-hero does on /charm/[id]) so .crumb/.loc pick it up
+   without repeating the inline style on each. */
+.charm-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.charm-panel-art {
+  width: 100%;
+  max-width: 220px;
+  margin: 2px auto 0;
+}
+.charm-panel-art .thumb {
+  aspect-ratio: 5 / 4;
+}
+/* Clamped with CSS, never by splitting sentences (D5) -- these write-ups
+   mix Japanese punctuation with abbreviations, so a naive split on "."
+   would misfire either way. */
+.charm-panel-story {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font-family: var(--font-display);
+  font-size: 14.5px;
+  line-height: 1.65;
+  color: var(--ink);
+  margin: 0;
+  white-space: pre-line;
+}
+.charm-panel-link {
+  align-self: flex-start;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--vermilion);
+  text-decoration: none;
+}
+.charm-panel-link:hover {
+  text-decoration: underline;
+}
+
 /* ---------- section shell ---------- */
 .section {
   max-width: var(--maxw);
@@ -731,6 +776,19 @@ body {
   gap: 9px;
   color: inherit;
   text-decoration: none;
+}
+/* Picker mode (spec 0010) renders this same class on a <button> instead of
+   a <Link> -- reset the button chrome away so it reads identically to the
+   anchor case above. */
+button.card-link {
+  width: 100%;
+  border: none;
+  background: none;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
 }
 .thumb {
   position: relative;

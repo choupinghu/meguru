@@ -187,7 +187,14 @@ const OWNED_RAW: {
   { no: "0001", code: 28, city: "Kobe 神戸", name: "Kobe Chinatown", ja: "神戸中華街", motif: "landmark", note: "Kitty in Chinese dress with a tray of buns; Nankinmachi" },
   { no: "0002", code: 13, city: "Arakawa 荒川", name: "Arakawa Yosakoi", ja: "荒川よさこい", motif: "festival", note: "Yosakoi dancer with naruko clappers; Toden Arakawa tram on card" },
   { no: "0003", code: 22, city: "Lake Hamana 浜名湖", name: "Lake Hamana", ja: "浜名湖", motif: "animal", note: "Kitty in a fish hood in a woven creel marked 浜名湖" },
-  { no: "0004", code: null, city: null, name: "Yoshitsune & Benkei", ja: "義経＆弁慶", motif: "history", note: "Design confirmed: the vertical red label is the five-glyph name 義経＆弁慶, ending in 慶 — it names the characters, not a place. This is the only card of the 25 with no 「〇〇限定」 prefecture badge, so it is genuinely unplaced on the packaging and sits off the map alongside the collabs. Hiraizumi (Iwate) or Kyoto (Gojo Bridge) are the likely origins; only purchase provenance would settle it." },
+  // Provenance reasoning behind 0004's note (kept here, not shown to
+  // visitors): Design confirmed: the vertical red label is the five-glyph
+  // name 義経＆弁慶, ending in 慶 — it names the characters, not a place.
+  // This is the only card of the 25 with no 「〇〇限定」 prefecture badge, so
+  // it is genuinely unplaced on the packaging and sits off the map alongside
+  // the collabs. Hiraizumi (Iwate) or Kyoto (Gojo Bridge) are the likely
+  // origins; only purchase provenance would settle it.
+  { no: "0004", code: null, city: null, name: "Yoshitsune & Benkei", ja: "義経＆弁慶", motif: "history", note: "No 「〇〇限定」 prefecture badge on the packaging — this one names its characters, not a place." },
   { no: "0005", code: 9, city: "Nikko 日光", name: "Kegon Falls", ja: "華厳の滝", motif: "landmark", note: "Retains its original ¥1980 price sticker and Fujisey shop label" },
   { no: "0006", code: null, city: null, name: "Shinshu-ichi Miso", ja: "神州一味噌", motif: "food", note: "Brand collaboration (Miyasaka Jozo of Nagano); Kitty in a miso bowl" },
   { no: "0007", code: 47, city: "Naha 那覇", name: "Eisa drummer", ja: "沖縄エイサー", motif: "festival", note: "Kitty as eisa drummer in Ryukyuan dress; Shureimon gate on card" },

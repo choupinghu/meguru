@@ -178,8 +178,21 @@ export default function MapExplorer({ charms }: { charms: DesignView[] }) {
   const animationFrame = useRef<number | null>(null);
   const discoverTimeout = useRef<number | null>(null);
   const discoverBtnRef = useRef<HTMLButtonElement>(null);
+  // Discover's no-repeat window (D2): most-recent-first design ids, trimmed
+  // to WINDOW on every pick. A ref, not state -- it must never itself
+  // trigger a re-render; only the picks it produces do that.
+  const recentPicks = useRef<number[]>([]);
 
   const [state, setState] = useState<ExplorerState>({ level: "japan" });
+  // The charm Discover most recently surfaced, if any -- drives the panel's
+  // "charm" state independently of the map's own drill-down level (D7).
+  // Cleared by every *other* interaction (a prefecture/region click, the
+  // legend's All Japan chip, a panel's back control) so navigating away from
+  // a discovered charm falls straight back through the normal panel states.
+  const [discoveredCharm, setDiscoveredCharm] = useState<{
+    design: DesignView;
+    region: RegionKey | null;
+  } | null>(null);
 
   // Prefecture codes the collection reaches, grouped into their designs.
   // Collabs (prefectureCode === null) don't belong to the map.
@@ -341,15 +354,18 @@ export default function MapExplorer({ charms }: { charms: DesignView[] }) {
       if (!(e.target instanceof Element)) return;
       const el = e.target.closest(".prefecture");
       if (!el) {
+        setDiscoveredCharm(null);
         setState(zoomOutOneLevel);
         return;
       }
       const code = Number(el.getAttribute("data-code"));
       if (!Number.isFinite(code)) {
+        setDiscoveredCharm(null);
         setState(zoomOutOneLevel);
         return;
       }
       const hasCharms = el.classList.contains("has");
+      setDiscoveredCharm(null);
       setState((prev) => clickPrefecture(prev, code, hasCharms));
     };
 
@@ -363,6 +379,7 @@ export default function MapExplorer({ charms }: { charms: DesignView[] }) {
       const code = Number(el.getAttribute("data-code"));
       if (!Number.isFinite(code)) return;
       e.preventDefault();
+      setDiscoveredCharm(null);
       setState((prev) => clickPrefecture(prev, code, true));
     };
 
@@ -384,27 +401,57 @@ export default function MapExplorer({ charms }: { charms: DesignView[] }) {
 
   // Region chips jump straight to that region from any level.
   const selectRegion = useCallback((region: RegionKey) => {
+    setDiscoveredCharm(null);
     setState({ level: "region", regionKey: region });
   }, []);
 
   // "All Japan" always returns to the top level.
   const resetToOverview = useCallback(() => {
+    setDiscoveredCharm(null);
     setState({ level: "japan" });
   }, []);
 
   // The prefecture panel's "← Back" control: same transition as clicking
   // outside the focused prefecture (requirement 8).
   const backToRegion = useCallback(() => {
+    setDiscoveredCharm(null);
     setState(zoomOutOneLevel);
   }, []);
 
+  // Picking a card in the region/prefecture panel (spec 0010 fix): switches
+  // the panel into that charm's preview in place. Deliberately does not
+  // touch `state` -- the user already drilled the map to where this charm
+  // lives (or its region), so nothing needs to fly anywhere; only the panel
+  // changes, unlike a Discover pick which also owns the map's zoom level.
+  const selectCharm = useCallback((design: DesignView) => {
+    const region = design.prefectureCode != null ? regionForCode(design.prefectureCode) : null;
+    setDiscoveredCharm({ design, region });
+  }, []);
+
   const handleDiscover = useCallback(() => {
-    if (reachedCodes.length === 0) return;
+    // The pool is all 25 owned designs, placeless included (D1) -- `charms`
+    // is already exactly that (app/page.tsx hands MapExplorer the
+    // items.length > 0 filter, never the 29 documented-only designs).
+    const pool = charms;
+    if (pool.length === 0) return;
+
+    // No-repeat window (D2): exclude the most recent WINDOW picks. The
+    // `Math.max(0, …)` guard matters for a tiny collection -- with one charm
+    // the window is 0 and Discover still has something to pick instead of
+    // nothing.
+    const WINDOW = Math.min(5, Math.max(0, pool.length - 1));
+    const excluded = new Set(recentPicks.current);
+    let candidates = pool.filter((c) => !excluded.has(c.id));
+    // The exclusion can never actually empty the pool at this WINDOW size,
+    // but fall back to the full pool rather than have nothing to pick from.
+    if (candidates.length === 0) candidates = pool;
+
     // Randomness lives here, in the click handler -- never during render --
     // so there's nothing for hydration to disagree about.
-    const pick = reachedCodes[Math.floor(Math.random() * reachedCodes.length)];
-    const region = regionForCode(pick);
-    if (!region) return;
+    const design = candidates[Math.floor(Math.random() * candidates.length)];
+    recentPicks.current = [design.id, ...recentPicks.current].slice(0, WINDOW);
+
+    const region = design.prefectureCode != null ? regionForCode(design.prefectureCode) : null;
     const reduceMotion = prefersReducedMotion();
 
     const btn = discoverBtnRef.current;
@@ -418,9 +465,19 @@ export default function MapExplorer({ charms }: { charms: DesignView[] }) {
       window.clearTimeout(discoverTimeout.current);
       discoverTimeout.current = null;
     }
-    // Discover goes straight to the prefecture level, on its region, so
-    // backing out afterwards lands on that region (requirement 7).
-    const jump = () => setState({ level: "prefecture", regionKey: region, code: pick });
+    // A placed charm flies the map to its prefecture, on its region, exactly
+    // as clicking that prefecture would (requirement 3 / 7). A placeless
+    // charm (D3) returns the map to its resting all-Japan framing rather
+    // than hiding it or faking a location -- nothing selected, nothing
+    // in-region, same as the level nothing-chosen already renders.
+    const jump = () => {
+      setDiscoveredCharm({ design, region });
+      setState(
+        design.prefectureCode != null && region
+          ? { level: "prefecture", regionKey: region, code: design.prefectureCode }
+          : { level: "japan" }
+      );
+    };
     if (reduceMotion) {
       jump();
     } else {
@@ -429,9 +486,15 @@ export default function MapExplorer({ charms }: { charms: DesignView[] }) {
         discoverTimeout.current = null;
       }, DISCOVER_PRESS_MS);
     }
-  }, [reachedCodes]);
+  }, [charms]);
 
   const panelView: PanelView = useMemo(() => {
+    // A Discover pick overrides whatever level the map itself is at -- it's
+    // reset to null by every other interaction (see setDiscoveredCharm(null)
+    // above), so this only ever wins right after a Discover click.
+    if (discoveredCharm) {
+      return { kind: "charm", design: discoveredCharm.design, region: discoveredCharm.region };
+    }
     if (state.level === "prefecture") {
       return {
         kind: "prefecture",
@@ -453,7 +516,7 @@ export default function MapExplorer({ charms }: { charms: DesignView[] }) {
       prefecturesReached: reachedCodes.length,
       regionCounts,
     };
-  }, [state, byCode, reachedCodes.length, regionCounts, totalCharms]);
+  }, [discoveredCharm, state, byCode, reachedCodes.length, regionCounts, totalCharms]);
 
   const hint =
     state.level === "prefecture"
@@ -525,7 +588,7 @@ export default function MapExplorer({ charms }: { charms: DesignView[] }) {
               <span className="st" aria-hidden="true">
                 巡
               </span>
-              Discover a prefecture
+              Discover a charm
             </button>
           </div>
         </div>
@@ -533,6 +596,7 @@ export default function MapExplorer({ charms }: { charms: DesignView[] }) {
         <MapPanel
           view={panelView}
           onSelectRegion={selectRegion}
+          onSelectCharm={selectCharm}
           onReset={resetToOverview}
           onBackToRegion={backToRegion}
         />
