@@ -1,0 +1,49 @@
+name: CI
+
+# Spec 0015. Two jobs:
+#   checks — install, lint, typecheck, build, check:content. No secrets, no
+#            database. Must pass the moment this file lands.
+#   pages  — check:pages, which builds + serves the app and asserts the
+#            rendered HTML. Needs DATABASE_URL because every page is
+#            force-dynamic and queries Neon at request time; next build
+#            itself does not.
+#
+# `pages` will fail until a repo secret named DATABASE_URL is added, pointing
+# at the dev Neon branch (the same one `.env.local`'s DATABASE_URL points at
+# locally) — never the production branch. There is deliberately no
+# PRODUCTION_DATABASE_URL anywhere in this workflow: nothing in CI should be
+# able to reach the live database, and db:seed:prod / db:migrate:prod are not
+# invoked here or anywhere else in automation. Vercel already deploys `main`
+# on push, so this workflow has no deploy step of its own.
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npx tsc --noEmit
+      - run: npm run build
+      - run: npm run check:content
+
+  pages:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - run: npm ci
+      - run: npm run check:pages
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
