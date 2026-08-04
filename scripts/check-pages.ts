@@ -22,11 +22,18 @@ dotenv.config({ path: ".env.local" });
 
 import { spawn, spawnSync, type ChildProcess } from "node:child_process";
 import { setTimeout as delay } from "node:timers/promises";
+import path from "node:path";
 import { DOCUMENTED, OWNED } from "./seed-data";
 
 const PORT = 3100;
 const BASE_URL = `http://localhost:${PORT}`;
 const START_TIMEOUT_MS = 60_000;
+
+// The local binary, not `npx next` — `npx` forks a wrapper process around
+// the real `next` process, and killing the wrapper leaves the grandchild it
+// forked alive (see `stopServer` below). Running the local binary directly
+// means there's no wrapper to begin with.
+const NEXT_BIN = path.join(process.cwd(), "node_modules", ".bin", "next");
 
 // ---------------------------------------------------------------------------
 // Expectations, derived from the data (D2) — never a bare literal count.
@@ -122,7 +129,7 @@ function expect(label: string, actual: number | boolean, expected: number | bool
 
 function buildApp() {
   console.log("Building (next build) ...");
-  const result = spawnSync("npx", ["next", "build"], {
+  const result = spawnSync(NEXT_BIN, ["build"], {
     stdio: "inherit",
     env: process.env,
   });
@@ -133,9 +140,14 @@ function buildApp() {
 
 function startServer(): ChildProcess {
   console.log(`Starting (next start --port ${PORT}) ...`);
-  const child = spawn("npx", ["next", "start", "--port", String(PORT)], {
+  // `detached: true` makes this child the leader of its own process group,
+  // so `stopServer` can signal the whole group rather than just this pid —
+  // belt-and-braces with running the local binary directly (no wrapper to
+  // begin with, but `next start` itself may still fork).
+  const child = spawn(NEXT_BIN, ["start", "--port", String(PORT)], {
     stdio: ["ignore", "pipe", "pipe"],
     env: process.env,
+    detached: true,
   });
   child.stdout?.on("data", () => {});
   child.stderr?.on("data", () => {});
@@ -161,8 +173,20 @@ async function waitForServer(): Promise<void> {
 let serverProcess: ChildProcess | null = null;
 
 function stopServer() {
-  if (serverProcess && !serverProcess.killed) {
-    serverProcess.kill("SIGTERM");
+  if (serverProcess && !serverProcess.killed && serverProcess.pid) {
+    // Signal the whole process group (negative pid), not just this one
+    // process. A plain `serverProcess.kill()` only signals the direct
+    // child; if that child forked its own grandchild (as a wrapper process
+    // would, and as `next start` itself may), the grandchild survives,
+    // keeps this script's stdout/stderr pipes open, and the event loop
+    // never drains — a run that printed "OK" and then hung until CI's job
+    // limit killed it. `detached: true` on spawn made this child its own
+    // group leader, so `-pid` reaches everything under it.
+    try {
+      process.kill(-serverProcess.pid, "SIGTERM");
+    } catch {
+      // Group already gone — nothing left to signal.
+    }
     serverProcess = null;
   }
 }
@@ -286,6 +310,14 @@ async function main() {
     `check:pages OK — ${checked} assertions passed across / , /browse and ${designCount} /charm/[id] pages ` +
       `(${designCount} designs, ${ownedCount} owned, ${documented} documented, ${withStory} with a story).`
   );
+
+  // Explicit exit rather than trusting the event loop to drain on its own —
+  // the failure path below already calls process.exit(1); without a
+  // matching call here, a stray open handle (a socket, a timer) can hold
+  // the process open indefinitely even after the server is stopped. This is
+  // what let a run that printed "OK" hang for the rest of CI's six-hour job
+  // limit.
+  process.exit(0);
 }
 
 main().catch((err) => {
