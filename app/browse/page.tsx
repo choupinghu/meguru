@@ -34,7 +34,10 @@ export default async function BrowsePage() {
 
   return (
     <div className="meguru">
-      <SiteHeader active="browse" />
+      {/* Sticky (spec 0010 fix): / can't afford a docked header on top of its
+          already-tight hero + map budget, but /browse is a long scroll of
+          cards with no other way back to the map once you're past the hero. */}
+      <SiteHeader active="browse" sticky />
       <SiteHero stats={stats} />
       <section className="section">
         <div className="sec-head">

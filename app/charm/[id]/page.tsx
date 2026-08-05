@@ -96,7 +96,7 @@ export default async function CharmPage({
 
   return (
     <div className="meguru">
-      <SiteHeader active="browse" />
+      <SiteHeader active="none" />
       <article className="charm-page">
         <div className="charm-hero" style={{ "--rc": color } as CSSProperties}>
           <div className="charm-hero-art">

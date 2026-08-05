@@ -1,6 +1,9 @@
 import Link from "next/link";
 
-export type ActiveView = "map" | "browse";
+/** `"none"` matches neither switcher link — for a route that belongs to
+ * neither view (the charm depth page), rather than defaulting to whichever
+ * one it was most recently reached from. */
+export type ActiveView = "map" | "browse" | "none";
 
 const VIEWS: Array<{ key: ActiveView; href: string; label: string }> = [
   { key: "map", href: "/", label: "Map" },
@@ -14,10 +17,21 @@ const VIEWS: Array<{ key: ActiveView; href: string; label: string }> = [
  * derived from the pathname: every route is a server component that already
  * knows which view it is, so there's no need for a client-side `usePathname`
  * just to answer that question.
+ *
+ * `sticky` (spec 0010 fix): opt-in, since `/` can't afford a permanently
+ * docked header on top of its already-tight hero + map vertical budget.
+ * `/browse` passes it so there's always a way back to the map on screen,
+ * however far down the 54-card grid the page has scrolled.
  */
-export default function SiteHeader({ active }: { active: ActiveView }) {
+export default function SiteHeader({
+  active,
+  sticky,
+}: {
+  active: ActiveView;
+  sticky?: boolean;
+}) {
   return (
-    <header className="top">
+    <header className={`top${sticky ? " is-sticky" : ""}`}>
       <div className="brand">
         <div className="seal" aria-hidden="true">
           巡

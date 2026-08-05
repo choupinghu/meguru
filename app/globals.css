@@ -84,6 +84,19 @@ body {
   max-width: var(--maxw);
   margin: 0 auto;
 }
+/* Opt-in (spec 0010 fix), /browse only -- / can't afford a permanently
+   docked header on top of its already-tight hero + map budget, but a
+   54-card scroll needs a way back to the map on screen. An explicit
+   background stops cards showing through as they scroll underneath; the
+   highest z-index elsewhere on the site today is 2 (.legend/.maptools, both
+   /-only), so 50 clears everything without needing to fight for the top. */
+.top.is-sticky {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: var(--bg);
+  border-bottom: 1px solid var(--line-soft);
+}
 .brand {
   display: flex;
   align-items: center;

@@ -419,13 +419,21 @@ export default function MapExplorer({ charms }: { charms: DesignView[] }) {
   }, []);
 
   // Picking a card in the region/prefecture panel (spec 0010 fix): switches
-  // the panel into that charm's preview in place. Deliberately does not
-  // touch `state` -- the user already drilled the map to where this charm
-  // lives (or its region), so nothing needs to fly anywhere; only the panel
-  // changes, unlike a Discover pick which also owns the map's zoom level.
+  // the panel into that charm's preview in place. At the region level the
+  // map is still zoomed out on the whole region, so this also flies to the
+  // specific charm's prefecture, same as Discover's jump -- just without the
+  // press/spin animation or its timeout, since this is a direct click on a
+  // card, not the dice roll, and should feel immediate.
   const selectCharm = useCallback((design: DesignView) => {
     const region = design.prefectureCode != null ? regionForCode(design.prefectureCode) : null;
     setDiscoveredCharm({ design, region });
+    // Fly to the charm's prefecture, the same as Discover's jump. Idempotent
+    // when the panel is already at that prefecture; the point is the region
+    // level, where the map would otherwise stay zoomed out on the whole region
+    // while the panel showed one specific charm.
+    if (design.prefectureCode != null && region) {
+      setState({ level: "prefecture", regionKey: region, code: design.prefectureCode });
+    }
   }, []);
 
   const handleDiscover = useCallback(() => {
