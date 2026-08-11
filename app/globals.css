@@ -817,6 +817,11 @@ button.card-link {
   border: 1px solid var(--line-soft);
   overflow: hidden;
 }
+.thumb img {
+  /* Cut-outs are `contain`; this keeps them off the frame edge so the tinted
+     ground reads as a mount rather than a background the charm sits flush on. */
+  padding: 9px;
+}
 .thumb svg {
   width: 58%;
   height: auto;

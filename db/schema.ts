@@ -69,6 +69,12 @@ export const designs = pgTable("designs", {
   special: boolean("special").notNull().default(false),
   /** The design's story text. Nullable, unused until 0007. */
   story: text("story"),
+  /** Design-level premier image: a cut-out photograph of *some* copy of this
+   * design, shown where the charm itself is the point (the map). Distinct from
+   * `items.imageUrl`, which is a photograph of the copy on this shelf. Only one
+   * of the two is a claim about what you would receive. Provenance for every
+   * design-level image lives in public/img/charms/SOURCES.md. */
+  imageUrl: text("image_url"),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
 });
 

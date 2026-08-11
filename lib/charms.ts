@@ -48,6 +48,9 @@ export interface DesignView {
   /** The design's story text (spec 0007). Rendered only on `/charm/[id]`
    * (spec 0008) — never on Browse or the map panel's cards. */
   story: string | null;
+  /** Design-level premier image — a photograph of *some* copy of this design.
+   * Not a photograph of the item on the shelf; that is `ItemView.imageUrl`. */
+  imageUrl: string | null;
   items: ItemView[];
 }
 
@@ -76,6 +79,7 @@ export function toDesignView(design: Design, items: Item[]): DesignView {
     rarity: design.rarity as Rarity,
     special: design.special,
     story: design.story,
+    imageUrl: design.imageUrl,
     items: items.map(toItemView),
   };
 }
@@ -112,7 +116,9 @@ export function toCharmView(design: DesignView): CharmView {
     city: design.city,
     brand: design.brand,
     motif: design.motif,
-    imageUrl: item?.imageUrl ?? null,
+    // Our own photograph of this copy wins when we have one; the design-level
+    // reference image is the fallback, never the other way round.
+    imageUrl: item?.imageUrl ?? design.imageUrl ?? null,
   };
 }
 

@@ -83,6 +83,8 @@ export type OwnedDesign = {
   note: string;
   /** Researched write-up (0007a). Null where it could not be sourced. */
   story: string | null;
+  /** Design-level premier image, or null where none could be sourced. */
+  imageUrl: string | null;
 };
 
 export const DOCUMENTED: DocumentedDesign[] = [
@@ -265,6 +267,15 @@ export const STORIES: Record<string, string> = {
     "Haguro is the lowest and most visited of the Dewa Sanzan, the three mountains Shugendō ascetics walk as a passage through death and rebirth, with Haguro standing for the present world. The way up is two thousand four hundred and forty-six stone steps through cedar, past a five-storey pagoda that has stood in some form since the tenth century. The yamabushi who make the circuit wear white, the colour of the dead, because that is the whole point of the walk.",
 };
 
+/** Manifest rows with an owner-verified design-level reference image in
+ * public/img/charms/. The other twelve are blister-packed: Kitty sits behind
+ * plastic with printed card behind her, so no crop or mask isolates her, and
+ * they keep the CharmArt placeholder. See public/img/charms/SOURCES.md. */
+const REFERENCE_NOS = new Set([
+  "0001", "0006", "0010", "0011", "0013", "0015", "0018",
+  "0019", "0021", "0022", "0023", "0024", "0025",
+]);
+
 export const OWNED: OwnedDesign[] = OWNED_RAW.map((r) => {
   const unplaced = UNPLACED[r.no];
   const special = SPECIAL_NOS.has(r.no);
@@ -284,5 +295,6 @@ export const OWNED: OwnedDesign[] = OWNED_RAW.map((r) => {
     price,
     note: r.note,
     story: STORIES[r.no] ?? null,
+    imageUrl: REFERENCE_NOS.has(r.no) ? `/img/charms/${r.no}-reference.webp` : null,
   };
 });

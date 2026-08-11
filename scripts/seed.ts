@@ -80,6 +80,7 @@ function toOwnedDesignRow(d: OwnedDesign): NewDesign {
     rarity: d.rarity,
     special: d.special,
     story: d.story,
+    imageUrl: d.imageUrl,
   };
 }
 
