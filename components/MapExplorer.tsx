@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import type { CSSProperties } from "react";
 import type { DesignView } from "@/lib/charms";
+import { hasPhoto } from "@/lib/charms";
 import { REGIONS, REGION_LIST, regionForCode, type RegionKey } from "@/lib/regions";
 import { PREFECTURES } from "@/lib/prefectures";
 import { PREFECTURE_BOUNDS, REGION_BOUNDS, type Bounds } from "@/lib/map-bounds";
@@ -437,10 +438,16 @@ export default function MapExplorer({ charms }: { charms: DesignView[] }) {
   }, []);
 
   const handleDiscover = useCallback(() => {
-    // The pool is all 25 owned designs, placeless included (D1) -- `charms`
-    // is already exactly that (app/page.tsx hands MapExplorer the
-    // items.length > 0 filter, never the 29 documented-only designs).
-    const pool = charms;
+    // The pool is the owned designs, placeless included (D1) -- `charms` is
+    // already exactly that (app/page.tsx hands MapExplorer the items.length > 0
+    // filter, never the documented-only designs) -- narrowed to those that can
+    // show a photograph. Discover is the one surface that chooses *for* the
+    // visitor, so handing them a placeholder is a worse outcome than skipping
+    // that charm; every charm remains reachable by drilling into its
+    // prefecture. Falls back to the whole pool if nothing has a photo yet, so
+    // the button can never become a no-op.
+    const withPhoto = charms.filter(hasPhoto);
+    const pool = withPhoto.length > 0 ? withPhoto : charms;
     if (pool.length === 0) return;
 
     // No-repeat window (D2): exclude the most recent WINDOW picks. The

@@ -104,6 +104,13 @@ export interface CharmView {
   imageUrl: string | null;
 }
 
+/** True when a design can show an actual photograph rather than CharmArt —
+ * either our own photo of the copy on the shelf, or a design-level reference
+ * image. Discover uses this to pick only charms a visitor can actually *see*. */
+export function hasPhoto(design: DesignView): boolean {
+  return design.imageUrl != null || design.items.some((i) => i.imageUrl != null);
+}
+
 export function toCharmView(design: DesignView): CharmView {
   const item = design.items[0];
   return {
