@@ -48,6 +48,9 @@ export interface DesignView {
   /** The design's story text (spec 0007). Rendered only on `/charm/[id]`
    * (spec 0008) — never on Browse or the map panel's cards. */
   story: string | null;
+  /** Design-level premier image — a photograph of *some* copy of this design.
+   * Not a photograph of the item on the shelf; that is `ItemView.imageUrl`. */
+  imageUrl: string | null;
   items: ItemView[];
 }
 
@@ -76,6 +79,7 @@ export function toDesignView(design: Design, items: Item[]): DesignView {
     rarity: design.rarity as Rarity,
     special: design.special,
     story: design.story,
+    imageUrl: design.imageUrl,
     items: items.map(toItemView),
   };
 }
@@ -112,7 +116,9 @@ export function toCharmView(design: DesignView): CharmView {
     city: design.city,
     brand: design.brand,
     motif: design.motif,
-    imageUrl: item?.imageUrl ?? null,
+    // Our own photograph of this copy wins when we have one; the design-level
+    // reference image is the fallback, never the other way round.
+    imageUrl: item?.imageUrl ?? design.imageUrl ?? null,
   };
 }
 
@@ -165,8 +171,11 @@ type Locatable = {
 export function locationLabel(charm: Locatable): string {
   if (charm.isCollab) return charm.brand ?? COLLAB_REGION.en;
   const prefecture = charm.prefectureCode != null ? PREFECTURES[charm.prefectureCode] : undefined;
-  const prefLabel = prefecture?.en ?? "Place unknown";
-  return charm.city ? `${prefLabel} · ${charm.city}` : prefLabel;
+  // A charm with no prefecture but a named area knows where it is from — it is
+  // only unplaceable to prefecture resolution. Saying "Place unknown · Hokuriku"
+  // would be false. Show what the object actually claims.
+  if (!prefecture) return charm.city ?? "Place unknown";
+  return charm.city ? `${prefecture.en} · ${charm.city}` : prefecture.en;
 }
 
 /** The region hue this charm should be tinted with (applied via --rc). */
