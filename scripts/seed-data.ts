@@ -325,11 +325,20 @@ const REFERENCE_NOS = new Set([
   "0019", "0021", "0022", "0023", "0024", "0025",
 ]);
 
-/** Charms photographed loose enough that Kitty could be cut out of our own
- * photograph. 0027, 0029 and 0030 are absent on purpose: their source frames
- * are all under 900px and the resulting figure crops are 138-220px, too soft
- * to show. They are queued for a reshoot and fall back to CharmArt until then. */
-const OWN_PHOTO_NOS = new Set(["0026", "0031", "0034", "0035", "0036", "0037"]);
+/** Charms where Kitty could be cut out of our own photograph.
+ *
+ * These render in a 5:4 box about 230px wide with object-fit: contain, so the
+ * charm is shown at roughly 130x170 CSS px. A 138px cut-out is therefore close
+ * to native, not "too small" -- an earlier pass excluded three of these by
+ * measuring them against 0012/D7's 1200px target, which governs the *full
+ * artefact* shot and has nothing to do with this surface.
+ *
+ * 0030 is still absent, and for a different reason: that charm was photographed
+ * tilted and partly behind a pearl bead, so no crop box frames it cleanly and
+ * Vision loses the subject entirely on wider ones. Queued for a reshoot. */
+const OWN_PHOTO_NOS = new Set([
+  "0026", "0027", "0029", "0031", "0034", "0035", "0036", "0037",
+]);
 
 export const OWNED: OwnedDesign[] = OWNED_RAW.map((r) => {
   const unplaced = UNPLACED[r.no];
