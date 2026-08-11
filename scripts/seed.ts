@@ -74,7 +74,7 @@ function toOwnedDesignRow(d: OwnedDesign): NewDesign {
     isCollab: d.isCollab,
     brand: d.brand,
     prefectureCode: d.prefectureCode,
-    region: d.prefectureCode != null ? regionForCode(d.prefectureCode) : "collab",
+    region: (d.region ?? (d.prefectureCode != null ? regionForCode(d.prefectureCode) : "collab")) as NewDesign["region"],
     city: d.city,
     motif: d.motif,
     rarity: d.rarity,
@@ -87,11 +87,11 @@ function toOwnedDesignRow(d: OwnedDesign): NewDesign {
 function toOwnedItemRow(d: OwnedDesign, designId: number): NewItem {
   return {
     designId,
-    condition: "bnib",
+    condition: d.condition,
     status: "available",
     priceSgd: d.price,
     note: d.note,
-    imageUrl: null,
+    imageUrl: d.photoUrl,
   };
 }
 

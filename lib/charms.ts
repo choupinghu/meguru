@@ -171,8 +171,11 @@ type Locatable = {
 export function locationLabel(charm: Locatable): string {
   if (charm.isCollab) return charm.brand ?? COLLAB_REGION.en;
   const prefecture = charm.prefectureCode != null ? PREFECTURES[charm.prefectureCode] : undefined;
-  const prefLabel = prefecture?.en ?? "Place unknown";
-  return charm.city ? `${prefLabel} · ${charm.city}` : prefLabel;
+  // A charm with no prefecture but a named area knows where it is from — it is
+  // only unplaceable to prefecture resolution. Saying "Place unknown · Hokuriku"
+  // would be false. Show what the object actually claims.
+  if (!prefecture) return charm.city ?? "Place unknown";
+  return charm.city ? `${prefecture.en} · ${charm.city}` : prefecture.en;
 }
 
 /** The region hue this charm should be tinted with (applied via --rc). */

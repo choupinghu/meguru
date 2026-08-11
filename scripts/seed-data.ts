@@ -32,6 +32,10 @@
  */
 
 /** What the design depicts — a second axis for browsing/filtering. */
+/** Shelf condition of one physical copy. Mirrors db/schema.ts's conditionEnum,
+ * restated here because this file deliberately imports nothing from db/. */
+export type Condition = "bnib" | "boxed-notag" | "nobox-tag" | "nobox-notag";
+
 export type Motif =
   | "food"        // regional dish or produce
   | "landmark"    // place, building, natural landmark
@@ -85,6 +89,12 @@ export type OwnedDesign = {
   story: string | null;
   /** Design-level premier image, or null where none could be sourced. */
   imageUrl: string | null;
+  /** Our own photograph of this copy, or null. Takes precedence over the
+   * design-level image everywhere it exists — it is the honest one. */
+  photoUrl: string | null;
+  condition: Condition;
+  /** Explicit region where a prefecture code cannot supply one. */
+  region: string | null;
 };
 
 export const DOCUMENTED: DocumentedDesign[] = [
@@ -159,6 +169,11 @@ export const OWNED_RAW: {
   ja: string;
   motif: Motif;
   note: string;
+  /** Defaults to "bnib" — true of all 25 charms photographed in 2026-07. */
+  condition?: Condition;
+  /** Override only where a charm names a *region* but no prefecture, so it
+   * would otherwise fall to "collab" for want of a prefecture code. */
+  region?: string;
 }[] = [
   { no: "0001", code: 28, city: "Kobe 神戸", name: "Kobe Chinatown", ja: "神戸中華街", motif: "landmark", note: "Kitty in Chinese dress with a tray of buns; Nankinmachi" },
   { no: "0002", code: 13, city: "Arakawa 荒川", name: "Arakawa Yosakoi", ja: "荒川よさこい", motif: "festival", note: "Yosakoi dancer with naruko clappers; Toden Arakawa tram on card" },
@@ -192,6 +207,21 @@ export const OWNED_RAW: {
   { no: "0023", code: 26, city: "Kyoto 京都", name: "Kondo Isami", ja: "近藤勇", motif: "history", note: "Shinsengumi commander; the haori bears the 誠 crest" },
   { no: "0024", code: 5, city: "Lake Tazawa 田沢湖", name: "Lake Tazawa Tatsuko", ja: "田沢湖辰子", motif: "folklore", note: "The Tatsuko maiden legend; Japan's deepest lake" },
   { no: "0025", code: 6, city: "Haguro 羽黒", name: "Mt Haguro", ja: "羽黒山", motif: "landmark", note: "Kitty as a yamabushi ascetic; one of the Dewa Sanzan" },
+
+  // --- Batch shot 2026-08-10. Loose charms, so the first that are not BNIB.
+  // Three more from this batch are photographed but not yet identified and are
+  // deliberately absent: a null beats an invention.
+  { no: "0026", code: 1, city: null, name: "Ezo Sika Deer", ja: "エゾシカ", motif: "animal", condition: "nobox-tag", note: "Sold on a 北海道限定 tag in the Hello Kitty Lavender line; sleeve and tag still with it" },
+  { no: "0027", code: 12, city: "Narita 成田", name: "Narita Airport", ja: "成田空港", motif: "landmark", condition: "nobox-notag", note: "Kitty as an aircraft with a hinomaru on the tail; the wings read NARITA AIRPORT" },
+  { no: "0029", code: 46, city: "Kagoshima 鹿児島", name: "Saigo Takamori", ja: "西郷隆盛", motif: "history", condition: "nobox-tag", note: "Kitty in Satsuma dress with Saigō's dog; retains its 鹿児島 ご当地キティ tag" },
+  { no: "0030", code: 46, city: "Sakurajima 桜島", name: "Sakurajima Daikon", ja: "桜島大根", motif: "food", condition: "nobox-tag", note: "Retains its ご当地キティ 鹿児島 tag" },
+  { no: "0031", code: null, city: null, name: "Wasabi", ja: "わさび", motif: "food", condition: "nobox-notag", note: "Kitty in green beside a leafy wasabi rhizome. Nothing on the charm names a place" },
+  // 北陸産 names the Hokuriku region and no prefecture within it, so this one
+  // is placed as finely as the evidence allows and no finer.
+  { no: "0034", code: null, city: "Hokuriku 北陸", region: "chubu", name: "Hokuriku Crab", ja: "北陸産かに", motif: "food", condition: "nobox-notag", note: "The moulded plaque reads 北陸産 — the Hokuriku region rather than any one prefecture" },
+  { no: "0035", code: 1, city: null, name: "Sea Urchin", ja: "北海道産うに", motif: "food", condition: "nobox-notag", note: "The moulded plaque reads 北海道産" },
+  { no: "0036", code: 22, city: "Lake Hamana 浜名湖", name: "Lake Hamana Eel", ja: "浜名湖名物", motif: "food", condition: "nobox-notag", note: "The moulded plaque reads 浜名湖名物; Kitty carries a skewer and a fan" },
+  { no: "0037", code: 25, city: "Lake Biwa 琵琶湖", name: "Lake Biwa Ayu", ja: "琵琶湖産鮎", motif: "food", condition: "nobox-notag", note: "The moulded plaque reads 琵琶湖産鮎" },
 ];
 
 /**
@@ -217,6 +247,25 @@ export const OWNED_RAW: {
  *         the item's note and out of the design's story.
  */
 export const STORIES: Record<string, string> = {
+  // --- Batch shot 2026-08-10.
+  "0026":
+    "The Ezo sika is Hokkaidō's own subspecies and the largest of Japan's sika deer, far heavier-coated than the ones that wander Nara. Hunting and the deep snows of the 1880s brought it close to extinction, and protection worked so thoroughly that the herds now have to be culled — venison has become an ordinary Hokkaidō dish rather than a rarity.",
+  "0027":
+    "Narita opened in 1978 after more than a decade of fighting. The government picked farmland at Sanrizuka without asking the farmers on it, and the protests that followed — barricades, tunnels, riot police, deaths on both sides — held the airport back for years and kept it to a single runway for decades afterwards. It sits sixty kilometres from the city it is named for serving.",
+  "0029":
+    "Saigō Takamori did more than almost anyone to bring down the shogunate, then died fighting the government he had helped build. In 1877 he led the Satsuma Rebellion out of Kagoshima against the new conscript army and the abolition of the samurai class, and lost. He was pardoned twelve years later. He is nearly always shown in plain country dress with his dog, which is how Kagoshima prefers to remember him.",
+  "0030":
+    "The Sakurajima daikon is the largest radish in the world — round rather than long, and heavy enough that the record holders pass thirty kilograms. It grows in volcanic ash on the slopes of an active volcano, in soil too poor at holding water for most things, which is precisely what the radish wants.",
+  "0031":
+    "Real wasabi is a stream plant. It grows on terraced gravel beds in cold running water and takes a year and a half or more to make a usable rhizome, which is why nearly everything served as wasabi is horseradish with mustard and green colouring. The rhizome is grated in slow circles on sharkskin and loses its heat within about fifteen minutes. Nothing on this charm names a place, and Shizuoka and Nagano would both claim it.",
+  "0034":
+    "Zuwaigani, the snow crab, comes out of the Sea of Japan between November and March, and the Hokuriku coast has spent a long time arguing about whose is best. Fukui lands them as Echizen-gani and tags each one at the boat; Ishikawa calls its own Kanō-gani. This charm declines to take sides — its plaque reads 北陸産, the region, which is as precisely as it can honestly be placed.",
+  "0035":
+    "Most of Japan's sea urchin comes out of Hokkaidō, where divers work from small boats with a glass-bottomed box in one hand and a hooked pole in the other. The prized ones graze the kelp beds off Rishiri and Rebun and taste of that kelp. What is eaten is not roe but the gonads — five of them, lifted out whole.",
+  "0036":
+    "Lake Hamana is brackish: a freshwater lake that broke through to the sea in an earthquake in 1498 and never closed again. That turned out to suit eels. Farming began there in 1900 and put Hamana's name on the trade for most of a century. Kabayaki is the local form — split, skewered, steamed, then grilled over charcoal under a sweet soy glaze, fanned the whole time.",
+  "0037":
+    "Ayu live a single year and taste, improbably, of melon. Most run to sea as fry and come back upriver in spring, but Lake Biwa holds a landlocked population that never leaves and never grows large: ko-ayu, small ayu. Shiga ships them live across Japan to stock rivers that have none, so a good part of the country's ayu started out in this lake. They are eaten whole, salted and grilled.",
   "0001":
     "Nankinmachi grew up beside Kobe's harbour after the port opened to foreign trade in 1868, built by Chinese merchants who were barred from the designated foreign quarter and settled just outside it instead. It is now one of Japan's three great Chinatowns, with Yokohama and Nagasaki, and it is a place you eat standing up — the steamed pork buns sold from its stalls are what the queues are for.",
   "0002":
@@ -276,11 +325,28 @@ const REFERENCE_NOS = new Set([
   "0019", "0021", "0022", "0023", "0024", "0025",
 ]);
 
+/** Charms photographed loose enough that Kitty could be cut out of our own
+ * photograph. 0027, 0029 and 0030 are absent on purpose: their source frames
+ * are all under 900px and the resulting figure crops are 138-220px, too soft
+ * to show. They are queued for a reshoot and fall back to CharmArt until then. */
+const OWN_PHOTO_NOS = new Set(["0026", "0031", "0034", "0035", "0036", "0037"]);
+
 export const OWNED: OwnedDesign[] = OWNED_RAW.map((r) => {
   const unplaced = UNPLACED[r.no];
   const special = SPECIAL_NOS.has(r.no);
   const rarity: "uncommon" | "rare" = unplaced ? "rare" : "uncommon";
-  const price = unplaced ? 32 : special ? 28 : 24;
+  // D3 remains a policy, not a per-charm valuation — extended here for the
+  // first non-BNIB charms, since condition is the one thing a buyer can see.
+  const condition = r.condition ?? "bnib";
+  const price = unplaced
+    ? 32
+    : special
+      ? 28
+      : condition === "bnib"
+        ? 24
+        : condition === "nobox-tag"
+          ? 20
+          : 18;
   return {
     no: r.no,
     prefectureCode: r.code,
@@ -296,5 +362,8 @@ export const OWNED: OwnedDesign[] = OWNED_RAW.map((r) => {
     note: r.note,
     story: STORIES[r.no] ?? null,
     imageUrl: REFERENCE_NOS.has(r.no) ? `/img/charms/${r.no}-reference.webp` : null,
+    photoUrl: OWN_PHOTO_NOS.has(r.no) ? `/img/charms/${r.no}-figure.webp` : null,
+    condition: r.condition ?? "bnib",
+    region: r.region ?? null,
   };
 });
