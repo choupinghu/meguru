@@ -28,11 +28,19 @@ export default function SiteHero({ stats }: { stats: StatEntry[] }) {
           "Wander" for 巡る takes a small liberty: 巡る is to go around, tour, make
           a circuit, and carries a sense of route that wandering does not. It is
           used because MapPanel already translates 巡ってみましょう the same way, so
-          the site says one thing rather than two. */}
+          the site says one thing rather than two.
+
+          Three lines doing three jobs: what the object is, what the name means,
+          then the invitation. "One charm at a time" is salvaged from the eyebrow
+          that was cut -- the cadence was never the problem there, "collect the
+          country" was, and it works against a verb that fits. "Together" is
+          deliberate: a personal collection should sound like one. */}
       <p className="hero-lines">
         Gotochi (ご当地) Hello Kitty are unique to each region
         <br />
         Meguru means to wander
+        <br />
+        Explore Japan together, one charm at a time
       </p>
       <div className="stat-row">
         {stats.map((stat) => (
