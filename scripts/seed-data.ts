@@ -321,8 +321,8 @@ export const STORIES: Record<string, string> = {
  * plastic with printed card behind her, so no crop or mask isolates her, and
  * they keep the CharmArt placeholder. See public/img/charms/SOURCES.md. */
 const REFERENCE_NOS = new Set([
-  "0001", "0006", "0010", "0011", "0013", "0015", "0018",
-  "0019", "0021", "0022", "0023", "0024", "0025",
+  "0001", "0004", "0005", "0006", "0010", "0011", "0013", "0014",
+  "0015", "0018", "0019", "0021", "0022", "0023", "0024", "0025",
 ]);
 
 /** Charms where Kitty could be cut out of our own photograph.
