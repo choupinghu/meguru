@@ -179,14 +179,6 @@ body {
   margin: 6px auto 4px;
   padding: 26px 24px 8px;
 }
-.eyebrow {
-  font-size: 12px;
-  letter-spacing: 0.32em;
-  text-transform: uppercase;
-  color: var(--vermilion);
-  font-weight: 600;
-  margin-bottom: 14px;
-}
 .hero h2 {
   font-family: var(--font-display);
   font-weight: 600;
@@ -199,6 +191,11 @@ body {
 .hero h2 em {
   font-style: normal;
   color: var(--vermilion);
+}
+.hero-lines {
+  /* Hard breaks do not adapt, so hold the measure narrow enough that each line
+     survives a phone without re-wrapping into a ragged block. */
+  max-width: 34em;
 }
 .hero p {
   font-size: 17px;
