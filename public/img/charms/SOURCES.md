@@ -14,6 +14,7 @@ If any rights holder objects, delete the file and its row below.
 | file | design | place | source | retrieved |
 |---|---|---|---|---|
 | `0001-reference.webp` | Kobe Chinatown 神戸中華街 | Hyogo | [listing](https://auctions.c.yimg.jp/images.auctions.yahoo.co.jp/image/dr000/auc0203/user/f8be273a6cee996fe426f9272c313674a8f8f832f4941287edfd78c4a77666a8/i-img1200x1200-177470974537610u2gqb35.jpg) | 2026-08-11 |
+| `0002-reference.webp` | Arakawa Yosakoi 荒川よさこい | Tokyo | https://jp.mercari.com/item/m92143952768 | 2026-08-12 |
 | `0004-reference.webp` | Yoshitsune & Benkei 義経＆弁慶 | — | [listing](https://item.fril.jp/ccdc364989eaf4048e12e5e0f34c3c41) | 2026-08-12 |
 | `0005-reference.webp` | Kegon Falls 華厳の滝 | Tochigi | [listing](https://item.fril.jp/483ba418a44d4f792edd0e4abe845cc7) | 2026-08-12 |
 | `0006-reference.webp` | Shinshu-ichi Miso 神州一味噌 | — | [listing](https://auctions.c.yimg.jp/images.auctions.yahoo.co.jp/image/dr000/auc0207/user/75006ccb61129abf4793afca325a1845f0766948984ce1b7f860038e821f38f6/i-img1200x900-1783003352691017wqyc35.jpg) | 2026-08-11 |
