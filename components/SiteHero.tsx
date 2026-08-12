@@ -33,14 +33,18 @@ export default function SiteHero({ stats }: { stats: StatEntry[] }) {
           Three lines doing three jobs: what the object is, what the name means,
           then the invitation. "One charm at a time" is salvaged from the eyebrow
           that was cut -- the cadence was never the problem there, "collect the
-          country" was, and it works against a verb that fits. "Together" is
-          deliberate: a personal collection should sound like one. */}
+          country" was, and it works against a verb that fits.
+
+          The warmth sits in "Let's" rather than "together". That drops the comma,
+          which was the only punctuation left in the hero and conspicuous for it,
+          and it mirrors the site's own Japanese: MapPanel says 巡ってみましょう,
+          and ましょう is exactly this form. */}
       <p className="hero-lines">
         Gotochi (ご当地) Hello Kitty are unique to each region
         <br />
         Meguru means to wander
         <br />
-        Explore Japan together, one charm at a time
+        Let&apos;s explore Japan one charm at a time
       </p>
       <div className="stat-row">
         {stats.map((stat) => (
