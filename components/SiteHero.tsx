@@ -9,15 +9,16 @@ import type { StatEntry } from "@/lib/stats";
 export default function SiteHero({ stats }: { stats: StatEntry[] }) {
   return (
     <section className="hero">
-      <div className="eyebrow">Collect the country, one region at a time</div>
+      <div className="eyebrow">Collect the culture, one charm at a time</div>
       <h2>
-        Every charm is a <em>postcard</em> from somewhere in Japan.
+        Every charm a <em>postcard</em>.
       </h2>
       <p>
-        Gotochi (ご当地) Hello Kitty are made region by region — apples in
-        Aomori, gold leaf in Kanazawa, a shīsā in Okinawa. Meguru maps a
-        personal collection onto the country it came from, so you can
-        wander it the way you&apos;d wander Japan.
+        Gotochi (ご当地) Hello Kitty are unique to the region that made them.
+        Apples in Aomori, gold leaf in Kanazawa, a shīsā in Okinawa. Meguru
+        means to go around, and that is what this is: a collection mapped
+        back onto the country it came from, so you wander one by wandering
+        the other.
       </p>
       <div className="stat-row">
         {stats.map((stat) => (
