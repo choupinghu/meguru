@@ -18,11 +18,14 @@ export default function SiteHero({ stats }: { stats: StatEntry[] }) {
       {/* Written as short self-contained lines rather than prose with the full
           stops swapped out (owner, 2026-08-12). Each line stands alone, so the
           breaks carry the pauses that punctuation would. Kept as one <p> so it
-          stays a single paragraph to a screen reader. */}
+          stays a single paragraph to a screen reader.
+
+          The examples that used to sit here (apples in Aomori, gold leaf in
+          Kanazawa, a shīsā in Okinawa) were cut: the map underneath is the
+          demonstration, so listing them was telling what the page is about to
+          show. Say what a visitor cannot work out by looking, and stop. */}
       <p className="hero-lines">
         Gotochi (ご当地) Hello Kitty are unique to the region that made them
-        <br />
-        Apples in Aomori, gold leaf in Kanazawa, a shīsā in Okinawa
         <br />
         Meguru means to go around
         <br />
