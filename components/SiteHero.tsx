@@ -23,13 +23,16 @@ export default function SiteHero({ stats }: { stats: StatEntry[] }) {
           The examples that used to sit here (apples in Aomori, gold leaf in
           Kanazawa, a shīsā in Okinawa) were cut: the map underneath is the
           demonstration, so listing them was telling what the page is about to
-          show. Say what a visitor cannot work out by looking, and stop. */}
+          show. Say what a visitor cannot work out by looking, and stop.
+
+          "Wander" for 巡る takes a small liberty: 巡る is to go around, tour, make
+          a circuit, and carries a sense of route that wandering does not. It is
+          used because MapPanel already translates 巡ってみましょう the same way, so
+          the site says one thing rather than two. */}
       <p className="hero-lines">
-        Gotochi (ご当地) Hello Kitty are unique to the region that made them
+        Gotochi (ご当地) Hello Kitty are unique to each region
         <br />
-        Meguru means to go around
-        <br />
-        Wander the map, wander the collection
+        Meguru means to wander
       </p>
       <div className="stat-row">
         {stats.map((stat) => (
