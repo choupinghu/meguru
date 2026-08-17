@@ -5,24 +5,26 @@ copy of the same *design*, sourced from a public listing and background-removed,
 design-level premier image (the map). The owner's own photograph of the actual item is what
 appears on the item record — see CLAUDE.md invariant 3.
 
-The remaining owned designs are blister-packed, and Kitty cannot be isolated from behind the
-plastic; those keep the generated `CharmArt` placeholder instead.
-
 Copyright in each source photograph remains with whoever took it. This repository is private.
 If any rights holder objects, delete the file and its row below.
 
 | file | design | place | source | retrieved |
 |---|---|---|---|---|
-| `0001-reference.webp` | Kobe Chinatown 神戸中華街 | Hyogo | [listing](https://auctions.c.yimg.jp/images.auctions.yahoo.co.jp/image/dr000/auc0203/user/f8be273a6cee996fe426f9272c313674a8f8f832f4941287edfd78c4a77666a8/i-img1200x1200-177470974537610u2gqb35.jpg) | 2026-08-11 |
+| `0001-reference.webp` | Kobe Chinatown 神戸中華街 | Hyogo | https://jp.mercari.com/item/m88688855030 | 2026-08-13 |
 | `0002-reference.webp` | Arakawa Yosakoi 荒川よさこい | Tokyo | https://jp.mercari.com/item/m92143952768 | 2026-08-12 |
+| `0003-reference.webp` | Lake Hamana 浜名湖 | Shizuoka | https://jp.mercari.com/item/m99597033044 | 2026-08-13 |
 | `0004-reference.webp` | Yoshitsune & Benkei 義経＆弁慶 | — | [listing](https://item.fril.jp/ccdc364989eaf4048e12e5e0f34c3c41) | 2026-08-12 |
 | `0005-reference.webp` | Kegon Falls 華厳の滝 | Tochigi | [listing](https://item.fril.jp/483ba418a44d4f792edd0e4abe845cc7) | 2026-08-12 |
 | `0006-reference.webp` | Shinshu-ichi Miso 神州一味噌 | — | [listing](https://auctions.c.yimg.jp/images.auctions.yahoo.co.jp/image/dr000/auc0207/user/75006ccb61129abf4793afca325a1845f0766948984ce1b7f860038e821f38f6/i-img1200x900-1783003352691017wqyc35.jpg) | 2026-08-11 |
+| `0008-reference.webp` | Aquarium exclusive 水族館限定 | — | https://jp.mercari.com/item/m94341167376 | 2026-08-13 |
 | `0010-reference.webp` | Daisen Crow Tengu 大山カラス天狗 | Tottori | [listing](https://gotochikitty.com/wp-content/uploads/2024/07/大山カラス天狗.png) | 2026-08-11 |
 | `0011-reference.webp` | Amanohashidate 天の橋立 | Kyoto | [listing](https://gotochikitty.com/wp-content/uploads/2024/07/京都天橋立.png) | 2026-08-11 |
+| `0012-reference.webp` | Toba Aquarium Dugong 鳥羽水族館ジュゴン | Mie | https://jp.mercari.com/item/m10023212481 | 2026-08-13 |
 | `0013-reference.webp` | Tosa Inu 土佐犬 | Kochi | [listing](https://gotochikitty.com/wp-content/uploads/2024/07/高知土佐犬.png) | 2026-08-11 |
 | `0014-reference.webp` | Waseda 早稲田 | Tokyo | [listing](https://item.fril.jp/46eec531fa4da441b96ef67b38464479) | 2026-08-12 |
 | `0015-reference.webp` | Mt Tsukuba Toad 筑波山がま | Ibaraki | [listing](https://auctions.c.yimg.jp/images.auctions.yahoo.co.jp/image/dr000/auc0204/user/020d0e07bac164318046be75ea498188c2397163ed77a68765ae79c41610b89a/i-img900x1200-17766006705989vpdtxq202.jpg) | 2026-08-11 |
+| `0016-reference.webp` | Gon the Fox ごんぎつね | Aichi | [listing](https://jp.mercari.com/shops/product/2JTTVu9UwvnRbGfGhbUohY) | 2026-08-13 |
+| `0017-reference.webp` | Awaji Onion 淡路玉ねぎ | Hyogo | https://jp.mercari.com/item/m50793094469 | 2026-08-13 |
 | `0018-reference.webp` | Meguro no Sanma 目黒のさんま | Tokyo | [listing](https://gotochikitty.com/wp-content/uploads/2024/10/東京目黒のさんま.png) | 2026-08-11 |
 | `0019-reference.webp` | Akabeko あかべこ | Fukushima | [listing](https://gotochikitty.com/wp-content/uploads/2024/07/福島10.png) | 2026-08-11 |
 | `0021-reference.webp` | Floating Garden Observatory 空中庭園展望台 | Osaka | [listing](https://gotochikitty.com/wp-content/uploads/2024/07/大阪空中庭園展望台.png) | 2026-08-11 |
@@ -31,5 +33,5 @@ If any rights holder objects, delete the file and its row below.
 | `0024-reference.webp` | Lake Tazawa Tatsuko 田沢湖辰子 | Akita | [listing](https://gotochikitty.com/wp-content/uploads/2025/04/05-田沢湖.png) | 2026-08-11 |
 | `0025-reference.webp` | Mt Haguro 羽黒山 | Yamagata | [listing](https://gotochikitty.com/wp-content/uploads/2024/07/山形06.png) | 2026-08-11 |
 
-Full verdict log for all 25 designs, including rejections and the reasons, is kept locally in
+Full verdict log, including rejections and the reasons, is kept locally in
 `photos/reference.csv` (not tracked).
