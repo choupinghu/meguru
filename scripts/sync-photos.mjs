@@ -25,7 +25,7 @@ import { join } from "node:path";
 
 const DRIVE =
   "/Users/aaronchou/Library/CloudStorage/GoogleDrive-aaronchouhx@gmail.com/.shortcut-targets-by-id/17rgedbgi_VhzMwRtAKVeuCbZbc0LMc22/Hello Kitty Gotochis";
-const LOCAL = "photos/named";
+const LOCAL = "photos/references/mine";
 const MANIFEST = "photos/manifest.csv";
 const apply = process.argv.includes("--apply");
 

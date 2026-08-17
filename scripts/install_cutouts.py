@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Install hand-made cut-outs from photos/incoming/ into the site.
+"""Install hand-made cut-outs from photos/drafts/ into the site.
 
 Drop a PNG with transparency named NNNN.png (e.g. 0007.png) into
-photos/incoming/, then run:
+photos/drafts/, then run:
 
     npm run photos:install
 
@@ -11,7 +11,7 @@ For each file it:
      -- a JPEG renamed .png, or a PNG saved without transparency, is the most
      common mistake and produces a charm sitting on a white brick
   2. trims fully transparent margins so framing is consistent with the rest
-  3. writes the master to photos/reference/ (sourced) or photos/figure/ (ours)
+  3. writes the master to photos/cutouts/ (same name as the served file) (ours)
   4. writes the served WebP to public/img/charms/
   5. tells you whether scripts/seed-data.ts needs the number adding
 
@@ -20,13 +20,13 @@ Nothing is deleted; re-running overwrites in place.
 import os, sys, glob, re
 from PIL import Image
 
-INCOMING = "photos/incoming"
+DRAFTS = "photos/drafts"
 OWN = {"0026","0027","0029","0030","0031","0034","0035","0036","0037"}  # our own photos
 
 def main():
-    files = sorted(glob.glob(f"{INCOMING}/[0-9][0-9][0-9][0-9].png"))
+    files = sorted(glob.glob(f"{DRAFTS}/[0-9][0-9][0-9][0-9].png"))
     if not files:
-        print(f"Nothing to install. Put NNNN.png files in {INCOMING}/ first.")
+        print(f"Nothing to install. Put NNNN.png files in {DRAFTS}/ first.")
         return 0
     src = open("scripts/seed-data.ts", encoding="utf-8").read()
     # Only the two Set literals count. Searching the whole file gives false
@@ -49,7 +49,7 @@ def main():
         if bbox and bbox != (0, 0, im.width, im.height):
             im = im.crop(bbox)
         kind = "figure" if no in OWN else "reference"
-        master = f"photos/{kind}/{no}.png"
+        master = f"photos/cutouts/{no}-{kind}.png"
         os.makedirs(os.path.dirname(master), exist_ok=True)
         im.save(master)
         out = f"public/img/charms/{no}-{kind}.webp"
