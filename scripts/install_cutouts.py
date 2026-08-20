@@ -24,7 +24,12 @@ DRAFTS = "photos/drafts"
 OWN = {"0026","0027","0029","0030","0031","0034","0035","0036","0037"}  # our own photos
 
 def main():
-    files = sorted(glob.glob(f"{DRAFTS}/[0-9][0-9][0-9][0-9].png"))
+    # Any file whose name STARTS with the four-digit charm number counts.
+    # macOS names its cut-outs "0016 Background Removed.png", and being strict
+    # about the rest of the filename just means silently finding nothing.
+    files = sorted(f for f in glob.glob(f"{DRAFTS}/*")
+                   if re.match(r"^\d{4}", os.path.basename(f))
+                   and os.path.splitext(f)[1].lower() in (".png", ".jpg", ".jpeg", ".webp", ".tif", ".tiff"))
     if not files:
         print(f"Nothing to install. Put NNNN.png files in {DRAFTS}/ first.")
         return 0
