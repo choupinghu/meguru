@@ -16,7 +16,8 @@
     "check:content": "tsx scripts/check-content.ts",
     "check:pages": "tsx scripts/check-pages.ts",
     "photos:install": "python3 scripts/install_cutouts.py",
-    "photos:fetch": "python3 scripts/fetch_listing.py"
+    "photos:fetch": "python3 scripts/fetch_listing.py",
+    "photos:rotate": "python3 scripts/rotate_cutout.py"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.0.0",
