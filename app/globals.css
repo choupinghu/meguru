@@ -300,18 +300,14 @@ body {
     display: none;
   }
 
-  /* The panel is the thing worth seeing, so stop spending the screen before
-     the map reaches it. On a 393x852 phone the header, hero and map card came
-     to about 914px, so the panel could not be above the fold at any height --
-     it was arithmetic, not styling.
+  /* The goal is holding the map AND the charm on one screen, the way the
+     desktop two-column layout does. That needs three things to give ground,
+     because on a 393x852 phone the hero (~354px), the map card (~470px) and
+     the charm preview (~500px) could never share 852px.
 
-     Two changes buy it back. The hero moves below the map: on a phone it is
-     ~354px of copy standing between you and the thing you came for, and it
-     reads perfectly well underneath. And the map is capped, so the card stops
-     being a square that eats 470px.
-
-     Header + map card then land near 550px, leaving the panel a third of the
-     screen without scrolling -- which is the desktop arrangement, stacked. */
+     The hero goes below the map -- on a phone it is copy standing between you
+     and the thing you came for, and it reads fine underneath. The map is
+     capped. The preview is compacted. See each below. */
   .meguru {
     display: flex;
     flex-direction: column;
@@ -330,7 +326,45 @@ body {
     order: 4;
   }
   #jpmap {
-    height: min(42vh, 330px);
+    height: min(32vh, 260px);
+  }
+
+  /* Map and charm have to share one screen, so both give ground. The panel was
+     spending ~500px: a 220px-wide thumbnail, a three-line story and the item
+     note. Story and note both live on the full record, one tap away, so they
+     go here and the thumbnail moves beside the text instead of above it.
+
+     That takes the charm preview to roughly 150px, which fits under a 260px
+     map without either being cramped. */
+  .charm-panel {
+    display: grid;
+    grid-template-columns: 92px 1fr;
+    column-gap: 12px;
+    row-gap: 6px;
+    align-items: start;
+  }
+  .charm-panel > * {
+    grid-column: 2;
+  }
+  .charm-panel-art {
+    grid-column: 1;
+    grid-row: 1 / span 3;
+    max-width: none;
+    margin: 0;
+  }
+  .charm-panel-art .thumb {
+    aspect-ratio: 1;
+  }
+  .charm-panel-story,
+  .charm-panel .item-note {
+    display: none;
+  }
+  .charm-panel .panel-head {
+    padding-bottom: 8px;
+    margin-bottom: 2px;
+  }
+  .panel {
+    padding: 14px;
   }
 
   /* The strip is left in the tree but off: with the panel visible it says the
