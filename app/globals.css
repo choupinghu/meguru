@@ -300,14 +300,42 @@ body {
     display: none;
   }
 
-  /* The charm strip replaces the panel's charm preview on a phone. Three
-     things were tried and rejected before it: below the map meant scrolling
-     between map and charm; a bottom sheet reflowed the page; an overlay
-     covered the map it was meant to complement. */
-  .strip {
-    display: block;
+  /* The panel is the thing worth seeing, so stop spending the screen before
+     the map reaches it. On a 393x852 phone the header, hero and map card came
+     to about 914px, so the panel could not be above the fold at any height --
+     it was arithmetic, not styling.
+
+     Two changes buy it back. The hero moves below the map: on a phone it is
+     ~354px of copy standing between you and the thing you came for, and it
+     reads perfectly well underneath. And the map is capped, so the card stops
+     being a square that eats 470px.
+
+     Header + map card then land near 550px, leaving the panel a third of the
+     screen without scrolling -- which is the desktop arrangement, stacked. */
+  .meguru {
+    display: flex;
+    flex-direction: column;
   }
-  .panel:has(.charm-panel) {
+  .top {
+    order: 1;
+  }
+  .explore {
+    order: 2;
+  }
+  .hero {
+    order: 3;
+    padding-top: 30px;
+  }
+  .meguru > footer {
+    order: 4;
+  }
+  #jpmap {
+    height: min(42vh, 330px);
+  }
+
+  /* The strip is left in the tree but off: with the panel visible it says the
+     same thing twice. One line to bring it back if the panel proves worse. */
+  .strip {
     display: none;
   }
 }
