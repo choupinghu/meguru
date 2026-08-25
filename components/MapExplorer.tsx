@@ -4,6 +4,7 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } fr
 import type { CSSProperties } from "react";
 import type { DesignView } from "@/lib/charms";
 import { hasPhoto } from "@/lib/charms";
+import CharmStrip from "./CharmStrip";
 import { REGIONS, REGION_LIST, regionForCode, type RegionKey } from "@/lib/regions";
 import { PREFECTURES } from "@/lib/prefectures";
 import { PREFECTURE_BOUNDS, REGION_BOUNDS, type Bounds } from "@/lib/map-bounds";
@@ -581,6 +582,18 @@ export default function MapExplorer({ charms }: { charms: DesignView[] }) {
               ) : null}
             </JapanMapSvg>
           </div>
+          {/* Phone-only, see `.strip` in globals.css. At a region or prefecture
+              it holds that drill-down's charms; at the top level, and for a
+              charm surfaced by Discover, it holds the whole owned set so there
+              is always something to swipe through. */}
+          <CharmStrip
+            charms={
+              panelView.kind === "region" || panelView.kind === "prefecture"
+                ? panelView.charms
+                : charms
+            }
+            focusId={discoveredCharm?.design.id ?? null}
+          />
           <div className="maptools">
             <div className="maptools-nav">
               {state.level !== "japan" ? (

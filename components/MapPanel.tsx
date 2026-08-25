@@ -53,21 +53,6 @@ export default function MapPanel({
   onBackToRegion,
 }: MapPanelProps) {
   return (
-    <>
-      {/* Dismisses the charm preview by tapping outside it. Only rendered for
-          the charm state, and CSS only shows it on small screens: on a wide
-          screen the panel sits beside the map, so there is nothing covering
-          anything and nothing to dismiss. A button rather than a div so it is
-          focusable and announced, and it repeats an action the panel's own
-          "← Back" already offers. */}
-      {view.kind === "charm" ? (
-        <button
-          type="button"
-          className="panel-scrim"
-          aria-label="Close charm preview"
-          onClick={onReset}
-        />
-      ) : null}
       <aside className="panel" aria-live="polite">
       {view.kind === "overview" ? (
         <OverviewPanel view={view} onSelectRegion={onSelectRegion} />
@@ -89,7 +74,6 @@ export default function MapPanel({
         />
       )}
       </aside>
-    </>
   );
 }
 

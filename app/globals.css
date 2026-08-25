@@ -300,37 +300,15 @@ body {
     display: none;
   }
 
-  /* A selected charm floats over the map instead of pushing it around. A
-     bottom sheet was tried first and still felt disruptive: it reflows the
-     page and half-covers the map it is meant to sit beside. This is a small
-     card over a dim scrim, dismissed by tapping anywhere outside it.
-
-     :has() scopes it to the charm state. The overview, region and prefecture
-     panels are lists you read, not things you dismiss, so they stay in flow. */
-  .panel:has(.charm-panel) {
-    position: fixed;
-    z-index: 40;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
-    width: min(340px, calc(100vw - 32px));
-    min-height: 0;
-    max-height: 76vh;
-    overflow-y: auto;
-    overscroll-behavior: contain;
-    border-radius: 16px;
-    box-shadow: 0 18px 50px rgb(0 0 0 / 28%);
-  }
-  .panel-scrim {
+  /* The charm strip replaces the panel's charm preview on a phone. Three
+     things were tried and rejected before it: below the map meant scrolling
+     between map and charm; a bottom sheet reflowed the page; an overlay
+     covered the map it was meant to complement. */
+  .strip {
     display: block;
-    position: fixed;
-    inset: 0;
-    z-index: 39;
-    border: 0;
-    padding: 0;
-    cursor: pointer;
-    background: rgb(30 24 20 / 46%);
-    -webkit-tap-highlight-color: transparent;
+  }
+  .panel:has(.charm-panel) {
+    display: none;
   }
 }
 .mapcard {
@@ -342,6 +320,71 @@ body {
   padding: 16px 16px 12px;
   overflow: hidden;
 }
+/* ---------- charm strip (phones only; see the 640px block) ---------- */
+.strip {
+  display: none;
+  position: relative;
+  margin: 10px -16px 0;
+  padding-top: 26px;
+}
+.strip-label {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
+  max-width: calc(100% - 32px);
+  padding: 3px 12px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--surface) 78%, transparent);
+  backdrop-filter: blur(6px);
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.strip-label b {
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink);
+}
+.strip-label span {
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+.strip-track {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  /* Half the track minus half an item, so the first and last can reach the
+     centre like any other. */
+  padding: 4px calc(50% - 30px) 6px;
+}
+.strip-track::-webkit-scrollbar {
+  display: none;
+}
+.strip-item {
+  flex: 0 0 60px;
+  scroll-snap-align: center;
+  transition: transform 0.22s ease, opacity 0.22s ease;
+  transform: scale(0.82);
+  opacity: 0.55;
+}
+.strip-item.is-centre {
+  transform: scale(1.16);
+  opacity: 1;
+}
+.strip-item .thumb {
+  aspect-ratio: 1;
+  border-radius: 12px;
+}
+
 .mapcard::before {
   content: "";
   position: absolute;
@@ -622,12 +665,6 @@ body {
 }
 
 /* ---------- side panel ---------- */
-/* Only rendered for the charm state, and only visible on small screens --
-   see the 640px block. On a wide screen the panel sits beside the map and
-   there is nothing to dismiss. */
-.panel-scrim {
-  display: none;
-}
 .panel {
   background: var(--surface);
   border: 1px solid var(--line);
