@@ -321,8 +321,10 @@ export const STORIES: Record<string, string> = {
  * plastic with printed card behind her, so no crop or mask isolates her, and
  * they keep the CharmArt placeholder. See public/img/charms/SOURCES.md. */
 const REFERENCE_NOS = new Set([
-  "0001", "0002", "0003", "0004", "0005", "0006", "0007", "0008", "0009", "0010", "0011", "0012", "0013", "0014",
-  "0015", "0016", "0017", "0018", "0019", "0021", "0022", "0023", "0024", "0025",
+  "0001", "0002", "0003", "0004", "0005", "0006", "0007", "0008",
+  "0009", "0010", "0011", "0012", "0013", "0014", "0015", "0016",
+  "0017", "0018", "0019", "0020", "0021", "0022", "0023", "0024",
+  "0025",
 ]);
 
 /** Charms where Kitty could be cut out of our own photograph.
@@ -337,7 +339,8 @@ const REFERENCE_NOS = new Set([
  * tilted and partly behind a pearl bead, so no crop box frames it cleanly and
  * Vision loses the subject entirely on wider ones. Queued for a reshoot. */
 const OWN_PHOTO_NOS = new Set([
-  "0026", "0027", "0029", "0031", "0034", "0035", "0036", "0037",
+  "0026", "0027", "0029", "0030", "0031", "0034", "0035", "0036",
+  "0037",
 ]);
 
 export const OWNED: OwnedDesign[] = OWNED_RAW.map((r) => {
