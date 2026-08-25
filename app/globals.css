@@ -334,11 +334,11 @@ body {
      note. Story and note both live on the full record, one tap away, so they
      go here and the thumbnail moves beside the text instead of above it.
 
-     That takes the charm preview to roughly 150px, which fits under a 260px
-     map without either being cramped. */
+     That takes the charm preview to roughly 230px, which fits under a 260px
+     map with room to spare. */
   .charm-panel {
     display: grid;
-    grid-template-columns: 92px 1fr;
+    grid-template-columns: 104px 1fr;
     column-gap: 12px;
     row-gap: 6px;
     align-items: start;
@@ -355,9 +355,19 @@ body {
   .charm-panel-art .thumb {
     aspect-ratio: 1;
   }
-  .charm-panel-story,
+  /* The story stays -- these write-ups are the best thing here and cutting
+     them was over-correcting. Two lines instead of three, and the note keeps
+     its place: after capping the map there is about 380px for the panel and
+     the preview only needs ~230px of it, so there is no need to strip it. */
+  .charm-panel-story {
+    -webkit-line-clamp: 2;
+    font-size: 13.5px;
+    line-height: 1.55;
+    grid-column: 1 / -1;
+  }
   .charm-panel .item-note {
-    display: none;
+    grid-column: 1 / -1;
+    font-size: 11.5px;
   }
   .charm-panel .panel-head {
     padding-bottom: 8px;
