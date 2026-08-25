@@ -142,6 +142,12 @@ body {
   .tagline {
     display: none;
   }
+  /* The subtitle wraps to four lines beside the Map/Browse toggle and turns the
+     header into a wall. Drop it: the seal and the wordmark already say what this
+     is, and the brand line then sits level with the toggle. */
+  .sub {
+    display: none;
+  }
 }
 
 /* view switcher -- Map / Browse. The current route is marked both visually
@@ -208,6 +214,23 @@ body {
   flex-wrap: wrap;
   gap: 28px;
   margin-top: 24px;
+}
+@media (max-width: 560px) {
+  /* Four stats stacking one per line pushed the map right off the screen. A
+     2x2 grid with smaller figures keeps all four without the vertical cost. */
+  .stat-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px 18px;
+    margin-top: 18px;
+  }
+  .stat b {
+    font-size: 22px;
+  }
+  .stat span {
+    font-size: 10px;
+    letter-spacing: 0.16em;
+  }
 }
 .stat {
   display: flex;
