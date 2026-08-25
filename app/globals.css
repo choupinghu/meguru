@@ -268,6 +268,53 @@ body {
     grid-template-columns: 1fr;
   }
 }
+
+@media (max-width: 640px) {
+  /* Ten region chips wrapped to five rows and pushed the map most of a screen
+     down the page. One swipeable row instead -- they are a filter you reach
+     for, not a legend you read top to bottom. */
+  .legend {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scroll-snap-type: x proximity;
+    scrollbar-width: none;
+    padding-bottom: 2px;
+    margin-right: -16px;
+    padding-right: 16px;
+  }
+  .legend::-webkit-scrollbar {
+    display: none;
+  }
+  .legend .chip {
+    flex: 0 0 auto;
+    scroll-snap-align: start;
+  }
+
+  /* The hint restates the button sitting next to it. */
+  .hint {
+    display: none;
+  }
+
+  /* A selected charm becomes a sheet over the map rather than a block below
+     it. Stacked, you could never hold the map and the charm on screen at once
+     and ended up scrolling between them. :has() scopes this to the charm
+     state; the overview, region and prefecture panels stay in normal flow. */
+  .panel:has(.charm-panel) {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 40;
+    min-height: 0;
+    max-height: 56vh;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    border-radius: 18px 18px 0 0;
+    border-bottom: 0;
+    box-shadow: 0 -10px 30px rgb(0 0 0 / 16%);
+    padding-bottom: calc(20px + env(safe-area-inset-bottom));
+  }
+}
 .mapcard {
   position: relative;
   background: var(--surface);
