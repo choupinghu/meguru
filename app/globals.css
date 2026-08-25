@@ -281,6 +281,11 @@ body {
     padding-bottom: 2px;
     margin-right: -16px;
     padding-right: 16px;
+    /* Without this the row just looks truncated. Fading the trailing edge is
+       what tells you it slides -- the scrollbar is hidden and a touch device
+       shows none anyway. */
+    -webkit-mask-image: linear-gradient(to right, black calc(100% - 34px), transparent);
+    mask-image: linear-gradient(to right, black calc(100% - 34px), transparent);
   }
   .legend::-webkit-scrollbar {
     display: none;
@@ -295,24 +300,37 @@ body {
     display: none;
   }
 
-  /* A selected charm becomes a sheet over the map rather than a block below
-     it. Stacked, you could never hold the map and the charm on screen at once
-     and ended up scrolling between them. :has() scopes this to the charm
-     state; the overview, region and prefecture panels stay in normal flow. */
+  /* A selected charm floats over the map instead of pushing it around. A
+     bottom sheet was tried first and still felt disruptive: it reflows the
+     page and half-covers the map it is meant to sit beside. This is a small
+     card over a dim scrim, dismissed by tapping anywhere outside it.
+
+     :has() scopes it to the charm state. The overview, region and prefecture
+     panels are lists you read, not things you dismiss, so they stay in flow. */
   .panel:has(.charm-panel) {
     position: fixed;
-    left: 0;
-    right: 0;
-    bottom: 0;
     z-index: 40;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: min(340px, calc(100vw - 32px));
     min-height: 0;
-    max-height: 56vh;
+    max-height: 76vh;
     overflow-y: auto;
     overscroll-behavior: contain;
-    border-radius: 18px 18px 0 0;
-    border-bottom: 0;
-    box-shadow: 0 -10px 30px rgb(0 0 0 / 16%);
-    padding-bottom: calc(20px + env(safe-area-inset-bottom));
+    border-radius: 16px;
+    box-shadow: 0 18px 50px rgb(0 0 0 / 28%);
+  }
+  .panel-scrim {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 39;
+    border: 0;
+    padding: 0;
+    cursor: pointer;
+    background: rgb(30 24 20 / 46%);
+    -webkit-tap-highlight-color: transparent;
   }
 }
 .mapcard {
@@ -604,6 +622,12 @@ body {
 }
 
 /* ---------- side panel ---------- */
+/* Only rendered for the charm state, and only visible on small screens --
+   see the 640px block. On a wide screen the panel sits beside the map and
+   there is nothing to dismiss. */
+.panel-scrim {
+  display: none;
+}
 .panel {
   background: var(--surface);
   border: 1px solid var(--line);
