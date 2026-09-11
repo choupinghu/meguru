@@ -285,13 +285,17 @@ body {
   margin: 10px -16px 0;
   padding-top: 26px;
 }
+/* In normal flow, not absolutely positioned at the band's top edge. It used to
+   be absolute, with the band reserving a fixed strip of padding for it -- which
+   the centre item then grew into: the focused frame scales up about its own
+   centre, so it reaches ~8px above its layout box and clipped the name by 10px.
+   Laid out in flow the track simply starts below the label, and no focus scale
+   can ever collide with it. */
 .strip-label {
-  position: absolute;
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
   z-index: 2;
-  max-width: calc(100% - 32px);
+  width: fit-content;
+  margin: 0 auto 10px;
+  max-width: calc(100% - 20px);
   padding: 3px 12px;
   border-radius: 999px;
   background: color-mix(in srgb, var(--surface) 78%, transparent);
@@ -310,11 +314,14 @@ body {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+/* The name is the thing being read, so the place absorbs essentially all of the
+   shrink: "Enoshima Benzaiten" stays whole and "KANAGAWA - ENOSHIMA 江ノ島"
+   clips instead of both halves clipping together. */
 .strip-label b {
   flex: 0 1 auto;
 }
 .strip-label span {
-  flex: 0 2 auto;
+  flex: 0 100 auto;
 }
 .strip-label b {
   font-family: var(--font-display);
@@ -1406,7 +1413,11 @@ footer .mark {
      that is left is what makes the band read as sitting ON the map. */
   .mapstage {
     position: relative;
-    padding-bottom: 64px;
+    /* Reserves all but ~37px of the collapsed band's height, so the coastline
+       is never buried and the overlap that remains is what makes the band read
+       as sitting ON the map. Tracks the band's height: it grew when the name
+       moved into normal flow. */
+    padding-bottom: 88px;
   }
   .panel {
     display: none;
@@ -1481,7 +1492,7 @@ footer .mark {
     bottom: 0;
     z-index: 3;
     margin: 0;
-    padding: 22px 0 8px;
+    padding: 8px 0 8px;
     background: color-mix(in srgb, var(--surface) 74%, transparent);
     -webkit-backdrop-filter: blur(14px);
     backdrop-filter: blur(14px);
