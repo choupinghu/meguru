@@ -29,6 +29,13 @@
       "when": 1786450422219,
       "tag": "0003_first_kid_colt",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1789102915449,
+      "tag": "0004_careless_manta",
+      "breakpoints": true
     }
   ]
 }
