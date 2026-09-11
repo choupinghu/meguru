@@ -184,6 +184,10 @@ export default function CharmStrip({
 
   return (
     <div className={`strip${expanded ? " is-open" : ""}`}>
+      {/* The card floats above the band, over the map. The name stays rendered
+          underneath it either way and is only hidden from view -- removing it
+          would shorten the band and shift the carousel down the moment a charm
+          was opened. */}
       {expanded ? (
         <div className="strip-card">
           <button
@@ -210,12 +214,11 @@ export default function CharmStrip({
             </Link>
           </div>
         </div>
-      ) : (
-        <div className="strip-label" aria-live="polite">
-          <b>{centre.name}</b>
-          <span>{locationLabel(centre)}</span>
-        </div>
-      )}
+      ) : null}
+      <div className="strip-label" aria-live="polite">
+        <b>{centre.name}</b>
+        <span>{locationLabel(centre)}</span>
+      </div>
       <div className="strip-track" ref={setTrack}>
         {list.map((design) => {
           const isCentre = design.id === centreId;
