@@ -4,6 +4,7 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } fr
 import type { CSSProperties } from "react";
 import type { DesignView } from "@/lib/charms";
 import { hasPhoto } from "@/lib/charms";
+import CharmRail from "./CharmRail";
 import CharmStrip from "./CharmStrip";
 import { REGIONS, REGION_LIST, regionForCode, type RegionKey } from "@/lib/regions";
 import { PREFECTURES } from "@/lib/prefectures";
@@ -601,6 +602,19 @@ export default function MapExplorer({ charms }: { charms: DesignView[] }) {
   // order; the top level shows the whole pool, shuffled.
   const isDrilled = panelView.kind === "region" || panelView.kind === "prefecture";
 
+  // The rail follows the MAP's level, not the panel's view. Selecting a charm
+  // switches the panel to that charm, which is not a drill-down -- so keying
+  // the rail off the panel made it jump back to all 34 charms the moment you
+  // clicked one of them, throwing away the region you were looking at.
+  // Scoped to the REGION even at prefecture level. Narrowing to the prefecture
+  // emptied the rail at the worst moment: clicking Kegon Falls left Tochigi's
+  // single charm on screen and took the other six Kantō charms away, so the
+  // one surface meant for browsing collapsed the instant it was used.
+  const railCharms = useMemo(() => {
+    if (state.level === "japan") return charms;
+    return REGIONS[state.regionKey].codes.flatMap((code) => byCode.get(code) ?? []);
+  }, [state, byCode, charms]);
+
   return (
     <section className="explore">
       <div className="explore-grid">
@@ -682,6 +696,15 @@ export default function MapExplorer({ charms }: { charms: DesignView[] }) {
             </button>
           </div>
         </div>
+
+        {/* Wide screens only. Same charms as the phone band and the same
+            action as a panel card: fly to the prefecture and open it in the
+            panel. */}
+        <CharmRail
+          charms={railCharms}
+          selectedId={discoveredCharm?.design.id ?? null}
+          onSelect={selectCharm}
+        />
 
         <MapPanel
           view={panelView}

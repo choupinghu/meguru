@@ -1329,6 +1329,87 @@ footer .mark {
 }
 
 /* ----------------------------------------------------------------------------
+   The rail: a vertical column of cut-outs between the map and the panel, wide
+   screens only.
+
+   The map answers "where" and the panel answers "what is this one", but until
+   now nothing let you scan the collection -- a prefecture had to be clicked
+   before it showed anything, so a charm you would have stopped at stayed
+   invisible unless you drilled into the right place.
+
+   It costs the map and the panel about 9% of their width each (643 -> 583 and
+   463 -> 421 at 1280px). Nothing else fits: the row is already 1132px inside a
+   1180px page.
+   -------------------------------------------------------------------------- */
+.rail {
+  display: none;
+}
+@media (min-width: 901px) {
+  .explore-grid {
+    grid-template-columns: 1.32fr 88px 0.95fr;
+    gap: 20px;
+  }
+  .rail {
+    display: block;
+    position: relative;
+    /* Its own height, not the grid row's. Stretching tied it to whichever
+       column was tallest: a region with seven charms makes the panel 1296px,
+       which left the rail a 600px empty column beside seven thumbnails. A
+       fixed height keeps it beside the map, where it belongs, whatever the
+       panel is doing. */
+    align-self: start;
+    height: min(72vh, 760px);
+  }
+  /* Absolute, so the rail's own content never sets the grid row's height. As a
+     normal-flow child it did: 34 charms made the rail 3124px tall and dragged
+     the whole row with it instead of scrolling. Out of flow, .rail has no
+     content height, stretch gives it the row's height, and the track scrolls
+     inside that. */
+  .rail-track {
+    position: absolute;
+    inset: 0;
+    overflow-y: auto;
+    scrollbar-width: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 2px;
+    /* Fades both ends, so a rail that continues past the edge says so. */
+    -webkit-mask-image: linear-gradient(to bottom, transparent, black 18px, black calc(100% - 18px), transparent);
+    mask-image: linear-gradient(to bottom, transparent, black 18px, black calc(100% - 18px), transparent);
+  }
+  .rail-track::-webkit-scrollbar {
+    display: none;
+  }
+  .rail-item {
+    flex: 0 0 auto;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+    border-radius: 12px;
+    opacity: 0.72;
+    transition: opacity 0.18s ease, transform 0.18s ease;
+  }
+  .rail-item .thumb {
+    aspect-ratio: 1;
+    border-radius: 12px;
+  }
+  .rail-item:hover,
+  .rail-item:focus-visible {
+    opacity: 1;
+    transform: translateX(-3px) scale(1.04);
+  }
+  /* The highlight tracks the panel rather than the scroll position: on a wide
+     screen the panel is what "selected" means, and two competing answers to
+     that question would be one too many. */
+  .rail-item.is-selected {
+    opacity: 1;
+    box-shadow: 0 0 0 2px var(--rc), 0 6px 16px -8px rgb(0 0 0 / 0.35);
+  }
+}
+
+/* ----------------------------------------------------------------------------
    Mobile (<=640px). MUST STAY LAST in this file.
 
    These are overrides of the base component styles above, and most of them
