@@ -75,6 +75,12 @@ export const designs = pgTable("designs", {
    * of the two is a claim about what you would receive. Provenance for every
    * design-level image lives in public/img/charms/SOURCES.md. */
   imageUrl: text("image_url"),
+  /** Additional images beyond the premier one, in order. The carousel on
+   * /charm/[id] renders [imageUrl, ...imageUrls], so slide one is always the
+   * premier and the extras follow -- no sorting, and a charm with none has a
+   * one-slide carousel by construction. Deferred until a second photo of
+   * something actually existed (ROADMAP:287); it now does. */
+  imageUrls: text("image_urls").array(),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
 });
 
@@ -92,6 +98,12 @@ export const items = pgTable("items", {
   priceSgd: integer("price_sgd"),
   note: text("note"),
   imageUrl: text("image_url"),
+  /** Additional images beyond the premier one, in order. The carousel on
+   * /charm/[id] renders [imageUrl, ...imageUrls], so slide one is always the
+   * premier and the extras follow -- no sorting, and a charm with none has a
+   * one-slide carousel by construction. Deferred until a second photo of
+   * something actually existed (ROADMAP:287); it now does. */
+  imageUrls: text("image_urls").array(),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
 });
 
