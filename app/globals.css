@@ -1346,7 +1346,7 @@ footer .mark {
 }
 @media (min-width: 901px) {
   .explore-grid {
-    grid-template-columns: 1.32fr 88px 0.95fr;
+    grid-template-columns: 1.32fr 96px 0.95fr;
     gap: 20px;
   }
   .rail {
@@ -1373,7 +1373,11 @@ footer .mark {
     display: flex;
     flex-direction: column;
     gap: 8px;
-    padding: 2px;
+    /* Horizontal padding is load-bearing: overflow-y: auto forces overflow-x to
+       clip as well, so the selection ring was being shaved off against the
+       track's edge and read as the rail cutting into the map. The ring needs
+       2px and the hover scale about 2px more. */
+    padding: 4px 8px;
     /* Fades both ends, so a rail that continues past the edge says so. */
     -webkit-mask-image: linear-gradient(to bottom, transparent, black 18px, black calc(100% - 18px), transparent);
     mask-image: linear-gradient(to bottom, transparent, black 18px, black calc(100% - 18px), transparent);
@@ -1398,7 +1402,9 @@ footer .mark {
   .rail-item:hover,
   .rail-item:focus-visible {
     opacity: 1;
-    transform: translateX(-3px) scale(1.04);
+    /* Scale only. A sideways nudge pushed the tile towards the map and clipped
+       against the track edge on the way. */
+    transform: scale(1.05);
   }
   /* The highlight tracks the panel rather than the scroll position: on a wide
      screen the panel is what "selected" means, and two competing answers to

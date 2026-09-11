@@ -196,6 +196,11 @@ export default function MapExplorer({ charms }: { charms: DesignView[] }) {
   const [discoveredCharm, setDiscoveredCharm] = useState<{
     design: DesignView;
     region: RegionKey | null;
+    /** Keep the rail on the whole collection even though the map has flown to
+     * a prefecture. Set when the jump was not a browse action -- Discover, or
+     * picking a charm while looking at all of Japan. Selecting a region or a
+     * prefecture is a browse action and clears it. */
+    keepRailWide?: boolean;
   } | null>(null);
   // The charm the phone band last focused. Focusing flies the map to that
   // charm's prefecture, which narrows the band's list -- without this the list
@@ -485,7 +490,9 @@ export default function MapExplorer({ charms }: { charms: DesignView[] }) {
 
   const selectCharm = useCallback((design: DesignView) => {
     const region = design.prefectureCode != null ? regionForCode(design.prefectureCode) : null;
-    setDiscoveredCharm({ design, region });
+    // Picking from the whole-collection rail should leave it whole -- the pick
+    // is not a decision to browse one region.
+    setDiscoveredCharm({ design, region, keepRailWide: state.level === "japan" });
     // Fly to the charm's prefecture, the same as Discover's jump. Idempotent
     // when the panel is already at that prefecture; the point is the region
     // level, where the map would otherwise stay zoomed out on the whole region
@@ -493,7 +500,7 @@ export default function MapExplorer({ charms }: { charms: DesignView[] }) {
     if (design.prefectureCode != null && region) {
       setState({ level: "prefecture", regionKey: region, code: design.prefectureCode });
     }
-  }, []);
+  }, [state.level]);
 
   const handleDiscover = useCallback(() => {
     // The pool is the owned designs, placeless included (D1) -- `charms` is
@@ -544,7 +551,10 @@ export default function MapExplorer({ charms }: { charms: DesignView[] }) {
     // than hiding it or faking a location -- nothing selected, nothing
     // in-region, same as the level nothing-chosen already renders.
     const jump = () => {
-      setDiscoveredCharm({ design, region });
+      // Discover is an invitation to wander, so the rail stays on the whole
+      // collection even though the map flies to one prefecture -- narrowing it
+      // here would take everything away at the moment of offering it.
+      setDiscoveredCharm({ design, region, keepRailWide: true });
       setState(
         design.prefectureCode != null && region
           ? { level: "prefecture", regionKey: region, code: design.prefectureCode }
@@ -606,14 +616,20 @@ export default function MapExplorer({ charms }: { charms: DesignView[] }) {
   // switches the panel to that charm, which is not a drill-down -- so keying
   // the rail off the panel made it jump back to all 34 charms the moment you
   // clicked one of them, throwing away the region you were looking at.
-  // Scoped to the REGION even at prefecture level. Narrowing to the prefecture
-  // emptied the rail at the worst moment: clicking Kegon Falls left Tochigi's
-  // single charm on screen and took the other six Kantō charms away, so the
-  // one surface meant for browsing collapsed the instant it was used.
+  // The rail shows the whole collection, and only a region or prefecture chosen
+  // deliberately narrows it -- a chip, or a click on the map. Discover flies to
+  // a prefecture too, but it is a jump rather than a choice: narrowing there
+  // took the whole collection away at the exact moment the visitor was being
+  // invited to wander it. Same for picking a charm while looking at all Japan.
+  //
+  // Scoped to the REGION, never the prefecture. Narrowing that far emptied the
+  // rail at the worst moment: clicking Kegon Falls left Tochigi's single charm
+  // on screen and took the other six Kantō charms away, so the one surface
+  // meant for browsing collapsed the instant it was used.
   const railCharms = useMemo(() => {
-    if (state.level === "japan") return charms;
+    if (state.level === "japan" || discoveredCharm?.keepRailWide) return charms;
     return REGIONS[state.regionKey].codes.flatMap((code) => byCode.get(code) ?? []);
-  }, [state, byCode, charms]);
+  }, [state, byCode, charms, discoveredCharm]);
 
   return (
     <section className="explore">
