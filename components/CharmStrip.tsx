@@ -54,7 +54,9 @@ export default function CharmStrip({
   shuffle?: boolean;
 }) {
   const trackRef = useRef<HTMLDivElement | null>(null);
-  const [centreId, setCentreId] = useState<number | null>(charms[0]?.id ?? null);
+  const [centreId, setCentreId] = useState<number | null>(
+    charms[Math.floor((charms.length - 1) / 2)]?.id ?? null
+  );
   // Which list the card was opened against, rather than a bare boolean. Drilling
   // into another region hands down a new `charms` array, so the card closes by
   // derivation -- no effect, and no frame where last region's charm hangs over
@@ -91,22 +93,39 @@ export default function CharmStrip({
     trackRef.current = node;
   }, []);
 
-  // Whichever item overlaps the middle 10% of the track is the centre.
+  // The centre is whichever item's midpoint is nearest the track's, measured
+  // outright. An IntersectionObserver watching a narrow band down the middle
+  // did this before and was subtly wrong: during a fast flick several items
+  // report intersecting in one callback and the last entry won, so the enlarged
+  // frame could settle on a charm that was not the one under the middle.
+  // offsetLeft/offsetWidth are layout values, unaffected by the scale
+  // transform, which is exactly what should be measured here.
   useEffect(() => {
     const track = trackRef.current;
     if (!track) return;
-    const io = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) {
-          if (!entry.isIntersecting) continue;
-          const id = Number((entry.target as HTMLElement).dataset.id);
-          if (!Number.isNaN(id)) setCentreId(id);
+    let raf = 0;
+    const pick = () => {
+      raf = 0;
+      const mid = track.scrollLeft + track.clientWidth / 2;
+      let bestId: number | null = null;
+      let bestDistance = Infinity;
+      track.querySelectorAll<HTMLElement>("[data-id]").forEach((el) => {
+        const distance = Math.abs(el.offsetLeft + el.offsetWidth / 2 - mid);
+        if (distance < bestDistance) {
+          bestDistance = distance;
+          bestId = Number(el.dataset.id);
         }
-      },
-      { root: track, rootMargin: "0px -45% 0px -45%", threshold: 0 }
-    );
-    track.querySelectorAll<HTMLElement>("[data-id]").forEach((el) => io.observe(el));
-    return () => io.disconnect();
+      });
+      if (bestId != null) setCentreId(bestId);
+    };
+    const onScroll = () => {
+      if (!raf) raf = requestAnimationFrame(pick);
+    };
+    track.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      track.removeEventListener("scroll", onScroll);
+      if (raf) cancelAnimationFrame(raf);
+    };
   }, [list]);
 
   const centreOn = useCallback((id: number) => {
@@ -120,16 +139,27 @@ export default function CharmStrip({
     });
   }, []);
 
-  // A new list starts at its first charm. The track is the same DOM node across
-  // a drill-down, so without this its scroll position survives into a shorter
-  // list: switching from the 34-charm pool to a 7-charm region left the band
-  // parked at the far end, showing the last charm and three blanks.
+  // A new list opens on its middle charm, so the carousel is centred with
+  // charms on both sides rather than butted against its own start -- which also
+  // shows, without a hint, that it swipes both ways.
+  //
+  // Resetting at all matters: the track is the same DOM node across a
+  // drill-down, so its scroll position otherwise survives into a shorter list.
+  // Going from the 34-charm pool to a 7-charm region left the band clamped at
+  // the far end, showing the last charm and three blanks.
   useEffect(() => {
     if (focusId != null) return;
     const track = trackRef.current;
     if (!track) return;
-    track.scrollLeft = 0;
-    const id = requestAnimationFrame(() => setCentreId(list[0]?.id ?? null));
+    const middle = list[Math.floor((list.length - 1) / 2)];
+    const el = middle
+      ? track.querySelector<HTMLElement>(`[data-id="${middle.id}"]`)
+      : null;
+    // Set outright rather than scrollIntoView: this is the band's opening
+    // position, so it should already be there on the first paint, not glide
+    // there afterwards.
+    track.scrollLeft = el ? el.offsetLeft + el.offsetWidth / 2 - track.clientWidth / 2 : 0;
+    const id = requestAnimationFrame(() => setCentreId(middle?.id ?? null));
     return () => cancelAnimationFrame(id);
   }, [list, focusId]);
 

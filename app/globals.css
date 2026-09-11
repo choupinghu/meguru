@@ -334,6 +334,11 @@ body {
   overflow-x: auto;
   scroll-snap-type: x mandatory;
   scrollbar-width: none;
+  /* pan-x, so a swipe that wanders off the horizontal cannot scroll the page
+     out from under the map mid-gesture; contain, so overshooting the last charm
+     does not hand the gesture to the browser's back-navigation. */
+  touch-action: pan-x;
+  overscroll-behavior-x: contain;
   /* Half the track minus half an item, so the first and last can reach the
      centre like any other. */
   padding: 4px calc(50% - 30px) 6px;
@@ -345,11 +350,13 @@ body {
   flex: 0 0 60px;
   scroll-snap-align: center;
   transition: transform 0.22s ease, opacity 0.22s ease;
-  transform: scale(0.82);
-  opacity: 0.55;
+  transform: scale(0.76);
+  opacity: 0.48;
 }
+/* The focused charm is read at a glance by size alone, so the gap between it
+   and its neighbours has to be obvious rather than subtle. */
 .strip-item.is-centre {
-  transform: scale(1.16);
+  transform: scale(1.26);
   opacity: 1;
 }
 .strip-item .thumb {
@@ -1323,6 +1330,10 @@ footer .mark {
    this block above the component styles.
    -------------------------------------------------------------------------- */
 @media (max-width: 640px) {
+  html {
+    scroll-snap-type: y proximity;
+  }
+
   /* Ten region chips wrapped to five rows and pushed the map most of a screen
      down the page. One swipeable row instead -- they are a filter you reach
      for, not a legend you read top to bottom. */
@@ -1374,6 +1385,11 @@ footer .mark {
      311px map and left 245px of empty sea. */
   .explore {
     margin-top: 12px;
+    /* Scrolling down to the map clicks it into place rather than leaving it
+       half on screen. `proximity`, not `mandatory`: mandatory fights anyone
+       trying to scroll past the map to the footer. */
+    scroll-snap-align: start;
+    scroll-margin-top: 10px;
   }
   .explore-grid {
     display: flex;
@@ -1396,34 +1412,14 @@ footer .mark {
     display: none;
   }
 
-  .meguru {
-    display: flex;
-    flex-direction: column;
-  }
-  /* The sections are centred blocks on desktop -- `margin: 22px auto 0`. An auto
-     cross-axis margin switches a flex item off stretch and onto fit-content, so
-     turning .meguru into a column here silently sized every section to its
-     max-content width: .explore came out 1111px wide inside a 393px phone and
-     .meguru's overflow-x: hidden cropped the right third of the map, the chip
-     row and the third card column. Pinning the children to 100% resolves the
-     auto margins to zero and restores full-width behaviour. */
-  .meguru > * {
-    width: 100%;
-    min-width: 0;
-  }
-  .top {
-    order: 1;
-  }
-  .explore {
-    order: 2;
-  }
-  .hero {
-    order: 3;
-    padding-top: 30px;
-  }
-  .meguru > footer {
-    order: 4;
-  }
+  /* The hero stays above the map, in document order: it is a short scroll and
+     the copy earns its place. An earlier version moved the map above it with
+     flex `order`, which cost more than it bought -- the sections carry
+     `margin: 22px auto 0`, and an auto cross-axis margin switches a flex item
+     off stretch and onto fit-content, so every section sized to its max-content
+     width (.explore came out 1111px inside a 393px phone) and .meguru's
+     overflow-x: hidden cropped the right third of the map. Plain blocks have no
+     such trap. */
 
   /* Map and charm have to share one screen, so both give ground. The panel was
      spending ~500px: a 220px-wide thumbnail, a three-line story and the item
