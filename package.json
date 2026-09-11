@@ -18,7 +18,8 @@
     "photos:install": "python3 scripts/install_cutouts.py",
     "photos:fetch": "python3 scripts/fetch_listing.py",
     "photos:rotate": "python3 scripts/rotate_cutout.py",
-    "dev:phone": "sh scripts/preview-mobile.sh"
+    "dev:phone": "sh scripts/preview-mobile.sh",
+    "photos:originals": "python3 scripts/process_originals.py"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.0.0",

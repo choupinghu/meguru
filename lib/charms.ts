@@ -28,6 +28,7 @@ export interface ItemView {
   priceSgd: number | null;
   note: string | null;
   imageUrl: string | null;
+  imageUrls: string[];
 }
 
 /** A design plus every item currently on the shelf for it. The unit every
@@ -51,6 +52,7 @@ export interface DesignView {
   /** Design-level premier image — a photograph of *some* copy of this design.
    * Not a photograph of the item on the shelf; that is `ItemView.imageUrl`. */
   imageUrl: string | null;
+  imageUrls: string[];
   items: ItemView[];
 }
 
@@ -62,6 +64,7 @@ export function toItemView(row: Item): ItemView {
     priceSgd: row.priceSgd,
     note: row.note,
     imageUrl: row.imageUrl,
+    imageUrls: row.imageUrls ?? [],
   };
 }
 
@@ -80,6 +83,7 @@ export function toDesignView(design: Design, items: Item[]): DesignView {
     special: design.special,
     story: design.story,
     imageUrl: design.imageUrl,
+    imageUrls: design.imageUrls ?? [],
     items: items.map(toItemView),
   };
 }
@@ -109,6 +113,19 @@ export interface CharmView {
  * image. Discover uses this to pick only charms a visitor can actually *see*. */
 export function hasPhoto(design: DesignView): boolean {
   return design.imageUrl != null || design.items.some((i) => i.imageUrl != null);
+}
+
+/** Every image for a charm, in the order the carousel shows them: the premier
+ * first, then the extras. The premier follows the same rule as everywhere else
+ * -- our own photograph of this copy outranks a sourced picture of the design.
+ *
+ * A charm with one image yields one entry, so the carousel needs no special
+ * case for it and shows no controls. */
+export function charmImages(design: DesignView): string[] {
+  const item = design.items[0];
+  const premier = item?.imageUrl ?? design.imageUrl;
+  const rest = [...(item?.imageUrls ?? []), ...design.imageUrls];
+  return [premier, ...rest].filter((u): u is string => Boolean(u));
 }
 
 export function toCharmView(design: DesignView): CharmView {

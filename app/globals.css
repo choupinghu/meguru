@@ -1185,11 +1185,88 @@ button.card-link {
    rather than the site-wide one, so the story below is what actually
    dominates the page. */
 .charm-hero {
-  display: grid;
-  grid-template-columns: 240px 1fr;
-  gap: 28px;
-  align-items: start;
+  /* Single column since 0018: identity, then the carousel, then the story.
+     Was 240px art beside the heading. */
+  display: block;
   margin-bottom: 44px;
+}
+
+/* ---------- carousel (/charm/[id]) ---------- */
+.carousel {
+  position: relative;
+  max-width: 520px;
+  margin: 20px auto 0;
+}
+.carousel-track {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  background: color-mix(in srgb, var(--rc) 14%, var(--surface));
+}
+.carousel-track::-webkit-scrollbar {
+  display: none;
+}
+.carousel-track:focus-visible {
+  outline: 2px solid var(--vermilion);
+  outline-offset: 3px;
+}
+.carousel-slide {
+  position: relative;
+  flex: 0 0 100%;
+  aspect-ratio: 1;
+  scroll-snap-align: center;
+}
+.carousel-slide :is(img) {
+  padding: 18px;
+}
+.carousel-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: color-mix(in srgb, var(--surface) 88%, transparent);
+  backdrop-filter: blur(6px);
+  color: var(--ink);
+  font: inherit;
+  font-size: 15px;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+}
+.carousel-arrow.prev {
+  left: 8px;
+}
+.carousel-arrow.next {
+  right: 8px;
+}
+.carousel-arrow:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+.carousel-dots {
+  display: flex;
+  justify-content: center;
+  gap: 7px;
+  margin-top: 10px;
+}
+.carousel-dot {
+  width: 7px;
+  height: 7px;
+  padding: 0;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+  cursor: pointer;
+}
+.carousel-dot.is-active {
+  background: var(--ink);
+  border-color: var(--ink);
 }
 .charm-hero-art .thumb {
   aspect-ratio: 5 / 4;
@@ -1228,12 +1305,12 @@ button.card-link {
   gap: 6px;
 }
 @media (max-width: 640px) {
-  .charm-hero {
-    grid-template-columns: 1fr;
-  }
   .charm-hero-art {
     max-width: 280px;
     margin: 0 auto;
+  }
+  .carousel {
+    max-width: none;
   }
 }
 

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { db } from "@/db";
 import CharmThumb from "@/components/CharmThumb";
+import CharmCarousel from "@/components/CharmCarousel";
 import SiteHeader from "@/components/SiteHeader";
 import SiteFooter from "@/components/SiteFooter";
 import {
@@ -14,6 +15,7 @@ import {
   priceLabel,
   statusLabel,
   toCharmView,
+  charmImages,
   toDesignView,
   type DesignView,
 } from "@/lib/charms";
@@ -90,6 +92,7 @@ export default async function CharmPage({
 
   const color = charmColor(design);
   const thumbCharm = toCharmView(design);
+  const images = charmImages(design);
   const motif = motifLabel(design.motif);
   const region = regionLabel(design.region);
   const related = relatedDesigns(design, designs);
@@ -98,10 +101,11 @@ export default async function CharmPage({
     <div className="meguru">
       <SiteHeader active="none" />
       <article className="charm-page">
+        {/* Identity above the picture, picture above the story (0018/D4).
+            "Kinki · Shiga · Lake Biwa" then the name tells you what you are
+            looking at before you look at it, which reads better than the old
+            art-beside-heading split. */}
         <div className="charm-hero" style={{ "--rc": color } as CSSProperties}>
-          <div className="charm-hero-art">
-            <CharmThumb charm={thumbCharm} />
-          </div>
           <div className="charm-head">
             <div className="crumb">{region}</div>
             <h1>{design.name}</h1>
@@ -116,6 +120,13 @@ export default async function CharmPage({
               </div>
             ) : null}
           </div>
+          {images.length > 0 ? (
+            <CharmCarousel images={images} name={design.name} />
+          ) : (
+            <div className="charm-hero-art">
+              <CharmThumb charm={thumbCharm} />
+            </div>
+          )}
         </div>
 
         {/* Story leads (requirement 2): full reading width, mincho display

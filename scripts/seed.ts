@@ -92,6 +92,7 @@ function toOwnedItemRow(d: OwnedDesign, designId: number): NewItem {
     priceSgd: d.price,
     note: d.note,
     imageUrl: d.photoUrl,
+    imageUrls: d.photoUrls,
   };
 }
 

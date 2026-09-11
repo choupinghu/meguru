@@ -89,6 +89,10 @@ export type OwnedDesign = {
   story: string | null;
   /** Design-level premier image, or null where none could be sourced. */
   imageUrl: string | null;
+  /** Our own photograph of this copy, web-sized: the carousel's second slide.
+   * Every owned charm has one, because it is a photo of the thing on the
+   * shelf rather than something that had to be found. */
+  photoUrls: string[];
   /** Our own photograph of this copy, or null. Takes precedence over the
    * design-level image everywhere it exists — it is the honest one. */
   photoUrl: string | null;
@@ -375,6 +379,7 @@ export const OWNED: OwnedDesign[] = OWNED_RAW.map((r) => {
     story: STORIES[r.no] ?? null,
     imageUrl: REFERENCE_NOS.has(r.no) ? `/img/charms/${r.no}-reference.webp` : null,
     photoUrl: OWN_PHOTO_NOS.has(r.no) ? `/img/charms/${r.no}-figure.webp` : null,
+    photoUrls: [`/img/charms/${r.no}-original.webp`],
     condition: r.condition ?? "bnib",
     region: r.region ?? null,
   };
