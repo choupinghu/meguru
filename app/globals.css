@@ -1498,11 +1498,6 @@ footer .mark {
     padding: 8px 0 0;
     background: none;
   }
-  /* Hidden rather than unmounted, so opening a charm does not shorten the band
-     and shift the carousel down under the reader's thumb. */
-  .strip.is-open .strip-label {
-    visibility: hidden;
-  }
 
   /* Tapping the centred charm grows the band into this: enough to know what the
      charm is without leaving the map, and a link out for the rest. It covers
@@ -1517,9 +1512,6 @@ footer .mark {
     right: 16px;
     bottom: 100%;
     margin-bottom: 6px;
-    display: grid;
-    grid-template-columns: 88px 1fr;
-    gap: 12px;
     padding: 10px 14px;
     /* The only backed surface here. The name and the cards read fine straight
        over the map, but three lines of story do not. */
@@ -1548,32 +1540,15 @@ footer .mark {
     border: 0;
     cursor: pointer;
   }
-  .strip-card-art .thumb {
-    aspect-ratio: 1;
-    border-radius: 12px;
-  }
   .strip-card-body {
     min-width: 0;
     padding-right: 26px;
   }
-  .strip-card-body h4 {
-    font-family: var(--font-display);
-    font-size: 16px;
-    font-weight: 600;
-    line-height: 1.2;
-    margin: 0;
-  }
   .strip-card-body .cja {
-    font-size: 11.5px;
-    color: var(--ink-soft);
-    margin-top: 1px;
-  }
-  .strip-card-body .loc {
-    font-size: 10px;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: var(--ink-faint);
-    margin-top: 3px;
+    font-family: var(--font-display);
+    font-size: 13px;
+    color: var(--ink);
+    margin: 0;
   }
   .strip-card-story {
     display: -webkit-box;
@@ -1583,7 +1558,7 @@ footer .mark {
     font-size: 12.5px;
     line-height: 1.5;
     color: var(--ink-soft);
-    margin: 5px 0 0;
+    margin: 3px 0 0;
   }
   .strip-more {
     display: inline-block;

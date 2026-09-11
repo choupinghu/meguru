@@ -213,16 +213,13 @@ export default function CharmStrip({
           >
             <span aria-hidden="true">⌄</span>
           </button>
-          <div
-            className="strip-card-art"
-            style={{ "--rc": charmColor(toCharmView(centre)) } as React.CSSProperties}
-          >
-            <CharmThumb charm={toCharmView(centre)} />
-          </div>
+          {/* Only what is not already on screen. The cut-out is the centred
+              carousel card, and the name and place are in the label right
+              below -- repeating either would make the popup twice the size to
+              say the same thing. The Japanese name is the one identity line
+              the map view shows nowhere else, so it stays. */}
           <div className="strip-card-body">
-            <h4>{centre.name}</h4>
             {centre.nameJa ? <div className="cja">{centre.nameJa}</div> : null}
-            <div className="loc">{locationLabel(centre)}</div>
             {centre.story ? <p className="strip-card-story">{centre.story}</p> : null}
             <Link href={`/charm/${centre.id}`} className="strip-more">
               Full record →
