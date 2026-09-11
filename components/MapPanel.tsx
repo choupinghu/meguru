@@ -53,7 +53,7 @@ export default function MapPanel({
   onBackToRegion,
 }: MapPanelProps) {
   return (
-      <aside className="panel" aria-live="polite">
+    <aside className="panel" aria-live="polite">
       {view.kind === "overview" ? (
         <OverviewPanel view={view} onSelectRegion={onSelectRegion} />
       ) : view.kind === "region" ? (
@@ -73,7 +73,7 @@ export default function MapPanel({
           onBack={onReset}
         />
       )}
-      </aside>
+    </aside>
   );
 }
 
