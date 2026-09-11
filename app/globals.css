@@ -268,6 +268,7 @@ body {
     grid-template-columns: 1fr;
   }
 }
+
 .mapcard {
   position: relative;
   background: var(--surface);
@@ -277,6 +278,103 @@ body {
   padding: 16px 16px 12px;
   overflow: hidden;
 }
+/* ---------- charm strip (phones only; see the 640px block) ---------- */
+.strip {
+  display: none;
+  position: relative;
+  margin: 10px -16px 0;
+  padding-top: 26px;
+}
+/* In normal flow, not absolutely positioned at the band's top edge. It used to
+   be absolute, with the band reserving a fixed strip of padding for it -- which
+   the centre item then grew into: the focused frame scales up about its own
+   centre, so it reaches ~8px above its layout box and clipped the name by 10px.
+   Laid out in flow the track simply starts below the label, and no focus scale
+   can ever collide with it. */
+.strip-label {
+  z-index: 2;
+  width: fit-content;
+  margin: 0 auto 10px;
+  max-width: calc(100% - 20px);
+  padding: 3px 12px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--surface) 78%, transparent);
+  backdrop-filter: blur(6px);
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+  white-space: nowrap;
+  overflow: hidden;
+}
+/* "Enoshima Benzaiten · KANAGAWA · ENOSHIMA" overruns a 393px screen. The name
+   is what you are reading, so the place gives way first. */
+.strip-label b,
+.strip-label span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+/* The name is the thing being read, so the place absorbs essentially all of the
+   shrink: "Enoshima Benzaiten" stays whole and "KANAGAWA - ENOSHIMA 江ノ島"
+   clips instead of both halves clipping together. */
+.strip-label b {
+  flex: 0 1 auto;
+}
+.strip-label span {
+  flex: 0 100 auto;
+}
+.strip-label b {
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink);
+}
+.strip-label span {
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+.strip-track {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  /* pan-x, so a swipe that wanders off the horizontal cannot scroll the page
+     out from under the map mid-gesture; contain, so overshooting the last charm
+     does not hand the gesture to the browser's back-navigation. */
+  touch-action: pan-x;
+  overscroll-behavior-x: contain;
+  /* Vertical: the focused frame scales to 1.26 of a 60px box, so it reaches
+     ~8px past the box on each side. overflow-x: auto forces overflow-y to
+     compute as auto too, which clipped exactly that -- the middle card came out
+     with its top and bottom shaved. 14px clears it with room to spare.
+     Horizontal: half the track minus half an item, so the first and last charm
+     can reach the centre like any other. */
+  padding: 14px calc(50% - 30px);
+}
+.strip-track::-webkit-scrollbar {
+  display: none;
+}
+.strip-item {
+  flex: 0 0 60px;
+  scroll-snap-align: center;
+  transition: transform 0.22s ease, opacity 0.22s ease;
+  transform: scale(0.76);
+  opacity: 0.62;
+}
+/* The focused charm is read at a glance by size alone, so the gap between it
+   and its neighbours has to be obvious rather than subtle. */
+.strip-item.is-centre {
+  transform: scale(1.26);
+  opacity: 1;
+}
+.strip-item .thumb {
+  aspect-ratio: 1;
+  border-radius: 12px;
+}
+
 .mapcard::before {
   content: "";
   position: absolute;
@@ -498,19 +596,6 @@ body {
 /* On touch there's no hover and no cursor: pointer to show the map is
    interactive, so on small screens the hint line has to carry that signal
    on its own -- promoted from a quiet footnote to a visible chip. */
-@media (max-width: 640px) {
-  .maptools .hint {
-    font-size: 13.5px;
-    font-weight: 600;
-    color: var(--ink);
-    background: var(--surface-2);
-    border: 1px solid var(--line);
-    border-radius: 999px;
-    padding: 7px 13px;
-    display: inline-flex;
-    align-items: center;
-  }
-}
 .discover {
   font: inherit;
   font-size: 13.5px;
@@ -1240,5 +1325,195 @@ footer .mark {
   .meguru * {
     animation-duration: 0.001ms !important;
     transition-duration: 0.001ms !important;
+  }
+}
+
+/* ----------------------------------------------------------------------------
+   Mobile (<=640px). MUST STAY LAST in this file.
+
+   These are overrides of the base component styles above, and most of them
+   match a base rule's specificity exactly -- .legend, .mapcard, .panel,
+   #jpmap. CSS then decides on source order, so while this block sat near the
+   top of the file every one of those rules silently lost to the base rule
+   defined later. The map stayed full height, the region chips kept wrapping to
+   four rows and the panel never flexed, which is why the phone layout kept
+   looking untouched after each fix. Append new mobile rules here; do not move
+   this block above the component styles.
+   -------------------------------------------------------------------------- */
+@media (max-width: 640px) {
+  html {
+    scroll-snap-type: y proximity;
+  }
+
+  /* Ten region chips wrapped to five rows and pushed the map most of a screen
+     down the page. One swipeable row instead -- they are a filter you reach
+     for, not a legend you read top to bottom. */
+  .legend {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scroll-snap-type: x proximity;
+    scrollbar-width: none;
+    padding-bottom: 2px;
+    margin-right: -16px;
+    padding-right: 16px;
+    /* Without this the row just looks truncated. Fading the trailing edge is
+       what tells you it slides -- the scrollbar is hidden and a touch device
+       shows none anyway. */
+    -webkit-mask-image: linear-gradient(to right, black calc(100% - 34px), transparent);
+    mask-image: linear-gradient(to right, black calc(100% - 34px), transparent);
+  }
+  .legend::-webkit-scrollbar {
+    display: none;
+  }
+  .legend .chip {
+    flex: 0 0 auto;
+    scroll-snap-align: start;
+  }
+
+  /* The hint restates the button sitting next to it. */
+  .hint {
+    display: none;
+  }
+
+  /* On a phone the drill-down panel is replaced by a band of charms laid over
+     the map's own bottom edge (`.strip` below). The panel is a desktop idea: it
+     works there because it sits BESIDE the map. Stacked underneath on a 393px
+     screen the two could never be seen at once, and a region's charms became a
+     vertical list of full-width cards -- seven charms was 1000px of scrolling
+     inside a 350px box, so drilling into a region told you less than the map
+     already had. Compacting the cards to a 3-across grid helped and still was
+     not enough: the list has to scroll somewhere, and any vertical answer costs
+     the map the height it needs.
+
+     Sideways costs nothing. The band overlays the map instead of displacing it,
+     so the map and a whole region's charms fit a phone screen together and a
+     region is one swipe.
+
+     With the panel gone nothing here needs to be told a height: the card is as
+     tall as the map, and the map is as tall as it is wide. An earlier version
+     pinned this section to 100dvh and gave the surplus to the map, which did
+     nothing -- the map's viewBox is square, so a 556px-tall stage letterboxed a
+     311px map and left 245px of empty sea. */
+  .explore {
+    margin-top: 12px;
+    /* Scrolling down to the map clicks it into place rather than leaving it
+       half on screen. `proximity`, not `mandatory`: mandatory fights anyone
+       trying to scroll past the map to the footer. */
+    scroll-snap-align: start;
+    scroll-margin-top: 10px;
+  }
+  .explore-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    /* The base rule is a grid with align-items: start. Re-declaring display as
+       a column flex makes that the *cross* axis, so start meant the map card
+       sized to its own content -- 1063px, driven by the now-unwrapped chip row --
+       and overflowed the 345px column. */
+    align-items: stretch;
+  }
+  /* The stage is the band's containing block, and reserves most of the band's
+     height as padding so the coastline is never buried under it -- the overlap
+     that is left is what makes the band read as sitting ON the map. */
+  .mapstage {
+    position: relative;
+  }
+  .panel {
+    display: none;
+  }
+
+  /* The hero stays above the map, in document order: it is a short scroll and
+     the copy earns its place. An earlier version moved the map above it with
+     flex `order`, which cost more than it bought -- the sections carry
+     `margin: 22px auto 0`, and an auto cross-axis margin switches a flex item
+     off stretch and onto fit-content, so every section sized to its max-content
+     width (.explore came out 1111px inside a 393px phone) and .meguru's
+     overflow-x: hidden cropped the right third of the map. Plain blocks have no
+     such trap. */
+
+  /* ---- the band ----------------------------------------------------------
+     The band sits in the space a tall screen leaves under a square map, rather
+     than on top of the map. Overlaying it was tried and cost too much: the map
+     is 311px square on a 393px phone, so a 124px band buried its bottom 40% --
+     Shikoku and Kyushu included -- to save height the screen had spare anyway.
+     Only the popup overlaps the map now.
+
+     No background of its own: over the card it would read as a tray bolted
+     under the map. The name and the charm cards carry their own. */
+  .strip {
+    display: block;
+    position: relative;
+    z-index: 3;
+    /* Full-bleed across the card so the carousel spans the map's full width
+       rather than being inset by the card's 16px padding. */
+    margin: 0 -16px;
+    padding: 8px 0 0;
+    background: none;
+  }
+
+  /* Tapping the centred charm grows the band into this. Grows upward into the map -- the one thing allowed to cover
+     it. Absolute, so opening a charm moves nothing: the map, the carousel and
+     the buttons all stay exactly where they were. */
+  .strip-card {
+    position: absolute;
+    left: 16px;
+    right: 16px;
+    bottom: 100%;
+    margin-bottom: 6px;
+    padding: 10px 14px;
+    /* The only backed surface here. The name and the cards read fine straight
+       over the map, but three lines of story do not. */
+    background: color-mix(in srgb, var(--surface) 88%, transparent);
+    -webkit-backdrop-filter: blur(16px);
+    backdrop-filter: blur(16px);
+    border: 1px solid var(--line-soft);
+    border-radius: 14px;
+    box-shadow: 0 10px 30px -12px rgb(0 0 0 / 0.28);
+  }
+  .strip-close {
+    position: absolute;
+    top: -4px;
+    right: 6px;
+    z-index: 1;
+    width: 30px;
+    height: 24px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font: inherit;
+    font-size: 17px;
+    line-height: 1;
+    color: var(--ink-soft);
+    background: none;
+    border: 0;
+    cursor: pointer;
+  }
+  .strip-card-body {
+    min-width: 0;
+    padding-right: 26px;
+  }
+  .strip-card-body .cja {
+    font-family: var(--font-display);
+    font-size: 13px;
+    color: var(--ink);
+    margin: 0;
+  }
+  .strip-card-story {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+    overflow: hidden;
+    font-size: 12.5px;
+    line-height: 1.5;
+    color: var(--ink-soft);
+    margin: 3px 0 0;
+  }
+  .strip-more {
+    display: inline-block;
+    margin-top: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--vermilion);
+    text-decoration: none;
   }
 }

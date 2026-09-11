@@ -4,6 +4,7 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } fr
 import type { CSSProperties } from "react";
 import type { DesignView } from "@/lib/charms";
 import { hasPhoto } from "@/lib/charms";
+import CharmStrip from "./CharmStrip";
 import { REGIONS, REGION_LIST, regionForCode, type RegionKey } from "@/lib/regions";
 import { PREFECTURES } from "@/lib/prefectures";
 import { PREFECTURE_BOUNDS, REGION_BOUNDS, type Bounds } from "@/lib/map-bounds";
@@ -179,6 +180,7 @@ export default function MapExplorer({ charms }: { charms: DesignView[] }) {
   const animationFrame = useRef<number | null>(null);
   const discoverTimeout = useRef<number | null>(null);
   const discoverBtnRef = useRef<HTMLButtonElement>(null);
+  const legendRef = useRef<HTMLDivElement>(null);
   // Discover's no-repeat window (D2): most-recent-first design ids, trimmed
   // to WINDOW on every pick. A ref, not state -- it must never itself
   // trigger a re-render; only the picks it produces do that.
@@ -194,6 +196,11 @@ export default function MapExplorer({ charms }: { charms: DesignView[] }) {
     design: DesignView;
     region: RegionKey | null;
   } | null>(null);
+  // The charm the phone band last focused. Focusing flies the map to that
+  // charm's prefecture, which narrows the band's list -- without this the list
+  // change would re-centre on the new middle charm and slide the one just
+  // tapped out from under the reader's finger.
+  const [bandFocusId, setBandFocusId] = useState<number | null>(null);
 
   // Prefecture codes the collection reaches, grouped into their designs.
   // Collabs (prefectureCode === null) don't belong to the map.
@@ -356,17 +363,20 @@ export default function MapExplorer({ charms }: { charms: DesignView[] }) {
       const el = e.target.closest(".prefecture");
       if (!el) {
         setDiscoveredCharm(null);
+        setBandFocusId(null);
         setState(zoomOutOneLevel);
         return;
       }
       const code = Number(el.getAttribute("data-code"));
       if (!Number.isFinite(code)) {
         setDiscoveredCharm(null);
+        setBandFocusId(null);
         setState(zoomOutOneLevel);
         return;
       }
       const hasCharms = el.classList.contains("has");
       setDiscoveredCharm(null);
+      setBandFocusId(null);
       setState((prev) => clickPrefecture(prev, code, hasCharms));
     };
 
@@ -381,6 +391,7 @@ export default function MapExplorer({ charms }: { charms: DesignView[] }) {
       if (!Number.isFinite(code)) return;
       e.preventDefault();
       setDiscoveredCharm(null);
+      setBandFocusId(null);
       setState((prev) => clickPrefecture(prev, code, true));
     };
 
@@ -390,6 +401,35 @@ export default function MapExplorer({ charms }: { charms: DesignView[] }) {
       svg.removeEventListener("click", handleClick);
       svg.removeEventListener("keydown", handleKeydown);
     };
+  }, []);
+
+  // The region chips are one horizontally scrolling row on a phone, which a
+  // touch swipe drives perfectly. A wheel does not: a vertical trackpad gesture
+  // over the row scrolls the page instead, so on a laptop -- and in the phone
+  // preview window, which is where this gets reviewed -- the regions look
+  // unscrollable even though they are not. Measured: a vertical wheel left
+  // scrollLeft at 0 and moved the page 9px; a horizontal one moved the row
+  // 433px.
+  //
+  // So put a vertical wheel onto the row's own axis, but only while the row can
+  // still move that way. At either end the gesture falls back to the page, so
+  // the row never traps a scroll -- and on a screen wide enough for the chips
+  // to wrap there is no overflow, so this does nothing at all.
+  useEffect(() => {
+    const row = legendRef.current;
+    if (!row) return;
+    const onWheel = (event: WheelEvent) => {
+      if (Math.abs(event.deltaY) <= Math.abs(event.deltaX)) return;
+      const max = row.scrollWidth - row.clientWidth;
+      if (max <= 0) return;
+      if (event.deltaY < 0 && row.scrollLeft <= 0) return;
+      if (event.deltaY > 0 && row.scrollLeft >= max) return;
+      event.preventDefault();
+      row.scrollLeft = Math.max(0, Math.min(max, row.scrollLeft + event.deltaY));
+    };
+    // Not passive: the whole point is to take the gesture off the page.
+    row.addEventListener("wheel", onWheel, { passive: false });
+    return () => row.removeEventListener("wheel", onWheel);
   }, []);
 
   // Cancel any in-flight zoom animation / pending Discover jump on unmount.
@@ -403,12 +443,14 @@ export default function MapExplorer({ charms }: { charms: DesignView[] }) {
   // Region chips jump straight to that region from any level.
   const selectRegion = useCallback((region: RegionKey) => {
     setDiscoveredCharm(null);
+    setBandFocusId(null);
     setState({ level: "region", regionKey: region });
   }, []);
 
   // "All Japan" always returns to the top level.
   const resetToOverview = useCallback(() => {
     setDiscoveredCharm(null);
+    setBandFocusId(null);
     setState({ level: "japan" });
   }, []);
 
@@ -416,6 +458,7 @@ export default function MapExplorer({ charms }: { charms: DesignView[] }) {
   // outside the focused prefecture (requirement 8).
   const backToRegion = useCallback(() => {
     setDiscoveredCharm(null);
+    setBandFocusId(null);
     setState(zoomOutOneLevel);
   }, []);
 
@@ -425,6 +468,20 @@ export default function MapExplorer({ charms }: { charms: DesignView[] }) {
   // specific charm's prefecture, same as Discover's jump -- just without the
   // press/spin animation or its timeout, since this is a direct click on a
   // card, not the dice roll, and should feel immediate.
+  // The band's first tap on the centred charm: fly to its prefecture and open
+  // nothing, which is the map step a desktop reader gets for free by clicking
+  // the prefecture before picking a card. A second tap, once the map is already
+  // there, opens the mini record. Deliberately does NOT set discoveredCharm --
+  // that would flip the panel view to "charm" and hand the band the whole pool
+  // instead of the prefecture's charms.
+  const focusCharmPrefecture = useCallback((design: DesignView) => {
+    const region = design.prefectureCode != null ? regionForCode(design.prefectureCode) : null;
+    if (design.prefectureCode == null || !region) return;
+    setDiscoveredCharm(null);
+    setBandFocusId(design.id);
+    setState({ level: "prefecture", regionKey: region, code: design.prefectureCode });
+  }, []);
+
   const selectCharm = useCallback((design: DesignView) => {
     const region = design.prefectureCode != null ? regionForCode(design.prefectureCode) : null;
     setDiscoveredCharm({ design, region });
@@ -540,11 +597,15 @@ export default function MapExplorer({ charms }: { charms: DesignView[] }) {
         ? "Tap a prefecture for its charms"
         : "Tap a region chip or a glowing prefecture to explore";
 
+  // A drill-down shows that region's or prefecture's charms, in their own
+  // order; the top level shows the whole pool, shuffled.
+  const isDrilled = panelView.kind === "region" || panelView.kind === "prefecture";
+
   return (
     <section className="explore">
       <div className="explore-grid">
         <div className="mapcard">
-          <div className="legend">
+          <div className="legend" ref={legendRef}>
             <button
               type="button"
               className={`chip all${state.level === "japan" ? " active" : ""}`}
@@ -580,6 +641,20 @@ export default function MapExplorer({ charms }: { charms: DesignView[] }) {
                 />
               ) : null}
             </JapanMapSvg>
+            {/* Phone-only, see `.strip` in globals.css. It lives inside the
+                stage rather than after it so it can be pinned to the map's own
+                bottom edge -- overlaying the map costs no vertical space, which
+                is the whole reason it replaces the panel here. At a region or
+                prefecture it holds that drill-down's charms; at the top level,
+                and for a charm surfaced by Discover, it holds the whole owned
+                set so there is always something to swipe through. */}
+            <CharmStrip
+              charms={isDrilled ? panelView.charms : charms}
+              focusId={discoveredCharm?.design.id ?? bandFocusId}
+              shuffle={!isDrilled}
+              focusedCode={state.level === "prefecture" ? state.code : null}
+              onFocusPrefecture={focusCharmPrefecture}
+            />
           </div>
           <div className="maptools">
             <div className="maptools-nav">
