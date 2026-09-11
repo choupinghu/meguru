@@ -346,9 +346,13 @@ body {
      does not hand the gesture to the browser's back-navigation. */
   touch-action: pan-x;
   overscroll-behavior-x: contain;
-  /* Half the track minus half an item, so the first and last can reach the
-     centre like any other. */
-  padding: 4px calc(50% - 30px) 6px;
+  /* Vertical: the focused frame scales to 1.26 of a 60px box, so it reaches
+     ~8px past the box on each side. overflow-x: auto forces overflow-y to
+     compute as auto too, which clipped exactly that -- the middle card came out
+     with its top and bottom shaved. 14px clears it with room to spare.
+     Horizontal: half the track minus half an item, so the first and last charm
+     can reach the centre like any other. */
+  padding: 14px calc(50% - 30px);
 }
 .strip-track::-webkit-scrollbar {
   display: none;

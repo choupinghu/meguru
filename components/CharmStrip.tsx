@@ -43,6 +43,8 @@ export default function CharmStrip({
   charms,
   focusId,
   shuffle = false,
+  focusedCode = null,
+  onFocusPrefecture,
 }: {
   charms: DesignView[];
   /** A charm chosen elsewhere (Discover, or a card in the panel) -- scrolled to
@@ -52,6 +54,11 @@ export default function CharmStrip({
    * invitation to wander; never for a drill-down, where an order that reshuffles
    * as you navigate reads as a bug. */
   shuffle?: boolean;
+  /** The prefecture the map is currently focused on, or null. Decides whether a
+   * tap on the centred charm focuses the map or opens the record. */
+  focusedCode?: number | null;
+  /** Fly the map to this charm's prefecture, opening nothing. */
+  onFocusPrefecture?: (design: DesignView) => void;
 }) {
   const trackRef = useRef<HTMLDivElement | null>(null);
   const [centreId, setCentreId] = useState<number | null>(
@@ -182,6 +189,14 @@ export default function CharmStrip({
   if (list.length === 0) return null;
   const centre = list.find((c) => c.id === centreId) ?? list[0];
 
+  // A charm the map is not yet showing, and can show. One with no prefecture
+  // has nothing to fly to, so it opens on the first tap rather than swallowing
+  // one that appears to do nothing.
+  const needsFocus = (design: DesignView) =>
+    Boolean(onFocusPrefecture) &&
+    design.prefectureCode != null &&
+    focusedCode !== design.prefectureCode;
+
   return (
     <div className={`strip${expanded ? " is-open" : ""}`}>
       {/* The card floats above the band, over the map. The name stays rendered
@@ -230,14 +245,27 @@ export default function CharmStrip({
               className={`strip-item${isCentre ? " is-centre" : ""}`}
               style={{ "--rc": charmColor(toCharmView(design)) } as React.CSSProperties}
               aria-label={
-                isCentre ? `${design.name} — open this charm` : `${design.name} — bring to centre`
+                !isCentre
+                  ? `${design.name} — bring to centre`
+                  : needsFocus(design)
+                    ? `${design.name} — show its prefecture on the map`
+                    : `${design.name} — open this charm`
               }
               onClick={() => {
-                if (isCentre) setExpanded(!expanded);
-                else {
+                if (!isCentre) {
                   setExpanded(false);
                   centreOn(design.id);
+                  return;
                 }
+                // Two stages, so tapping a charm never skips the map. The first
+                // tap flies to its prefecture -- the step a desktop reader gets
+                // by clicking the prefecture before picking a card -- and only
+                // once the map is there does the next tap open the record.
+                if (needsFocus(design)) {
+                  onFocusPrefecture?.(design);
+                  return;
+                }
+                setExpanded(!expanded);
               }}
             >
               <CharmThumb charm={toCharmView(design)} />

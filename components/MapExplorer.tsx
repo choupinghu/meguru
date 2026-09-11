@@ -195,6 +195,11 @@ export default function MapExplorer({ charms }: { charms: DesignView[] }) {
     design: DesignView;
     region: RegionKey | null;
   } | null>(null);
+  // The charm the phone band last focused. Focusing flies the map to that
+  // charm's prefecture, which narrows the band's list -- without this the list
+  // change would re-centre on the new middle charm and slide the one just
+  // tapped out from under the reader's finger.
+  const [bandFocusId, setBandFocusId] = useState<number | null>(null);
 
   // Prefecture codes the collection reaches, grouped into their designs.
   // Collabs (prefectureCode === null) don't belong to the map.
@@ -357,17 +362,20 @@ export default function MapExplorer({ charms }: { charms: DesignView[] }) {
       const el = e.target.closest(".prefecture");
       if (!el) {
         setDiscoveredCharm(null);
+        setBandFocusId(null);
         setState(zoomOutOneLevel);
         return;
       }
       const code = Number(el.getAttribute("data-code"));
       if (!Number.isFinite(code)) {
         setDiscoveredCharm(null);
+        setBandFocusId(null);
         setState(zoomOutOneLevel);
         return;
       }
       const hasCharms = el.classList.contains("has");
       setDiscoveredCharm(null);
+      setBandFocusId(null);
       setState((prev) => clickPrefecture(prev, code, hasCharms));
     };
 
@@ -382,6 +390,7 @@ export default function MapExplorer({ charms }: { charms: DesignView[] }) {
       if (!Number.isFinite(code)) return;
       e.preventDefault();
       setDiscoveredCharm(null);
+      setBandFocusId(null);
       setState((prev) => clickPrefecture(prev, code, true));
     };
 
@@ -404,12 +413,14 @@ export default function MapExplorer({ charms }: { charms: DesignView[] }) {
   // Region chips jump straight to that region from any level.
   const selectRegion = useCallback((region: RegionKey) => {
     setDiscoveredCharm(null);
+    setBandFocusId(null);
     setState({ level: "region", regionKey: region });
   }, []);
 
   // "All Japan" always returns to the top level.
   const resetToOverview = useCallback(() => {
     setDiscoveredCharm(null);
+    setBandFocusId(null);
     setState({ level: "japan" });
   }, []);
 
@@ -417,6 +428,7 @@ export default function MapExplorer({ charms }: { charms: DesignView[] }) {
   // outside the focused prefecture (requirement 8).
   const backToRegion = useCallback(() => {
     setDiscoveredCharm(null);
+    setBandFocusId(null);
     setState(zoomOutOneLevel);
   }, []);
 
@@ -426,6 +438,20 @@ export default function MapExplorer({ charms }: { charms: DesignView[] }) {
   // specific charm's prefecture, same as Discover's jump -- just without the
   // press/spin animation or its timeout, since this is a direct click on a
   // card, not the dice roll, and should feel immediate.
+  // The band's first tap on the centred charm: fly to its prefecture and open
+  // nothing, which is the map step a desktop reader gets for free by clicking
+  // the prefecture before picking a card. A second tap, once the map is already
+  // there, opens the mini record. Deliberately does NOT set discoveredCharm --
+  // that would flip the panel view to "charm" and hand the band the whole pool
+  // instead of the prefecture's charms.
+  const focusCharmPrefecture = useCallback((design: DesignView) => {
+    const region = design.prefectureCode != null ? regionForCode(design.prefectureCode) : null;
+    if (design.prefectureCode == null || !region) return;
+    setDiscoveredCharm(null);
+    setBandFocusId(design.id);
+    setState({ level: "prefecture", regionKey: region, code: design.prefectureCode });
+  }, []);
+
   const selectCharm = useCallback((design: DesignView) => {
     const region = design.prefectureCode != null ? regionForCode(design.prefectureCode) : null;
     setDiscoveredCharm({ design, region });
@@ -594,8 +620,10 @@ export default function MapExplorer({ charms }: { charms: DesignView[] }) {
                 set so there is always something to swipe through. */}
             <CharmStrip
               charms={isDrilled ? panelView.charms : charms}
-              focusId={discoveredCharm?.design.id ?? null}
+              focusId={discoveredCharm?.design.id ?? bandFocusId}
               shuffle={!isDrilled}
+              focusedCode={state.level === "prefecture" ? state.code : null}
+              onFocusPrefecture={focusCharmPrefecture}
             />
           </div>
           <div className="maptools">
