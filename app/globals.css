@@ -1431,56 +1431,8 @@ footer .mark {
      overflow-x: hidden cropped the right third of the map. Plain blocks have no
      such trap. */
 
-  /* Map and charm have to share one screen, so both give ground. The panel was
-     spending ~500px: a 220px-wide thumbnail, a three-line story and the item
-     note. Story and note both live on the full record, one tap away, so they
-     go here and the thumbnail moves beside the text instead of above it.
-
-     That takes the charm preview to roughly 230px, which fits under a 260px
-     map with room to spare. */
-  .charm-panel {
-    display: grid;
-    grid-template-columns: 104px 1fr;
-    column-gap: 12px;
-    row-gap: 6px;
-    align-items: start;
-  }
-  .charm-panel > * {
-    grid-column: 2;
-  }
-  .charm-panel-art {
-    grid-column: 1;
-    grid-row: 1 / span 3;
-    max-width: none;
-    margin: 0;
-  }
-  .charm-panel-art .thumb {
-    aspect-ratio: 1;
-  }
-  /* The story stays -- these write-ups are the best thing here and cutting
-     them was over-correcting. Two lines instead of three, and the note keeps
-     its place: after capping the map there is about 380px for the panel and
-     the preview only needs ~230px of it, so there is no need to strip it. */
-  .charm-panel-story {
-    -webkit-line-clamp: 2;
-    font-size: 13.5px;
-    line-height: 1.55;
-    grid-column: 1 / -1;
-  }
-  .charm-panel .item-note {
-    grid-column: 1 / -1;
-    font-size: 11.5px;
-  }
-  .charm-panel .panel-head {
-    padding-bottom: 8px;
-    margin-bottom: 2px;
-  }
   /* ---- the band ----------------------------------------------------------
-     Pinned over the bottom of the map stage. Translucent and blurred so the
-     coastline still reads underneath, which is what keeps it feeling like part
-     of the map rather than a tray parked on top of it -- an earlier full-screen
-     overlay covered the very map it was meant to sit beside. */
-  /* The band sits in the space a tall screen leaves under a square map, rather
+     The band sits in the space a tall screen leaves under a square map, rather
      than on top of the map. Overlaying it was tried and cost too much: the map
      is 311px square on a 393px phone, so a 124px band buried its bottom 40% --
      Shikoku and Kyushu included -- to save height the screen had spare anyway.
@@ -1499,11 +1451,7 @@ footer .mark {
     background: none;
   }
 
-  /* Tapping the centred charm grows the band into this: enough to know what the
-     charm is without leaving the map, and a link out for the rest. It covers
-     the lower half of the stage at most -- the prefecture lit by the drill-down
-     stays visible above it. */
-  /* Grows upward from the band into the map -- the one thing allowed to cover
+  /* Tapping the centred charm grows the band into this. Grows upward into the map -- the one thing allowed to cover
      it. Absolute, so opening a charm moves nothing: the map, the carousel and
      the buttons all stay exactly where they were. */
   .strip-card {
