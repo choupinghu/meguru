@@ -541,6 +541,10 @@ export default function MapExplorer({ charms }: { charms: DesignView[] }) {
         ? "Tap a prefecture for its charms"
         : "Tap a region chip or a glowing prefecture to explore";
 
+  // A drill-down shows that region's or prefecture's charms, in their own
+  // order; the top level shows the whole pool, shuffled.
+  const isDrilled = panelView.kind === "region" || panelView.kind === "prefecture";
+
   return (
     <section className="explore">
       <div className="explore-grid">
@@ -581,19 +585,19 @@ export default function MapExplorer({ charms }: { charms: DesignView[] }) {
                 />
               ) : null}
             </JapanMapSvg>
+            {/* Phone-only, see `.strip` in globals.css. It lives inside the
+                stage rather than after it so it can be pinned to the map's own
+                bottom edge -- overlaying the map costs no vertical space, which
+                is the whole reason it replaces the panel here. At a region or
+                prefecture it holds that drill-down's charms; at the top level,
+                and for a charm surfaced by Discover, it holds the whole owned
+                set so there is always something to swipe through. */}
+            <CharmStrip
+              charms={isDrilled ? panelView.charms : charms}
+              focusId={discoveredCharm?.design.id ?? null}
+              shuffle={!isDrilled}
+            />
           </div>
-          {/* Phone-only, see `.strip` in globals.css. At a region or prefecture
-              it holds that drill-down's charms; at the top level, and for a
-              charm surfaced by Discover, it holds the whole owned set so there
-              is always something to swipe through. */}
-          <CharmStrip
-            charms={
-              panelView.kind === "region" || panelView.kind === "prefecture"
-                ? panelView.charms
-                : charms
-            }
-            focusId={discoveredCharm?.design.id ?? null}
-          />
           <div className="maptools">
             <div className="maptools-nav">
               {state.level !== "japan" ? (
