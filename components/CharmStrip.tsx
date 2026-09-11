@@ -146,9 +146,17 @@ export default function CharmStrip({
     });
   }, []);
 
-  // A new list opens on its middle charm, so the carousel is centred with
-  // charms on both sides rather than butted against its own start -- which also
-  // shows, without a hint, that it swipes both ways.
+  // A new list opens on a charm picked at random, so entering a region twice
+  // does not put the same charm under you both times. The order is left alone:
+  // shuffling that as well would make a region read differently on every visit,
+  // which is disorienting rather than playful.
+  //
+  // The pick avoids the two end charms, because an end centres with nothing on
+  // one side and loses the cue that the carousel swipes both ways. Below three
+  // charms there is no interior, so it falls back to the middle.
+  //
+  // Randomness lives in the effect, never in render: the server and the first
+  // client render both use the middle, and this repositions afterwards.
   //
   // Resetting at all matters: the track is the same DOM node across a
   // drill-down, so its scroll position otherwise survives into a shorter list.
@@ -158,15 +166,18 @@ export default function CharmStrip({
     if (focusId != null) return;
     const track = trackRef.current;
     if (!track) return;
-    const middle = list[Math.floor((list.length - 1) / 2)];
-    const el = middle
-      ? track.querySelector<HTMLElement>(`[data-id="${middle.id}"]`)
+    const count = list.length;
+    const index =
+      count < 3 ? Math.floor((count - 1) / 2) : 1 + Math.floor(Math.random() * (count - 2));
+    const opening = list[index];
+    const el = opening
+      ? track.querySelector<HTMLElement>(`[data-id="${opening.id}"]`)
       : null;
     // Set outright rather than scrollIntoView: this is the band's opening
     // position, so it should already be there on the first paint, not glide
     // there afterwards.
     track.scrollLeft = el ? el.offsetLeft + el.offsetWidth / 2 - track.clientWidth / 2 : 0;
-    const id = requestAnimationFrame(() => setCentreId(middle?.id ?? null));
+    const id = requestAnimationFrame(() => setCentreId(opening?.id ?? null));
     return () => cancelAnimationFrame(id);
   }, [list, focusId]);
 
