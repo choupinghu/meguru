@@ -180,6 +180,7 @@ export default function MapExplorer({ charms }: { charms: DesignView[] }) {
   const animationFrame = useRef<number | null>(null);
   const discoverTimeout = useRef<number | null>(null);
   const discoverBtnRef = useRef<HTMLButtonElement>(null);
+  const legendRef = useRef<HTMLDivElement>(null);
   // Discover's no-repeat window (D2): most-recent-first design ids, trimmed
   // to WINDOW on every pick. A ref, not state -- it must never itself
   // trigger a re-render; only the picks it produces do that.
@@ -402,6 +403,35 @@ export default function MapExplorer({ charms }: { charms: DesignView[] }) {
     };
   }, []);
 
+  // The region chips are one horizontally scrolling row on a phone, which a
+  // touch swipe drives perfectly. A wheel does not: a vertical trackpad gesture
+  // over the row scrolls the page instead, so on a laptop -- and in the phone
+  // preview window, which is where this gets reviewed -- the regions look
+  // unscrollable even though they are not. Measured: a vertical wheel left
+  // scrollLeft at 0 and moved the page 9px; a horizontal one moved the row
+  // 433px.
+  //
+  // So put a vertical wheel onto the row's own axis, but only while the row can
+  // still move that way. At either end the gesture falls back to the page, so
+  // the row never traps a scroll -- and on a screen wide enough for the chips
+  // to wrap there is no overflow, so this does nothing at all.
+  useEffect(() => {
+    const row = legendRef.current;
+    if (!row) return;
+    const onWheel = (event: WheelEvent) => {
+      if (Math.abs(event.deltaY) <= Math.abs(event.deltaX)) return;
+      const max = row.scrollWidth - row.clientWidth;
+      if (max <= 0) return;
+      if (event.deltaY < 0 && row.scrollLeft <= 0) return;
+      if (event.deltaY > 0 && row.scrollLeft >= max) return;
+      event.preventDefault();
+      row.scrollLeft = Math.max(0, Math.min(max, row.scrollLeft + event.deltaY));
+    };
+    // Not passive: the whole point is to take the gesture off the page.
+    row.addEventListener("wheel", onWheel, { passive: false });
+    return () => row.removeEventListener("wheel", onWheel);
+  }, []);
+
   // Cancel any in-flight zoom animation / pending Discover jump on unmount.
   useEffect(() => {
     return () => {
@@ -575,7 +605,7 @@ export default function MapExplorer({ charms }: { charms: DesignView[] }) {
     <section className="explore">
       <div className="explore-grid">
         <div className="mapcard">
-          <div className="legend">
+          <div className="legend" ref={legendRef}>
             <button
               type="button"
               className={`chip all${state.level === "japan" ? " active" : ""}`}
