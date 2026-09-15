@@ -725,7 +725,6 @@ export default function MapExplorer({ charms }: { charms: DesignView[] }) {
         <MapPanel
           view={panelView}
           onSelectRegion={selectRegion}
-          onSelectCharm={selectCharm}
           onReset={resetToOverview}
           onBackToRegion={backToRegion}
         />
