@@ -1,6 +1,5 @@
 import type { CSSProperties } from "react";
 import Link from "next/link";
-import CharmCard from "./CharmCard";
 import CharmThumb from "./CharmThumb";
 import type { CharmView, DesignView } from "@/lib/charms";
 import { locationLabel, motifLabel, toCharmView } from "@/lib/charms";
@@ -38,7 +37,6 @@ interface MapPanelProps {
   /** Picking a card in the region/prefecture panels (spec 0010): switches
    * the panel into that charm's preview *in place*, without navigating off
    * `/` or moving the map (`MapExplorer` owns that distinction). */
-  onSelectCharm: (design: DesignView) => void;
   onReset: () => void;
   onBackToRegion: () => void;
 }
@@ -48,7 +46,6 @@ interface MapPanelProps {
 export default function MapPanel({
   view,
   onSelectRegion,
-  onSelectCharm,
   onReset,
   onBackToRegion,
 }: MapPanelProps) {
@@ -57,9 +54,9 @@ export default function MapPanel({
       {view.kind === "overview" ? (
         <OverviewPanel view={view} onSelectRegion={onSelectRegion} />
       ) : view.kind === "region" ? (
-        <RegionPanel view={view} onReset={onReset} onSelectCharm={onSelectCharm} />
+        <RegionPanel view={view} onReset={onReset} />
       ) : view.kind === "prefecture" ? (
-        <PrefecturePanel view={view} onBack={onBackToRegion} onSelectCharm={onSelectCharm} />
+        <PrefecturePanel view={view} onBack={onBackToRegion} />
       ) : (
         // A Discover pick's "← Back" resets to the overview (D4 item 9) --
         // there's no single drill-down level to unwind back to, since a
@@ -128,11 +125,9 @@ function OverviewPanel({
 function RegionPanel({
   view,
   onReset,
-  onSelectCharm,
 }: {
   view: Extract<PanelView, { kind: "region" }>;
   onReset: () => void;
-  onSelectCharm: (design: DesignView) => void;
 }) {
   const region = REGIONS[view.region];
   return (
@@ -151,15 +146,13 @@ function RegionPanel({
           ← All Japan
         </button>
       </div>
-      <div className="cards">
-        {view.charms.length ? (
-          view.charms.map((design) => (
-            <CharmCard design={design} key={design.id} onSelect={() => onSelectCharm(design)} />
-          ))
-        ) : (
-          <p className="panel-note">No charms from this region yet.</p>
-        )}
-      </div>
+      {view.charms.length ? (
+        <p className="panel-note">
+          Pick one from the column beside the map to read it here.
+        </p>
+      ) : (
+        <p className="panel-note">No charms from this region yet.</p>
+      )}
     </>
   );
 }
@@ -167,11 +160,9 @@ function RegionPanel({
 function PrefecturePanel({
   view,
   onBack,
-  onSelectCharm,
 }: {
   view: Extract<PanelView, { kind: "prefecture" }>;
   onBack: () => void;
-  onSelectCharm: (design: DesignView) => void;
 }) {
   const region = REGIONS[view.region];
   const name = PREFECTURES[view.code];
@@ -191,15 +182,13 @@ function PrefecturePanel({
           ← Back
         </button>
       </div>
-      <div className="cards">
-        {view.charms.length ? (
-          view.charms.map((design) => (
-            <CharmCard design={design} key={design.id} onSelect={() => onSelectCharm(design)} />
-          ))
-        ) : (
-          <p className="panel-note">No charms from this prefecture yet.</p>
-        )}
-      </div>
+      {view.charms.length ? (
+        <p className="panel-note">
+          Pick one from the column beside the map to read it here.
+        </p>
+      ) : (
+        <p className="panel-note">No charms from this prefecture yet.</p>
+      )}
     </>
   );
 }

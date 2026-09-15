@@ -449,6 +449,15 @@ body {
 }
 #jpmap {
   width: 100%;
+  /* The viewBox is square, so height always equals width -- left to fill its
+     column the map grows as tall as it is wide and pushes the card past the
+     screen. Capping it against the viewport HEIGHT, the axis that actually
+     runs out, lets the columns beside it keep their width: the map does not
+     need to fill the card, it needs to be legible. Centred in whatever space
+     is left. On a phone the column is narrower than the cap, so nothing
+     changes there. */
+  max-width: min(100%, 58vh);
+  margin-inline: auto;
   height: auto;
   display: block;
   touch-action: manipulation;
@@ -1325,6 +1334,122 @@ footer .mark {
   .meguru * {
     animation-duration: 0.001ms !important;
     transition-duration: 0.001ms !important;
+  }
+}
+
+/* ----------------------------------------------------------------------------
+   The rail: a vertical column of cut-outs between the map and the panel, wide
+   screens only.
+
+   The map answers "where" and the panel answers "what is this one", but until
+   now nothing let you scan the collection -- a prefecture had to be clicked
+   before it showed anything, so a charm you would have stopped at stayed
+   invisible unless you drilled into the right place.
+
+   It costs the map and the panel about 9% of their width each (643 -> 583 and
+   463 -> 421 at 1280px). Nothing else fits: the row is already 1132px inside a
+   1180px page.
+   -------------------------------------------------------------------------- */
+.rail {
+  display: none;
+}
+/* The rail is the default companion to the map wherever there is room for a
+   panel at all -- a tablet gets map + rail too, and the panel gives up the
+   width rather than the rail disappearing. Only the phone drops it, and there
+   the horizontal band and its popup do the same job. */
+@media (min-width: 641px) {
+  .explore-grid {
+    grid-template-columns: 1.32fr 96px 0.95fr;
+    gap: 20px;
+  }
+  .rail {
+    display: block;
+    position: relative;
+    /* Its own height, not the grid row's. Stretching tied it to whichever
+       column was tallest: a region with seven charms makes the panel 1296px,
+       which left the rail a 600px empty column beside seven thumbnails. A
+       fixed height keeps it beside the map, where it belongs, whatever the
+       panel is doing. */
+    align-self: start;
+    height: min(72vh, 760px);
+  }
+  /* Absolute, so the rail's own content never sets the grid row's height. As a
+     normal-flow child it did: 34 charms made the rail 3124px tall and dragged
+     the whole row with it instead of scrolling. Out of flow, .rail has no
+     content height, stretch gives it the row's height, and the track scrolls
+     inside that. */
+  .rail-track {
+    position: absolute;
+    inset: 0;
+    overflow-y: auto;
+    scrollbar-width: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    /* Horizontal padding is load-bearing: overflow-y: auto forces overflow-x to
+       clip as well, so the selection ring was being shaved off against the
+       track's edge and read as the rail cutting into the map. The ring needs
+       2px and the hover scale about 2px more. */
+    padding: 4px 8px;
+    /* Fades both ends, so a rail that continues past the edge says so. */
+    -webkit-mask-image: linear-gradient(to bottom, transparent, black 18px, black calc(100% - 18px), transparent);
+    mask-image: linear-gradient(to bottom, transparent, black 18px, black calc(100% - 18px), transparent);
+  }
+  .rail-track::-webkit-scrollbar {
+    display: none;
+  }
+  .rail-item {
+    flex: 0 0 auto;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+    border-radius: 12px;
+    opacity: 0.72;
+    transition: opacity 0.18s ease, transform 0.18s ease;
+  }
+  .rail-item .thumb {
+    aspect-ratio: 1;
+    border-radius: 12px;
+  }
+  .rail-item:hover,
+  .rail-item:focus-visible {
+    opacity: 1;
+    /* Scale only. A sideways nudge pushed the tile towards the map and clipped
+       against the track edge on the way. */
+    transform: scale(1.05);
+  }
+  /* The highlight tracks the panel rather than the scroll position: on a wide
+     screen the panel is what "selected" means, and two competing answers to
+     that question would be one too many. */
+  .rail-item.is-selected {
+    opacity: 1;
+    box-shadow: 0 0 0 2px var(--rc), 0 6px 16px -8px rgb(0 0 0 / 0.35);
+  }
+}
+
+/* Tablet (641-900px): the same three columns, with the panel paying for them.
+   It does not need to be as wide as it is on a desktop -- the rail does the
+   browsing now, so the panel is mostly the record. Its cards drop to one column
+   because two of them in ~200px would be unreadable. */
+@media (min-width: 641px) and (max-width: 900px) {
+  .explore-grid {
+    grid-template-columns: 1fr 76px minmax(190px, 0.72fr);
+    gap: 14px;
+  }
+
+  .rail-track {
+    gap: 6px;
+    padding: 4px 7px;
+  }
+  .panel {
+    padding: 14px;
+  }
+  .panel .cards {
+    grid-template-columns: 1fr;
+  }
+  .panel-head h3 {
+    font-size: 20px;
   }
 }
 
