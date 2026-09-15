@@ -449,6 +449,15 @@ body {
 }
 #jpmap {
   width: 100%;
+  /* The viewBox is square, so height always equals width -- left to fill its
+     column the map grows as tall as it is wide and pushes the card past the
+     screen. Capping it against the viewport HEIGHT, the axis that actually
+     runs out, lets the columns beside it keep their width: the map does not
+     need to fill the card, it needs to be legible. Centred in whatever space
+     is left. On a phone the column is narrower than the cap, so nothing
+     changes there. */
+  max-width: min(100%, 58vh);
+  margin-inline: auto;
   height: auto;
   display: block;
   touch-action: manipulation;
@@ -1428,22 +1437,7 @@ footer .mark {
     grid-template-columns: 1fr 76px minmax(190px, 0.72fr);
     gap: 14px;
   }
-  /* Under ~760px a third column starves the map -- at 641px it left a 250px
-     map to keep a 205px panel, which sacrifices the very thing the layout is
-     for. Map and rail keep the full width and the panel drops beneath them
-     instead: still map + rail by default, and a panel that is wider to read
-     rather than narrower. */
-  @media (max-width: 759px) {
-    .explore-grid {
-      grid-template-columns: 1fr 76px;
-    }
-    .panel {
-      grid-column: 1 / -1;
-    }
-    .panel .cards {
-      grid-template-columns: 1fr 1fr;
-    }
-  }
+
   .rail-track {
     gap: 6px;
     padding: 4px 7px;
