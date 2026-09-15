@@ -1344,7 +1344,11 @@ footer .mark {
 .rail {
   display: none;
 }
-@media (min-width: 901px) {
+/* The rail is the default companion to the map wherever there is room for a
+   panel at all -- a tablet gets map + rail too, and the panel gives up the
+   width rather than the rail disappearing. Only the phone drops it, and there
+   the horizontal band and its popup do the same job. */
+@media (min-width: 641px) {
   .explore-grid {
     grid-template-columns: 1.32fr 96px 0.95fr;
     gap: 20px;
@@ -1412,6 +1416,46 @@ footer .mark {
   .rail-item.is-selected {
     opacity: 1;
     box-shadow: 0 0 0 2px var(--rc), 0 6px 16px -8px rgb(0 0 0 / 0.35);
+  }
+}
+
+/* Tablet (641-900px): the same three columns, with the panel paying for them.
+   It does not need to be as wide as it is on a desktop -- the rail does the
+   browsing now, so the panel is mostly the record. Its cards drop to one column
+   because two of them in ~200px would be unreadable. */
+@media (min-width: 641px) and (max-width: 900px) {
+  .explore-grid {
+    grid-template-columns: 1fr 76px minmax(190px, 0.72fr);
+    gap: 14px;
+  }
+  /* Under ~760px a third column starves the map -- at 641px it left a 250px
+     map to keep a 205px panel, which sacrifices the very thing the layout is
+     for. Map and rail keep the full width and the panel drops beneath them
+     instead: still map + rail by default, and a panel that is wider to read
+     rather than narrower. */
+  @media (max-width: 759px) {
+    .explore-grid {
+      grid-template-columns: 1fr 76px;
+    }
+    .panel {
+      grid-column: 1 / -1;
+    }
+    .panel .cards {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+  .rail-track {
+    gap: 6px;
+    padding: 4px 7px;
+  }
+  .panel {
+    padding: 14px;
+  }
+  .panel .cards {
+    grid-template-columns: 1fr;
+  }
+  .panel-head h3 {
+    font-size: 20px;
   }
 }
 
