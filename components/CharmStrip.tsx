@@ -42,6 +42,7 @@ import CharmThumb from "./CharmThumb";
 export default function CharmStrip({
   charms,
   focusId,
+  seed = 0,
   shuffle = false,
   focusedCode = null,
   onFocusPrefecture,
@@ -54,6 +55,11 @@ export default function CharmStrip({
    * invitation to wander; never for a drill-down, where an order that reshuffles
    * as you navigate reads as a bug. */
   shuffle?: boolean;
+  /** Changes every time the visitor moves the map. Re-rotates the charms, so
+   * entering a region twice does not put the same charm under you -- which the
+   * charms themselves cannot signal, since re-entering hands down exactly the
+   * same ones. */
+  seed?: number;
   /** The prefecture the map is currently focused on, or null. Decides whether a
    * tap on the centred charm focuses the map or opens the record. */
   focusedCode?: number | null;
@@ -77,24 +83,42 @@ export default function CharmStrip({
 
   // Randomness after mount, never during render: the server and the first
   // client render must agree or hydration complains.
-  // Tagged with the list it was built from, so a shuffle never outlives the
-  // charms it ordered.
-  const [order, setOrder] = useState<{ for: DesignView[]; list: DesignView[] } | null>(null);
+  // Tagged with the CONTENTS it was built from, not the array identity. The
+  // parent rebuilds this array on unrelated state changes -- selecting a charm
+  // recomputes the panel view -- so an identity tag stopped matching moments
+  // after it was set and the band silently fell back to the unrotated order.
+  // That is why a three-charm region still opened on the same charm most of the
+  // time even though the rotation was running every single entry.
+  const key = `${seed}:${charms.map((c) => c.id).join(",")}`;
+  const [order, setOrder] = useState<{ key: string; list: DesignView[] } | null>(null);
   useEffect(() => {
-    if (!shuffle || charms.length < 3) return;
-    const shuffled = [...charms];
-    for (let i = shuffled.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    if (charms.length < 2) return;
+    let next: DesignView[];
+    if (shuffle) {
+      next = [...charms];
+      for (let i = next.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [next[i], next[j]] = [next[j], next[i]];
+      }
+    } else {
+      // A drill-down is rotated, not shuffled. Picking a random opening index
+      // instead could not give a three-charm region any variety at all: with
+      // both ends ruled out -- an end centres with nothing beside it -- index 1
+      // was the only legal slot, so Tōhoku and Hokkaidō opened on the same
+      // charm every single time. Rotating moves a different charm into the
+      // middle while the charms keep their cyclic order, so the band stays
+      // balanced and still changes between visits.
+      const by = 1 + Math.floor(Math.random() * (charms.length - 1));
+      next = [...charms.slice(by), ...charms.slice(0, by)];
     }
     // Deferred a frame rather than set synchronously: the state is not
     // synchronising an external system, it is a one-off reorder, and setting
     // it inside the effect body cascades a second render before paint.
-    const id = requestAnimationFrame(() => setOrder({ for: charms, list: shuffled }));
+    const id = requestAnimationFrame(() => setOrder({ key, list: next }));
     return () => cancelAnimationFrame(id);
-  }, [charms, shuffle]);
+  }, [charms, key, shuffle]);
 
-  const list = order?.for === charms ? order.list : charms;
+  const list = order?.key === key ? order.list : charms;
 
   const setTrack = useCallback((node: HTMLDivElement | null) => {
     trackRef.current = node;
@@ -107,33 +131,46 @@ export default function CharmStrip({
   // frame could settle on a charm that was not the one under the middle.
   // offsetLeft/offsetWidth are layout values, unaffected by the scale
   // transform, which is exactly what should be measured here.
+  // The single source of truth for which charm is focused: whatever is actually
+  // nearest the middle of the track. Both the scroll listener and the opening
+  // position call this, so the enlarged tile can never disagree with the tile
+  // under the centre -- computing the two separately let them drift apart
+  // whenever the scroll landed somewhere other than the index that asked for
+  // it. offsetLeft/offsetWidth are layout values, unaffected by the scale
+  // transform, which is exactly what should be measured here.
+  const pickCentre = useCallback(() => {
+    const track = trackRef.current;
+    if (!track) return;
+    const mid = track.scrollLeft + track.clientWidth / 2;
+    let bestId: number | null = null;
+    let bestDistance = Infinity;
+    track.querySelectorAll<HTMLElement>("[data-id]").forEach((el) => {
+      const distance = Math.abs(el.offsetLeft + el.offsetWidth / 2 - mid);
+      if (distance < bestDistance) {
+        bestDistance = distance;
+        bestId = Number(el.dataset.id);
+      }
+    });
+    if (bestId != null) setCentreId(bestId);
+  }, []);
+
   useEffect(() => {
     const track = trackRef.current;
     if (!track) return;
     let raf = 0;
-    const pick = () => {
-      raf = 0;
-      const mid = track.scrollLeft + track.clientWidth / 2;
-      let bestId: number | null = null;
-      let bestDistance = Infinity;
-      track.querySelectorAll<HTMLElement>("[data-id]").forEach((el) => {
-        const distance = Math.abs(el.offsetLeft + el.offsetWidth / 2 - mid);
-        if (distance < bestDistance) {
-          bestDistance = distance;
-          bestId = Number(el.dataset.id);
-        }
-      });
-      if (bestId != null) setCentreId(bestId);
-    };
     const onScroll = () => {
-      if (!raf) raf = requestAnimationFrame(pick);
+      if (!raf)
+        raf = requestAnimationFrame(() => {
+          raf = 0;
+          pickCentre();
+        });
     };
     track.addEventListener("scroll", onScroll, { passive: true });
     return () => {
       track.removeEventListener("scroll", onScroll);
       if (raf) cancelAnimationFrame(raf);
     };
-  }, [list]);
+  }, [list, pickCentre]);
 
   const centreOn = useCallback((id: number) => {
     const track = trackRef.current;
@@ -146,17 +183,13 @@ export default function CharmStrip({
     });
   }, []);
 
-  // A new list opens on a charm picked at random, so entering a region twice
-  // does not put the same charm under you both times. The order is left alone:
-  // shuffling that as well would make a region read differently on every visit,
-  // which is disorienting rather than playful.
-  //
-  // The pick avoids the two end charms, because an end centres with nothing on
-  // one side and loses the cue that the carousel swipes both ways. Below three
-  // charms there is no interior, so it falls back to the middle.
+  // A new list always opens on its middle charm, which keeps charms on both
+  // sides of the focused one wherever the list is long enough. The variety
+  // comes from the rotation above moving a different charm into that middle
+  // slot, not from moving the slot around.
   //
   // Randomness lives in the effect, never in render: the server and the first
-  // client render both use the middle, and this repositions afterwards.
+  // client render both use the middle, and the rotation arrives afterwards.
   //
   // Resetting at all matters: the track is the same DOM node across a
   // drill-down, so its scroll position otherwise survives into a shorter list.
@@ -166,10 +199,7 @@ export default function CharmStrip({
     if (focusId != null) return;
     const track = trackRef.current;
     if (!track) return;
-    const count = list.length;
-    const index =
-      count < 3 ? Math.floor((count - 1) / 2) : 1 + Math.floor(Math.random() * (count - 2));
-    const opening = list[index];
+    const opening = list[Math.floor((list.length - 1) / 2)];
     const el = opening
       ? track.querySelector<HTMLElement>(`[data-id="${opening.id}"]`)
       : null;
@@ -177,9 +207,12 @@ export default function CharmStrip({
     // position, so it should already be there on the first paint, not glide
     // there afterwards.
     track.scrollLeft = el ? el.offsetLeft + el.offsetWidth / 2 - track.clientWidth / 2 : 0;
-    const id = requestAnimationFrame(() => setCentreId(opening?.id ?? null));
+    // Read the position back rather than assuming it took: the browser clamps
+    // to the track's scrollable range, so the charm that ends up centred is not
+    // always the one that was asked for.
+    const id = requestAnimationFrame(pickCentre);
     return () => cancelAnimationFrame(id);
-  }, [list, focusId]);
+  }, [list, focusId, pickCentre]);
 
   // A selection made elsewhere pulls the band to it.
   useEffect(() => {
