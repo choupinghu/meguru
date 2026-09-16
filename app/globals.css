@@ -1410,7 +1410,10 @@ footer .mark {
        clip as well, so the selection ring was being shaved off against the
        track's edge and read as the rail cutting into the map. The ring needs
        2px and the hover scale about 2px more. */
-    padding: 4px 8px;
+    /* Vertical padding clears the fade below. With only 4px the gradient landed
+       on the first and last tiles themselves, which read as the top charm being
+       cut off rather than as the rail continuing. */
+    padding: 22px 8px;
     /* Fades both ends, so a rail that continues past the edge says so. */
     -webkit-mask-image: linear-gradient(to bottom, transparent, black 18px, black calc(100% - 18px), transparent);
     mask-image: linear-gradient(to bottom, transparent, black 18px, black calc(100% - 18px), transparent);
@@ -1460,7 +1463,7 @@ footer .mark {
 
   .rail-track {
     gap: 6px;
-    padding: 4px 7px;
+    padding: 22px 7px;
   }
   .panel {
     padding: 14px;

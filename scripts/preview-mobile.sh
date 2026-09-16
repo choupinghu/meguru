@@ -18,7 +18,7 @@ CHROME="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
 [ -x "$CHROME" ] || { echo "Google Chrome not found at $CHROME"; exit 1; }
 curl -s -o /dev/null --max-time 3 "$URL" || { echo "Nothing at $URL — run 'npm run dev' first."; exit 1; }
 echo "Opening $URL at ${W}x${H}"
-echo "  breakpoints: 901 wider rail+panel · 641 rail appears · 640 phone band · 560 header+stats"
+echo "  breakpoints: 901 hero side-by-side + wider rail/panel · 641 rail appears · 640 phone band · 560 header+stats"
 "$CHROME" --new-window --window-size="$W,$H" --window-position=40,40 \
   --user-data-dir="${TMPDIR:-/tmp}/meguru-preview" --no-first-run --no-default-browser-check \
   "$URL" >/dev/null 2>&1 &

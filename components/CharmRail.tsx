@@ -71,6 +71,17 @@ export default function CharmRail({
     return by === 0 ? charms : [...charms.slice(by), ...charms.slice(0, by)];
   }, [charms, selectedId, centreSelected]);
 
+  // A new list starts at the top. The track is the same DOM node across a
+  // drill-down, so its scroll position otherwise survives into a shorter list:
+  // going from the 34-charm pool to a 7-charm region kept the old offset and
+  // left a half-tile clipped against the top edge. Only when nothing is
+  // selected -- if something is, the effect below is placing it deliberately.
+  useEffect(() => {
+    if (selectedId != null) return;
+    const track = trackRef.current;
+    if (track) track.scrollTop = 0;
+  }, [list, selectedId]);
+
   // A selection made on the map or in the panel scrolls the rail to match, so
   // the highlight is never parked out of sight.
   useEffect(() => {
