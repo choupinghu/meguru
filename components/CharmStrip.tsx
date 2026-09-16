@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import type { DesignView } from "@/lib/charms";
 import { charmColor, locationLabel, toCharmView } from "@/lib/charms";
@@ -43,6 +43,7 @@ export default function CharmStrip({
   charms,
   focusId,
   seed = 0,
+  sweep = false,
   shuffle = false,
   focusedCode = null,
   onFocusPrefecture,
@@ -60,6 +61,10 @@ export default function CharmStrip({
    * charms themselves cannot signal, since re-entering hands down exactly the
    * same ones. */
   seed?: number;
+  /** The focused charm arrived from Discover, so sweep the whole band to reach
+   * it rather than scrolling the short way. Not set for the two-stage tap,
+   * which focuses a charm already under the thumb. */
+  sweep?: boolean;
   /** The prefecture the map is currently focused on, or null. Decides whether a
    * tap on the centred charm focuses the map or opens the record. */
   focusedCode?: number | null;
@@ -118,7 +123,21 @@ export default function CharmStrip({
     return () => cancelAnimationFrame(id);
   }, [charms, key, shuffle]);
 
-  const list = order?.key === key ? order.list : charms;
+  const ordered = order?.key === key ? order.list : charms;
+
+  // For a Discover, rotate so the pick sits deep in the band. The scroll then
+  // starts from the beginning and runs the whole collection past on the way,
+  // which is the same reason the desktop rail does it: Discover should look
+  // like it reached across everything to find this one.
+  const list = useMemo(() => {
+    if (!sweep || focusId == null) return ordered;
+    const at = ordered.findIndex((c) => c.id === focusId);
+    if (at < 0) return ordered;
+    const deep =
+      ordered.length >= 12 ? ordered.length - 6 : Math.floor((ordered.length - 1) / 2);
+    const by = (at - deep + ordered.length) % ordered.length;
+    return by === 0 ? ordered : [...ordered.slice(by), ...ordered.slice(0, by)];
+  }, [ordered, sweep, focusId]);
 
   const setTrack = useCallback((node: HTMLDivElement | null) => {
     trackRef.current = node;
@@ -214,11 +233,50 @@ export default function CharmStrip({
     return () => cancelAnimationFrame(id);
   }, [list, focusId, pickCentre]);
 
-  // A selection made elsewhere pulls the band to it.
+  // A selection made elsewhere pulls the band to it. Discover sweeps; anything
+  // else takes the short way, because the charm is already in view.
   useEffect(() => {
     if (focusId == null) return;
-    centreOn(focusId);
-  }, [focusId, list, centreOn]);
+    const track = trackRef.current;
+    const el = track?.querySelector<HTMLElement>(`[data-id="${focusId}"]`);
+    if (!sweep || !track || !el) {
+      centreOn(focusId);
+      return;
+    }
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      centreOn(focusId);
+      return;
+    }
+
+    const target = el.offsetLeft + el.offsetWidth / 2 - track.clientWidth / 2;
+    const max = track.scrollWidth - track.clientWidth;
+    const to = Math.max(0, Math.min(max, target));
+
+    // Mandatory snapping pulls the track to the nearest charm on every frame of
+    // a hand-driven scroll, which turns the sweep into a stutter. Off for the
+    // duration, restored when it lands so a thumb still snaps normally.
+    const snap = track.style.scrollSnapType;
+    track.style.scrollSnapType = "none";
+    track.scrollLeft = 0;
+
+    const DURATION = 900;
+    const started = performance.now();
+    let raf = 0;
+    const step = (now: number) => {
+      const t = Math.min(1, (now - started) / DURATION);
+      track.scrollLeft = to * (1 - Math.pow(1 - t, 3));
+      if (t < 1) {
+        raf = requestAnimationFrame(step);
+      } else {
+        track.style.scrollSnapType = snap;
+      }
+    };
+    raf = requestAnimationFrame(step);
+    return () => {
+      cancelAnimationFrame(raf);
+      track.style.scrollSnapType = snap;
+    };
+  }, [focusId, list, centreOn, sweep]);
 
   // Escape closes the card, matching every other dismissable thing on the site.
   useEffect(() => {
