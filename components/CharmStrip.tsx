@@ -203,9 +203,9 @@ export default function CharmStrip({
     const el = opening
       ? track.querySelector<HTMLElement>(`[data-id="${opening.id}"]`)
       : null;
-    // Set outright rather than scrollIntoView: this is the band's opening
-    // position, so it should already be there on the first paint, not glide
-    // there afterwards.
+    // Set outright rather than glided: this is the band's opening position, so
+    // it should already be there on the first paint. Discover is the case that
+    // wants travel, and it comes in through focusId below, which scrolls.
     track.scrollLeft = el ? el.offsetLeft + el.offsetWidth / 2 - track.clientWidth / 2 : 0;
     // Read the position back rather than assuming it took: the browser clamps
     // to the track's scrollable range, so the charm that ends up centred is not
