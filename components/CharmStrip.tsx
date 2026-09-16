@@ -75,17 +75,6 @@ export default function CharmStrip({
   const [centreId, setCentreId] = useState<number | null>(
     charms[Math.floor((charms.length - 1) / 2)]?.id ?? null
   );
-  // Which list the card was opened against, rather than a bare boolean. Drilling
-  // into another region hands down a new `charms` array, so the card closes by
-  // derivation -- no effect, and no frame where last region's charm hangs over
-  // the new map.
-  const [openedFor, setOpenedFor] = useState<DesignView[] | null>(null);
-  const expanded = openedFor === charms;
-  const setExpanded = useCallback(
-    (next: boolean) => setOpenedFor(next ? charms : null),
-    [charms]
-  );
-
   // Randomness after mount, never during render: the server and the first
   // client render must agree or hydration complains.
   // Tagged with the CONTENTS it was built from, not the array identity. The
@@ -95,6 +84,23 @@ export default function CharmStrip({
   // That is why a three-charm region still opened on the same charm most of the
   // time even though the rotation was running every single entry.
   const key = `${seed}:${charms.map((c) => c.id).join(",")}`;
+
+  // What the card was opened against, rather than a bare boolean, so it closes
+  // by derivation whenever that changes -- no effect, and no frame where the
+  // last charm's record hangs over a new one.
+  //
+  // The focused charm is part of it. Keying on the list alone was not enough:
+  // Discover hands back the same top-level pool it was already showing, so the
+  // key never changed and a record stayed open across the jump. The next tap
+  // then closed the old record instead of opening the new charm, which is what
+  // made tapping the middle charm feel like it did the wrong thing at random.
+  const openKey = `${key}:${focusId ?? ""}`;
+  const [openedFor, setOpenedFor] = useState<string | null>(null);
+  const expanded = openedFor === openKey;
+  const setExpanded = useCallback(
+    (next: boolean) => setOpenedFor(next ? openKey : null),
+    [openKey]
+  );
   const [order, setOrder] = useState<{ key: string; list: DesignView[] } | null>(null);
   useEffect(() => {
     if (charms.length < 2) return;
