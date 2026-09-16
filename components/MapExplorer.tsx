@@ -201,12 +201,23 @@ export default function MapExplorer({ charms }: { charms: DesignView[] }) {
      * picking a charm while looking at all of Japan. Selecting a region or a
      * prefecture is a browse action and clears it. */
     keepRailWide?: boolean;
+    /** The charm arrived from Discover rather than from a click, so the rail
+     * should bring it to its middle -- it could be anywhere in the collection,
+     * and unlike a tile the visitor just clicked it is not already in view. */
+    viaDiscover?: boolean;
   } | null>(null);
   // The charm the phone band last focused. Focusing flies the map to that
   // charm's prefecture, which narrows the band's list -- without this the list
   // change would re-centre on the new middle charm and slide the one just
   // tapped out from under the reader's finger.
   const [bandFocusId, setBandFocusId] = useState<number | null>(null);
+  // Bumped every time the visitor moves the map themselves. The phone band
+  // rotates its charms on each entry and needs to know an entry happened:
+  // keying off the charms array's identity re-rotated on unrelated re-renders,
+  // and keying off its contents never re-rotated at all, because re-entering
+  // the same region hands down exactly the same charms.
+  const [entrySeed, setEntrySeed] = useState(0);
+  const bumpEntry = useCallback(() => setEntrySeed((n) => n + 1), []);
 
   // Prefecture codes the collection reaches, grouped into their designs.
   // Collabs (prefectureCode === null) don't belong to the map.
@@ -370,6 +381,7 @@ export default function MapExplorer({ charms }: { charms: DesignView[] }) {
       if (!el) {
         setDiscoveredCharm(null);
         setBandFocusId(null);
+        bumpEntry();
         setState(zoomOutOneLevel);
         return;
       }
@@ -377,12 +389,14 @@ export default function MapExplorer({ charms }: { charms: DesignView[] }) {
       if (!Number.isFinite(code)) {
         setDiscoveredCharm(null);
         setBandFocusId(null);
+        bumpEntry();
         setState(zoomOutOneLevel);
         return;
       }
       const hasCharms = el.classList.contains("has");
       setDiscoveredCharm(null);
       setBandFocusId(null);
+      bumpEntry();
       setState((prev) => clickPrefecture(prev, code, hasCharms));
     };
 
@@ -398,6 +412,7 @@ export default function MapExplorer({ charms }: { charms: DesignView[] }) {
       e.preventDefault();
       setDiscoveredCharm(null);
       setBandFocusId(null);
+      bumpEntry();
       setState((prev) => clickPrefecture(prev, code, true));
     };
 
@@ -407,7 +422,7 @@ export default function MapExplorer({ charms }: { charms: DesignView[] }) {
       svg.removeEventListener("click", handleClick);
       svg.removeEventListener("keydown", handleKeydown);
     };
-  }, []);
+  }, [bumpEntry]);
 
   // The region chips are one horizontally scrolling row on a phone, which a
   // touch swipe drives perfectly. A wheel does not: a vertical trackpad gesture
@@ -450,23 +465,26 @@ export default function MapExplorer({ charms }: { charms: DesignView[] }) {
   const selectRegion = useCallback((region: RegionKey) => {
     setDiscoveredCharm(null);
     setBandFocusId(null);
+    bumpEntry();
     setState({ level: "region", regionKey: region });
-  }, []);
+  }, [bumpEntry]);
 
   // "All Japan" always returns to the top level.
   const resetToOverview = useCallback(() => {
     setDiscoveredCharm(null);
     setBandFocusId(null);
+    bumpEntry();
     setState({ level: "japan" });
-  }, []);
+  }, [bumpEntry]);
 
   // The prefecture panel's "← Back" control: same transition as clicking
   // outside the focused prefecture (requirement 8).
   const backToRegion = useCallback(() => {
     setDiscoveredCharm(null);
     setBandFocusId(null);
+    bumpEntry();
     setState(zoomOutOneLevel);
-  }, []);
+  }, [bumpEntry]);
 
   // Picking a card in the region/prefecture panel (spec 0010 fix): switches
   // the panel into that charm's preview in place. At the region level the
@@ -554,7 +572,7 @@ export default function MapExplorer({ charms }: { charms: DesignView[] }) {
       // Discover is an invitation to wander, so the rail stays on the whole
       // collection even though the map flies to one prefecture -- narrowing it
       // here would take everything away at the moment of offering it.
-      setDiscoveredCharm({ design, region, keepRailWide: true });
+      setDiscoveredCharm({ design, region, keepRailWide: true, viaDiscover: true });
       setState(
         design.prefectureCode != null && region
           ? { level: "prefecture", regionKey: region, code: design.prefectureCode }
@@ -679,6 +697,7 @@ export default function MapExplorer({ charms }: { charms: DesignView[] }) {
                 and for a charm surfaced by Discover, it holds the whole owned
                 set so there is always something to swipe through. */}
             <CharmStrip
+              seed={entrySeed}
               charms={isDrilled ? panelView.charms : charms}
               focusId={discoveredCharm?.design.id ?? bandFocusId}
               shuffle={!isDrilled}
@@ -719,6 +738,7 @@ export default function MapExplorer({ charms }: { charms: DesignView[] }) {
         <CharmRail
           charms={railCharms}
           selectedId={discoveredCharm?.design.id ?? null}
+          centreSelected={Boolean(discoveredCharm?.viaDiscover)}
           onSelect={selectCharm}
         />
 

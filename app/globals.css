@@ -216,8 +216,9 @@ body {
   margin-top: 24px;
 }
 @media (max-width: 560px) {
-  /* Four stats stacking one per line pushed the map right off the screen. A
-     2x2 grid with smaller figures keeps all four without the vertical cost. */
+  /* Smaller figures, side by side. This was a 2x2 grid holding four stats,
+     which stacked one per line and pushed the map off the screen; there are two
+     now, so one row does it. */
   .stat-row {
     display: grid;
     grid-template-columns: 1fr 1fr;

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import type { DesignView } from "@/lib/charms";
 import { charmColor, locationLabel, toCharmView } from "@/lib/charms";
 import CharmThumb from "./CharmThumb";
@@ -30,14 +30,34 @@ import CharmThumb from "./CharmThumb";
 export default function CharmRail({
   charms,
   selectedId,
+  centreSelected = false,
   onSelect,
 }: {
   charms: DesignView[];
   /** The charm the panel is currently showing, if any. */
   selectedId?: number | null;
+  /** Put the selected charm in the middle of the rail rather than wherever it
+   * happens to fall. Wanted for Discover, which can land on any charm in the
+   * collection; not for a click on a tile, which is already in view and whose
+   * neighbours should not jump around under the pointer. */
+  centreSelected?: boolean;
   onSelect: (design: DesignView) => void;
 }) {
   const trackRef = useRef<HTMLDivElement | null>(null);
+
+  // Rotated so the selected charm sits mid-list. Scrolling alone cannot centre
+  // a charm near either end -- there is nothing beyond it to scroll -- so a
+  // Discover pick in the first or last few would sit against an edge however it
+  // was scrolled. A rotation keeps every charm present and in cyclic order, and
+  // costs one slice.
+  const list = useMemo(() => {
+    if (!centreSelected || selectedId == null) return charms;
+    const at = charms.findIndex((c) => c.id === selectedId);
+    if (at < 0) return charms;
+    const middle = Math.floor((charms.length - 1) / 2);
+    const by = (at - middle + charms.length) % charms.length;
+    return by === 0 ? charms : [...charms.slice(by), ...charms.slice(0, by)];
+  }, [charms, selectedId, centreSelected]);
 
   // A selection made on the map or in the panel scrolls the rail to match, so
   // the highlight is never parked out of sight.
@@ -48,16 +68,18 @@ export default function CharmRail({
       behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
         ? "auto"
         : "smooth",
-      block: "nearest",
+      // Centre, not nearest: nearest scrolls the least it can get away with, so
+      // the charm landed against whichever edge it entered from.
+      block: "center",
     });
-  }, [selectedId, charms]);
+  }, [selectedId, list]);
 
-  if (charms.length === 0) return null;
+  if (list.length === 0) return null;
 
   return (
     <div className="rail" aria-label="Charms in view">
       <div className="rail-track" ref={trackRef}>
-        {charms.map((design) => {
+        {list.map((design) => {
           const selected = design.id === selectedId;
           return (
             <button
