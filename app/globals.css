@@ -198,6 +198,25 @@ body {
   font-style: normal;
   color: var(--vermilion);
 }
+/* Wide screens: the copy and the stats share the row instead of stacking, and
+   the headline runs on one line. Left alone, the hero filled about 700px of a
+   1180px page and left a third of it empty -- and `max-width: 16ch` broke a
+   22-character headline across two lines for no reason at that size. */
+@media (min-width: 901px) {
+  .hero {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 48px;
+  }
+  .hero h2 {
+    max-width: none;
+  }
+  .hero .stat-row {
+    margin-top: 0;
+    flex: 0 0 auto;
+  }
+}
 .hero-lines {
   /* Hard breaks do not adapt, so hold the measure narrow enough that each line
      survives a phone without re-wrapping into a ragged block. */
