@@ -19,6 +19,7 @@
     "photos:fetch": "python3 scripts/fetch_listing.py",
     "photos:rotate": "python3 scripts/rotate_cutout.py",
     "dev:phone": "sh scripts/preview-mobile.sh",
+    "dev:kill": "sh scripts/kill-dev.sh",
     "photos:originals": "python3 scripts/process_originals.py"
   },
   "dependencies": {
