@@ -45,34 +45,94 @@ export default function CharmRail({
 }) {
   const trackRef = useRef<HTMLDivElement | null>(null);
 
-  // Rotated so the selected charm sits mid-list. Scrolling alone cannot centre
-  // a charm near either end -- there is nothing beyond it to scroll -- so a
-  // Discover pick in the first or last few would sit against an edge however it
-  // was scrolled. A rotation keeps every charm present and in cyclic order, and
-  // costs one slice.
+  // Rotated so the selected charm sits DEEP in the list rather than at its
+  // middle. Two reasons.
+  //
+  // Scrolling alone cannot centre a charm near either end -- there is nothing
+  // beyond it to scroll -- so a Discover pick in the first or last few would sit
+  // against an edge however it was scrolled. Any rotation fixes that.
+  //
+  // But the middle also halves the runway. Putting the pick near the end and
+  // starting from the top means the whole collection goes past on the way,
+  // which is the point: Discover should feel like it reached across everything
+  // to find this one. Duplicating the list would give more runway still, at the
+  // cost of showing every charm twice once it settles -- the same repetition
+  // that makes a looping rail read as a trick.
+  //
+  // Six from the end keeps it centrable: the rail shows about seven and a half
+  // charms, so it still has half a rail below it to sit against.
   const list = useMemo(() => {
     if (!centreSelected || selectedId == null) return charms;
     const at = charms.findIndex((c) => c.id === selectedId);
     if (at < 0) return charms;
-    const middle = Math.floor((charms.length - 1) / 2);
-    const by = (at - middle + charms.length) % charms.length;
+    const deep =
+      charms.length >= 12 ? charms.length - 6 : Math.floor((charms.length - 1) / 2);
+    const by = (at - deep + charms.length) % charms.length;
     return by === 0 ? charms : [...charms.slice(by), ...charms.slice(0, by)];
   }, [charms, selectedId, centreSelected]);
+
+  // A new list starts at the top. The track is the same DOM node across a
+  // drill-down, so its scroll position otherwise survives into a shorter list:
+  // going from the 34-charm pool to a 7-charm region kept the old offset and
+  // left a half-tile clipped against the top edge. Only when nothing is
+  // selected -- if something is, the effect below is placing it deliberately.
+  useEffect(() => {
+    if (selectedId != null) return;
+    const track = trackRef.current;
+    if (track) track.scrollTop = 0;
+  }, [list, selectedId]);
 
   // A selection made on the map or in the panel scrolls the rail to match, so
   // the highlight is never parked out of sight.
   useEffect(() => {
     if (selectedId == null) return;
-    const el = trackRef.current?.querySelector<HTMLElement>(`[data-id="${selectedId}"]`);
-    el?.scrollIntoView({
-      behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
-        ? "auto"
-        : "smooth",
-      // Centre, not nearest: nearest scrolls the least it can get away with, so
-      // the charm landed against whichever edge it entered from.
-      block: "center",
-    });
-  }, [selectedId, list]);
+    const track = trackRef.current;
+    const el = track?.querySelector<HTMLElement>(`[data-id="${selectedId}"]`);
+    if (!track || !el) return;
+
+    const target = el.offsetTop + el.offsetHeight / 2 - track.clientHeight / 2;
+    const max = track.scrollHeight - track.clientHeight;
+    const settle = (at: number) => Math.max(0, Math.min(max, at));
+
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      track.scrollTop = settle(target);
+      return;
+    }
+
+    // Only Discover gets the long travel. Clicking a tile changes the selection
+    // too, and running the same animation there flung the rail to the top and
+    // scrolled back -- for a charm that was already under the pointer. That one
+    // just needs to stay in view.
+    if (!centreSelected) {
+      el.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      return;
+    }
+
+    // From the very top, every time. The rotation above put the pick near the
+    // end, so this runs the whole collection past on the way -- and starting
+    // from a fixed place means the travel cannot collapse to nothing the way it
+    // did when the target sat at a constant mid-list offset.
+    track.scrollTop = 0;
+
+    // Animated by hand rather than with behavior: "smooth", which gives no say
+    // over how long it takes -- Chrome runs a 2000px scroll in roughly the same
+    // blink as a 200px one, which is exactly what made this feel small. Eased
+    // out over 900ms so it sets off quickly and arrives gently.
+    const from = 0;
+    const to = settle(target);
+    const distance = to - from;
+    const DURATION = 900;
+    const started = performance.now();
+    let id = 0;
+    const step = (now: number) => {
+      const t = Math.min(1, (now - started) / DURATION);
+      // ease-out cubic
+      track.scrollTop = from + distance * (1 - Math.pow(1 - t, 3));
+      if (t < 1) id = requestAnimationFrame(step);
+    };
+    id = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(id);
+  }, [selectedId, list, centreSelected]);
 
   if (list.length === 0) return null;
 

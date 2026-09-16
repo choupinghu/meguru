@@ -698,6 +698,7 @@ export default function MapExplorer({ charms }: { charms: DesignView[] }) {
                 set so there is always something to swipe through. */}
             <CharmStrip
               seed={entrySeed}
+              sweep={Boolean(discoveredCharm?.viaDiscover)}
               charms={isDrilled ? panelView.charms : charms}
               focusId={discoveredCharm?.design.id ?? bandFocusId}
               shuffle={!isDrilled}

@@ -102,6 +102,16 @@ body {
   align-items: center;
   gap: 14px;
 }
+/* The wordmark is a link on every page but the map. It should look exactly as
+   it did as plain text -- the affordance is that it is the logo, not that it is
+   decorated like a link. */
+.brand-link {
+  color: inherit;
+  text-decoration: none;
+}
+.brand-link:hover h1 {
+  color: var(--vermilion);
+}
 .seal {
   width: 46px;
   height: 46px;
@@ -197,6 +207,25 @@ body {
 .hero h2 em {
   font-style: normal;
   color: var(--vermilion);
+}
+/* Wide screens: the copy and the stats share the row instead of stacking, and
+   the headline runs on one line. Left alone, the hero filled about 700px of a
+   1180px page and left a third of it empty -- and `max-width: 16ch` broke a
+   22-character headline across two lines for no reason at that size. */
+@media (min-width: 901px) {
+  .hero {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 48px;
+  }
+  .hero h2 {
+    max-width: none;
+  }
+  .hero .stat-row {
+    margin-top: 0;
+    flex: 0 0 auto;
+  }
 }
 .hero-lines {
   /* Hard breaks do not adapt, so hold the measure narrow enough that each line
@@ -1391,7 +1420,10 @@ footer .mark {
        clip as well, so the selection ring was being shaved off against the
        track's edge and read as the rail cutting into the map. The ring needs
        2px and the hover scale about 2px more. */
-    padding: 4px 8px;
+    /* Vertical padding clears the fade below. With only 4px the gradient landed
+       on the first and last tiles themselves, which read as the top charm being
+       cut off rather than as the rail continuing. */
+    padding: 22px 8px;
     /* Fades both ends, so a rail that continues past the edge says so. */
     -webkit-mask-image: linear-gradient(to bottom, transparent, black 18px, black calc(100% - 18px), transparent);
     mask-image: linear-gradient(to bottom, transparent, black 18px, black calc(100% - 18px), transparent);
@@ -1441,7 +1473,7 @@ footer .mark {
 
   .rail-track {
     gap: 6px;
-    padding: 4px 7px;
+    padding: 22px 7px;
   }
   .panel {
     padding: 14px;

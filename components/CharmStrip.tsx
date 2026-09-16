@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import type { DesignView } from "@/lib/charms";
 import { charmColor, locationLabel, toCharmView } from "@/lib/charms";
@@ -43,6 +43,7 @@ export default function CharmStrip({
   charms,
   focusId,
   seed = 0,
+  sweep = false,
   shuffle = false,
   focusedCode = null,
   onFocusPrefecture,
@@ -60,6 +61,10 @@ export default function CharmStrip({
    * charms themselves cannot signal, since re-entering hands down exactly the
    * same ones. */
   seed?: number;
+  /** The focused charm arrived from Discover, so sweep the whole band to reach
+   * it rather than scrolling the short way. Not set for the two-stage tap,
+   * which focuses a charm already under the thumb. */
+  sweep?: boolean;
   /** The prefecture the map is currently focused on, or null. Decides whether a
    * tap on the centred charm focuses the map or opens the record. */
   focusedCode?: number | null;
@@ -70,17 +75,6 @@ export default function CharmStrip({
   const [centreId, setCentreId] = useState<number | null>(
     charms[Math.floor((charms.length - 1) / 2)]?.id ?? null
   );
-  // Which list the card was opened against, rather than a bare boolean. Drilling
-  // into another region hands down a new `charms` array, so the card closes by
-  // derivation -- no effect, and no frame where last region's charm hangs over
-  // the new map.
-  const [openedFor, setOpenedFor] = useState<DesignView[] | null>(null);
-  const expanded = openedFor === charms;
-  const setExpanded = useCallback(
-    (next: boolean) => setOpenedFor(next ? charms : null),
-    [charms]
-  );
-
   // Randomness after mount, never during render: the server and the first
   // client render must agree or hydration complains.
   // Tagged with the CONTENTS it was built from, not the array identity. The
@@ -90,6 +84,23 @@ export default function CharmStrip({
   // That is why a three-charm region still opened on the same charm most of the
   // time even though the rotation was running every single entry.
   const key = `${seed}:${charms.map((c) => c.id).join(",")}`;
+
+  // What the card was opened against, rather than a bare boolean, so it closes
+  // by derivation whenever that changes -- no effect, and no frame where the
+  // last charm's record hangs over a new one.
+  //
+  // The focused charm is part of it. Keying on the list alone was not enough:
+  // Discover hands back the same top-level pool it was already showing, so the
+  // key never changed and a record stayed open across the jump. The next tap
+  // then closed the old record instead of opening the new charm, which is what
+  // made tapping the middle charm feel like it did the wrong thing at random.
+  const openKey = `${key}:${focusId ?? ""}`;
+  const [openedFor, setOpenedFor] = useState<string | null>(null);
+  const expanded = openedFor === openKey;
+  const setExpanded = useCallback(
+    (next: boolean) => setOpenedFor(next ? openKey : null),
+    [openKey]
+  );
   const [order, setOrder] = useState<{ key: string; list: DesignView[] } | null>(null);
   useEffect(() => {
     if (charms.length < 2) return;
@@ -118,7 +129,21 @@ export default function CharmStrip({
     return () => cancelAnimationFrame(id);
   }, [charms, key, shuffle]);
 
-  const list = order?.key === key ? order.list : charms;
+  const ordered = order?.key === key ? order.list : charms;
+
+  // For a Discover, rotate so the pick sits deep in the band. The scroll then
+  // starts from the beginning and runs the whole collection past on the way,
+  // which is the same reason the desktop rail does it: Discover should look
+  // like it reached across everything to find this one.
+  const list = useMemo(() => {
+    if (!sweep || focusId == null) return ordered;
+    const at = ordered.findIndex((c) => c.id === focusId);
+    if (at < 0) return ordered;
+    const deep =
+      ordered.length >= 12 ? ordered.length - 6 : Math.floor((ordered.length - 1) / 2);
+    const by = (at - deep + ordered.length) % ordered.length;
+    return by === 0 ? ordered : [...ordered.slice(by), ...ordered.slice(0, by)];
+  }, [ordered, sweep, focusId]);
 
   const setTrack = useCallback((node: HTMLDivElement | null) => {
     trackRef.current = node;
@@ -203,9 +228,9 @@ export default function CharmStrip({
     const el = opening
       ? track.querySelector<HTMLElement>(`[data-id="${opening.id}"]`)
       : null;
-    // Set outright rather than scrollIntoView: this is the band's opening
-    // position, so it should already be there on the first paint, not glide
-    // there afterwards.
+    // Set outright rather than glided: this is the band's opening position, so
+    // it should already be there on the first paint. Discover is the case that
+    // wants travel, and it comes in through focusId below, which scrolls.
     track.scrollLeft = el ? el.offsetLeft + el.offsetWidth / 2 - track.clientWidth / 2 : 0;
     // Read the position back rather than assuming it took: the browser clamps
     // to the track's scrollable range, so the charm that ends up centred is not
@@ -214,11 +239,50 @@ export default function CharmStrip({
     return () => cancelAnimationFrame(id);
   }, [list, focusId, pickCentre]);
 
-  // A selection made elsewhere pulls the band to it.
+  // A selection made elsewhere pulls the band to it. Discover sweeps; anything
+  // else takes the short way, because the charm is already in view.
   useEffect(() => {
     if (focusId == null) return;
-    centreOn(focusId);
-  }, [focusId, list, centreOn]);
+    const track = trackRef.current;
+    const el = track?.querySelector<HTMLElement>(`[data-id="${focusId}"]`);
+    if (!sweep || !track || !el) {
+      centreOn(focusId);
+      return;
+    }
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      centreOn(focusId);
+      return;
+    }
+
+    const target = el.offsetLeft + el.offsetWidth / 2 - track.clientWidth / 2;
+    const max = track.scrollWidth - track.clientWidth;
+    const to = Math.max(0, Math.min(max, target));
+
+    // Mandatory snapping pulls the track to the nearest charm on every frame of
+    // a hand-driven scroll, which turns the sweep into a stutter. Off for the
+    // duration, restored when it lands so a thumb still snaps normally.
+    const snap = track.style.scrollSnapType;
+    track.style.scrollSnapType = "none";
+    track.scrollLeft = 0;
+
+    const DURATION = 900;
+    const started = performance.now();
+    let raf = 0;
+    const step = (now: number) => {
+      const t = Math.min(1, (now - started) / DURATION);
+      track.scrollLeft = to * (1 - Math.pow(1 - t, 3));
+      if (t < 1) {
+        raf = requestAnimationFrame(step);
+      } else {
+        track.style.scrollSnapType = snap;
+      }
+    };
+    raf = requestAnimationFrame(step);
+    return () => {
+      cancelAnimationFrame(raf);
+      track.style.scrollSnapType = snap;
+    };
+  }, [focusId, list, centreOn, sweep]);
 
   // Escape closes the card, matching every other dismissable thing on the site.
   useEffect(() => {

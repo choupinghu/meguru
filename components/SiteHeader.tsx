@@ -30,17 +30,34 @@ export default function SiteHeader({
   active: ActiveView;
   sticky?: boolean;
 }) {
+  const brand = (
+    <>
+      <div className="seal" aria-hidden="true">
+        巡
+      </div>
+      <div>
+        <h1>Meguru</h1>
+        <div className="sub">Gotochi Hello Kitty · 全国めぐり</div>
+      </div>
+    </>
+  );
+
   return (
     <header className={`top${sticky ? " is-sticky" : ""}`}>
-      <div className="brand">
-        <div className="seal" aria-hidden="true">
-          巡
-        </div>
-        <div>
-          <h1>Meguru</h1>
-          <div className="sub">Gotochi Hello Kitty · 全国めぐり</div>
-        </div>
-      </div>
+      {/* The wordmark is the way home -- the convention every site has trained
+          people to expect. It stays a link on the map too, where it leads to the
+          page you are already on: the hover response is worth more than the
+          saved click, and a logo that goes dead on one route reads as broken
+          rather than as considerate. `aria-current` tells a screen reader what
+          the styling cannot. */}
+      <Link
+        className="brand brand-link"
+        href="/"
+        aria-label={active === "map" ? "Meguru — the map" : "Meguru — back to the map"}
+        aria-current={active === "map" ? "page" : undefined}
+      >
+        {brand}
+      </Link>
       <nav className="switcher" aria-label="View switcher">
         {VIEWS.map((view) => (
           <Link
