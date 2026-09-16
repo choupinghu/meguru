@@ -30,17 +30,30 @@ export default function SiteHeader({
   active: ActiveView;
   sticky?: boolean;
 }) {
+  const brand = (
+    <>
+      <div className="seal" aria-hidden="true">
+        巡
+      </div>
+      <div>
+        <h1>Meguru</h1>
+        <div className="sub">Gotochi Hello Kitty · 全国めぐり</div>
+      </div>
+    </>
+  );
+
   return (
     <header className={`top${sticky ? " is-sticky" : ""}`}>
-      <div className="brand">
-        <div className="seal" aria-hidden="true">
-          巡
-        </div>
-        <div>
-          <h1>Meguru</h1>
-          <div className="sub">Gotochi Hello Kitty · 全国めぐり</div>
-        </div>
-      </div>
+      {/* The wordmark is the way home from anywhere that is not already home --
+          the convention every site has trained people to expect. On the map
+          itself it stays inert rather than linking to the page you are on. */}
+      {active === "map" ? (
+        <div className="brand">{brand}</div>
+      ) : (
+        <Link className="brand brand-link" href="/" aria-label="Meguru — back to the map">
+          {brand}
+        </Link>
+      )}
       <nav className="switcher" aria-label="View switcher">
         {VIEWS.map((view) => (
           <Link
