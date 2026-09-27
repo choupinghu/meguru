@@ -151,9 +151,9 @@ export const DOCUMENTED: DocumentedDesign[] = [
   { collab: true, brand: "Sanrio Puroland", name: "Puroland Exclusive", ja: "ピューロランド限定", motif: "landmark", rarity: "rare", story: "Park-exclusive edition." },
 ];
 
-// The 7 designs `special: true` (D4). 0004/0006/0008 are unplaced;
+// The 9 designs `special: true` (D4). 0004/0006/0008 are unplaced;
 // the others carry a real prefecture badge.
-export const SPECIAL_NOS = new Set(["0004", "0005", "0009", "0011", "0012", "0016", "0019"]);
+export const SPECIAL_NOS = new Set(["0004", "0005", "0009", "0011", "0012", "0016", "0019", "0038", "0041"]);
 
 // The 3 unplaced designs (D5) — null prefectureCode, region "collab".
 export const UNPLACED: Record<string, { isCollab: boolean; brand: string | null }> = {
@@ -226,6 +226,13 @@ export const OWNED_RAW: {
   { no: "0035", code: 1, city: null, name: "Sea Urchin", ja: "北海道産うに", motif: "food", condition: "nobox-notag", note: "The moulded plaque reads 北海道産" },
   { no: "0036", code: 22, city: "Lake Hamana 浜名湖", name: "Lake Hamana Eel", ja: "浜名湖名物", motif: "food", condition: "nobox-notag", note: "The moulded plaque reads 浜名湖名物; Kitty carries a skewer and a fan" },
   { no: "0037", code: 25, city: "Lake Biwa 琵琶湖", name: "Lake Biwa Ayu", ja: "琵琶湖産鮎", motif: "food", condition: "nobox-notag", note: "The moulded plaque reads 琵琶湖産鮎" },
+
+  // --- Batch shot 2026-09-27. Blister-carded, so BNIB like 0001–0025.
+  { no: "0038", code: 24, city: "Nagashima 長島", name: "Steel Dragon 2000", ja: "スチールドラゴン2000", motif: "landmark", note: "Card reads Nagashima Resort; Kitty and a rabbit ride a coaster car printed STEEL DRAGON 2000" },
+  { no: "0039", code: 24, city: "Ise 伊勢", name: "Oise-san", ja: "お伊勢さん", motif: "landmark", note: "Kitty as a shrine maiden in red hakama, holding a paper wand; card reads はろうきてぃ お伊勢さん" },
+  { no: "0040", code: 19, city: null, name: "Kyoho Grapes", ja: "巨峰", motif: "food", note: "Kitty as a bunch of grapes in a white gift box; card marked 山梨限定" },
+  { no: "0041", code: 19, city: "Uenohara 上野原", name: "Dangozaka", ja: "談合坂", motif: "food", note: "Sold only on the Tokyo-bound (上り) side of the service area; Kitty and a rabbit on dango lettered 談合坂" },
+  { no: "0042", code: 19, city: null, name: "Takeda Shingen", ja: "武田信玄", motif: "history", note: "Kitty as Shingen with his 風林火山 war fan; card marked 山梨限定" },
 ];
 
 /**
@@ -318,17 +325,29 @@ export const STORIES: Record<string, string> = {
     "Tazawa-ko is the deepest lake in Japan at four hundred and twenty-three metres, deep enough that it never freezes over. The story says a girl named Tatsuko prayed to keep her beauty and was told to drink from the lake; she drank, and became the dragon that lives in it. A gilded statue of her stands at the shore, facing the water she went into.",
   "0025":
     "Haguro is the lowest and most visited of the Dewa Sanzan, the three mountains Shugendō ascetics walk as a passage through death and rebirth, with Haguro standing for the present world. The way up is two thousand four hundred and forty-six stone steps through cedar, past a five-storey pagoda that has stood in some form since the tenth century. The yamabushi who make the circuit wear white, the colour of the dead, because that is the whole point of the walk.",
+
+  // --- Batch shot 2026-09-27.
+  "0038":
+    "Steel Dragon 2000 opened at Nagashima Spa Land in the summer of 2000, a year of the dragon, which is where the name comes from. At 2,479 metres of track it is the longest roller coaster in the world, and its first climb is ninety-seven metres. The park sits on Nagashima, low delta land at the mouth of the Kiso, Nagara and Ibi rivers where they meet Ise Bay.",
+  "0039":
+    "Ise Jingū's inner shrine holds Amaterasu, the sun goddess from whom the imperial line claims descent. Every twenty years its sanctuaries are rebuilt in fresh cypress on the neighbouring plot and the goddess is moved across, sixty-two times so far, most recently in 2013. In the Edo period, when ordinary people needed permission to travel, a pilgrimage to Ise was the reason no one could refuse. Oise-san is what those pilgrims called it.",
+  "0040":
+    "Yamanashi grows more grapes than any other prefecture, in the Kōfu basin, where hot days and cool nights suit the vine. Kyoho is a Japanese variety bred for size, and its name means 'giant peak', after Mt Fuji. The white box on the charm is how the best of them are sold: a few perfect bunches, bought as a gift rather than as groceries.",
+  "0041":
+    "Dangozaka is a service area on the Chūō Expressway at Uenohara, and like most of them it is really two: one facing traffic heading out into the mountains, the other facing traffic heading back to Tokyo. This charm was sold only on the Tokyo-bound side. The pun does the rest: 談合 (dangō) sounds like 団子 (dango), so Kitty sits on a skewer of dumplings that spell out the name.",
+  "0042":
+    "Takeda Shingen ruled Kai, present-day Yamanashi, through the middle of the sixteenth century, and his banner carried four lines from Sunzi: swift as the wind, quiet as the forest, fierce as fire, unmoving as the mountain. He fought Uesugi Kenshin five times at Kawanakajima. The best-known story from those battles has Kenshin riding alone into Shingen's camp, and Shingen, with no time to draw, parrying the sword with his war fan. Kōfu still holds a Shingen festival every April.",
 };
 
 /** Manifest rows with an owner-verified design-level reference image in
- * public/img/charms/. The other twelve are blister-packed: Kitty sits behind
- * plastic with printed card behind her, so no crop or mask isolates her, and
- * they keep the CharmArt placeholder. See public/img/charms/SOURCES.md. */
+ * public/img/charms/, sourced from another copy of the design. The other
+ * thirteen owned charms carry our own cut-out instead (OWN_PHOTO_NOS), so every
+ * owned design has one or the other. See public/img/charms/SOURCES.md. */
 const REFERENCE_NOS = new Set([
   "0001", "0002", "0003", "0004", "0005", "0006", "0007", "0008",
   "0009", "0010", "0011", "0012", "0013", "0014", "0015", "0016",
   "0017", "0018", "0019", "0020", "0021", "0022", "0023", "0024",
-  "0025",
+  "0025", "0038",
 ]);
 
 /** Charms where Kitty could be cut out of our own photograph.
@@ -344,7 +363,7 @@ const REFERENCE_NOS = new Set([
  * Vision loses the subject entirely on wider ones. Queued for a reshoot. */
 const OWN_PHOTO_NOS = new Set([
   "0026", "0027", "0029", "0030", "0031", "0034", "0035", "0036",
-  "0037",
+  "0037", "0039", "0040", "0041", "0042",
 ]);
 
 export const OWNED: OwnedDesign[] = OWNED_RAW.map((r) => {

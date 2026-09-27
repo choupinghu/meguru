@@ -17,8 +17,8 @@ see the *shape* of what they have gathered. Meguru makes the collection legible.
 
 **Live.** A Next.js app on Vercel, backed by Neon Postgres.
 
-**63 charms catalogued · 34 in the collection · 21 of 47 prefectures reached ·
-62 write-ups.** The other 29 are documented but unowned — real designs that
+**68 charms catalogued · 39 in the collection · 22 of 47 prefectures reached ·
+67 write-ups.** The other 29 are documented but unowned — real designs that
 exist, recorded so the catalogue is a reference and not only an inventory.
 
 `prototype/index.html` is the original single-file build, kept as a frozen
@@ -56,7 +56,7 @@ it. Beside the map, a rail of cut-outs indexes whatever is in view; on a phone
 that rail becomes a swipeable band under the map, and a tap opens a small record
 over it. `/` never shows a price, condition or status.
 
-**`/browse` — the index.** All 63 designs as cards. Owned charms are priced;
+**`/browse` — the index.** All 68 designs as cards. Owned charms are priced;
 documented ones are dashed and priceless.
 
 **`/charm/[id]` — the record.** The story first, a carousel of the cut-out and
