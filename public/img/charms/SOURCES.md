@@ -32,6 +32,7 @@ If any rights holder objects, delete the file and its row below.
 | `0023-reference.webp` | Kondo Isami 近藤勇 | Kyoto | [listing](https://auctions.c.yimg.jp/images.auctions.yahoo.co.jp/image/dr000/auc0203/user/d158017d2bf164656f95c2f507b930fab4636f35766d7f4c51fd5c312cbd65fb/i-img900x1200-17731284139722jhu2vc25360.jpg) | 2026-08-11 |
 | `0024-reference.webp` | Lake Tazawa Tatsuko 田沢湖辰子 | Akita | [listing](https://gotochikitty.com/wp-content/uploads/2025/04/05-田沢湖.png) | 2026-08-11 |
 | `0025-reference.webp` | Mt Haguro 羽黒山 | Yamagata | [listing](https://gotochikitty.com/wp-content/uploads/2024/07/山形06.png) | 2026-08-11 |
+| `0038-reference.webp` | Nagashima Resort Steel Dragon 2000 ナガシマリゾート | Mie | [listing](https://gotochikitty.com/wp-content/uploads/2024/08/三重ナガシマスパーランド.png) | 2026-09-28 |
 
 Full verdict log, including rejections and the reasons, is kept locally in
 `photos/reference.csv` (not tracked).

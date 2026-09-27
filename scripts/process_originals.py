@@ -13,6 +13,7 @@ rationale is one thing, republishing their whole frame is another.
 
   0001-0025  photos/references/mine/     the blister shots
   0026-0037  photos/references/camera/   the August batch, per the manifest
+  0038-0042  photos/references/mine/     the September batch
 
 Never upscales: the long edge is min(1200, source), matching 0012/D7. Reports
 anything landing under 900px so weak sources are visible without being dropped.
@@ -22,7 +23,7 @@ from PIL import Image
 
 def main():
     man = {r[0]: r for r in list(csv.reader(open("photos/manifest.csv", encoding="utf-8")))[1:]}
-    owned = [f"{i:04d}" for i in range(1, 26)] + ["0026","0027","0029","0030","0031","0034","0035","0036","0037"]
+    owned = [f"{i:04d}" for i in range(1, 26)] + ["0026","0027","0029","0030","0031","0034","0035","0036","0037","0038","0039","0040","0041","0042"]
     os.makedirs("public/img/charms", exist_ok=True)
     written, small, missing = 0, [], []
     for no in owned:

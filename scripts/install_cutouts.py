@@ -21,7 +21,7 @@ import os, sys, glob, re
 from PIL import Image
 
 DRAFTS = "photos/drafts"
-OWN = {"0026","0027","0029","0030","0031","0034","0035","0036","0037"}  # our own photos
+OWN = {"0026","0027","0029","0030","0031","0034","0035","0036","0037","0039","0040","0041","0042"}  # our own photos
 
 def main():
     # Any file whose name STARTS with the four-digit charm number counts.
