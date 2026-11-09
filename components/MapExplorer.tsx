@@ -553,6 +553,27 @@ export default function MapExplorer({ charms }: { charms: DesignView[] }) {
     const reduceMotion = prefersReducedMotion();
 
     const btn = discoverBtnRef.current;
+
+    // Bring the map into view so the flight to the pick is seen (owner,
+    // 2026-11-10). On a phone the button sits under the map, so a reader a
+    // little way down the page tapped it with the map half off-screen and
+    // missed the very thing Discover does. Only when the card is not already
+    // wholly on screen -- otherwise the page would twitch on every press --
+    // and it glides alongside the map's own zoom. A card taller than the
+    // screen is brought to its top rather than centred.
+    const card = btn?.closest<HTMLElement>(".mapcard");
+    if (card) {
+      const rect = card.getBoundingClientRect();
+      const vh = window.innerHeight;
+      if (rect.top < 0 || rect.bottom > vh) {
+        const offset = Math.max(0, (vh - rect.height) / 2);
+        window.scrollTo({
+          top: window.scrollY + rect.top - offset,
+          behavior: reduceMotion ? "auto" : "smooth",
+        });
+      }
+    }
+
     if (btn && !reduceMotion) {
       btn.classList.remove("spin");
       void btn.offsetWidth; // force reflow so the press animation restarts
