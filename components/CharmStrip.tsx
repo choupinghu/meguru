@@ -197,14 +197,22 @@ export default function CharmStrip({
     };
   }, [list, pickCentre]);
 
-  const centreOn = useCallback((id: number) => {
+  // Scrolls the track itself, never `scrollIntoView`. That also scrolls every
+  // scrollable ancestor (the page included), and a smooth one inside a
+  // mandatory-snap track is what froze the band on an iPhone: entering a
+  // prefecture by tapping a charm called it on a list that had just been
+  // swapped in, the programmatic scroll never settled, and Safari swallowed
+  // every drag and tap after it (2026-11-09). `instant` is for placing a band
+  // that has just changed, which should already be there on first paint.
+  const centreOn = useCallback((id: number, instant = false) => {
     const track = trackRef.current;
-    track?.querySelector<HTMLElement>(`[data-id="${id}"]`)?.scrollIntoView({
-      behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
-        ? "auto"
-        : "smooth",
-      inline: "center",
-      block: "nearest",
+    const el = track?.querySelector<HTMLElement>(`[data-id="${id}"]`);
+    if (!track || !el) return;
+    const smooth =
+      !instant && !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    track.scrollTo({
+      left: el.offsetLeft + el.offsetWidth / 2 - track.clientWidth / 2,
+      behavior: smooth ? "smooth" : "auto",
     });
   }, []);
 
@@ -240,17 +248,20 @@ export default function CharmStrip({
   }, [list, focusId, pickCentre]);
 
   // A selection made elsewhere pulls the band to it. Discover sweeps; anything
-  // else takes the short way, because the charm is already in view.
+  // else is placed outright. This runs when the list or the focus changes --
+  // the band has just been rebuilt, often from a charm tapped in it a moment
+  // ago -- so there is no travel worth animating, and an animated scroll here is
+  // exactly what an iPhone failed to finish (see centreOn).
   useEffect(() => {
     if (focusId == null) return;
     const track = trackRef.current;
     const el = track?.querySelector<HTMLElement>(`[data-id="${focusId}"]`);
     if (!sweep || !track || !el) {
-      centreOn(focusId);
+      centreOn(focusId, true);
       return;
     }
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      centreOn(focusId);
+      centreOn(focusId, true);
       return;
     }
 
