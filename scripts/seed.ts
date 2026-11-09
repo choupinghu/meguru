@@ -17,7 +17,7 @@ dotenv.config({ path: ".env.local" });
 import { neon } from "@neondatabase/serverless";
 import { drizzle } from "drizzle-orm/neon-http";
 import { designs, items, type NewDesign, type NewItem } from "../db/schema";
-import { DOCUMENTED, OWNED, type DocumentedDesign, type OwnedDesign } from "./seed-data";
+import { DOCUMENTED, LISTED, OWNED, type DocumentedDesign, type OwnedDesign } from "./seed-data";
 
 type Region =
   | "hokkaido"
@@ -142,11 +142,12 @@ async function main() {
   await sql`TRUNCATE TABLE items, designs RESTART IDENTITY`;
 
   const documentedRows = DOCUMENTED.map(toDocumentedDesignRow);
-  const ownedRows = OWNED.map(toOwnedDesignRow);
+  const ownedRows = LISTED.map(toOwnedDesignRow);
   const allDesignRows = [...documentedRows, ...ownedRows];
 
   console.log(
-    `Inserting ${allDesignRows.length} designs (${documentedRows.length} documented, ${ownedRows.length} owned) ...`
+    `Inserting ${allDesignRows.length} designs (${documentedRows.length} documented, ${ownedRows.length} owned; ` +
+      `${OWNED.length - LISTED.length} owned held back until they have a cut-out) ...`
   );
   const insertedDesigns = await db
     .insert(designs)
@@ -154,7 +155,7 @@ async function main() {
     .returning({ id: designs.id });
 
   const ownedDesignIds = insertedDesigns.slice(documentedRows.length);
-  const itemRows = OWNED.map((d, i) => toOwnedItemRow(d, ownedDesignIds[i].id));
+  const itemRows = LISTED.map((d, i) => toOwnedItemRow(d, ownedDesignIds[i].id));
   console.log(`Inserting ${itemRows.length} items (owned designs only) ...`);
   await db.insert(items).values(itemRows);
 
@@ -163,7 +164,7 @@ async function main() {
   await sql`SELECT setval(pg_get_serial_sequence('designs', 'id'), (SELECT MAX(id) FROM designs))`;
 
   const ownedPrefectures = new Set(
-    OWNED.filter((d) => d.prefectureCode != null).map((d) => d.prefectureCode)
+    LISTED.filter((d) => d.prefectureCode != null).map((d) => d.prefectureCode)
   );
   const withStory = allDesignRows.filter((d) => d.story != null).length;
   console.log(

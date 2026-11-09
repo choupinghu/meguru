@@ -14,7 +14,9 @@
  * non-zero; a passing run still prints a one-line summary of what it checked
  * so success is visible too, not just silent.
  */
-import { DOCUMENTED, OWNED, OWNED_RAW, SPECIAL_NOS, STORIES, UNPLACED } from "./seed-data";
+import { existsSync } from "node:fs";
+import path from "node:path";
+import { DOCUMENTED, LISTED, OWNED, OWNED_RAW, SPECIAL_NOS, STORIES, UNPLACED } from "./seed-data";
 
 const failures: string[] = [];
 
@@ -164,6 +166,17 @@ for (const d of OWNED) {
   }
 }
 
+// 11. A listed charm really has its cut-out and its full photo: every image it
+// points at exists under public/. LISTED only knows what the data declares, so
+// this is what stops a charm going live with a broken image.
+for (const d of LISTED) {
+  for (const url of [d.imageUrl, d.photoUrl, ...d.photoUrls]) {
+    if (url && !existsSync(path.join(process.cwd(), "public", url))) {
+      fail(`LISTED ${d.no} (${d.name}): ${url} is missing from public/`);
+    }
+  }
+}
+
 // ---------------------------------------------------------------------------
 // Structure (invariant 1: nothing unowned can show a price)
 // ---------------------------------------------------------------------------
@@ -194,5 +207,5 @@ const designCount = DOCUMENTED.length + OWNED.length;
 const withStory = [...DOCUMENTED, ...OWNED].filter((d) => d.story).length;
 console.log(
   `check:content OK — ${designCount} designs (${DOCUMENTED.length} documented, ${OWNED.length} owned), ` +
-    `${withStory} write-ups, ${OWNED_RAW.length} notes checked, 10/10 assertions passed.`
+    `${withStory} write-ups, ${OWNED_RAW.length} notes checked, 11/11 assertions passed; ${LISTED.length} listed, ${OWNED.length - LISTED.length} held back for a cut-out.`
 );

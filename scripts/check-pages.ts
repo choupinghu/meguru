@@ -23,7 +23,7 @@ dotenv.config({ path: ".env.local" });
 import { spawn, spawnSync, type ChildProcess } from "node:child_process";
 import { setTimeout as delay } from "node:timers/promises";
 import path from "node:path";
-import { DOCUMENTED, OWNED } from "./seed-data";
+import { DOCUMENTED, LISTED } from "./seed-data";
 
 const PORT = 3100;
 const BASE_URL = `http://localhost:${PORT}`;
@@ -38,26 +38,26 @@ const NEXT_BIN = path.join(process.cwd(), "node_modules", ".bin", "next");
 // ---------------------------------------------------------------------------
 // Expectations, derived from the data (D2) — never a bare literal count.
 // ---------------------------------------------------------------------------
-const designCount = DOCUMENTED.length + OWNED.length; // cards on /browse
-const ownedCount = OWNED.length; // footers, prices
+const designCount = DOCUMENTED.length + LISTED.length; // cards on /browse
+const ownedCount = LISTED.length; // footers, prices
 const documented = DOCUMENTED.length; // is-documented
-const withStory = [...DOCUMENTED, ...OWNED].filter((d) => d.story).length;
-// Every OWNED row becomes exactly one item, always status "available" — a
+const withStory = [...DOCUMENTED, ...LISTED].filter((d) => d.story).length;
+// Every LISTED row becomes exactly one item, always status "available" — a
 // fixed policy in seed.ts's toOwnedItemRow, not a per-row field, so there is
 // no per-item "available" flag in seed-data.ts to filter on. Until the seed
 // grows a non-"available" owned item, availableCount is ownedCount; this is
-// re-derived from OWNED.length (not a bare literal) so it still tracks the
+// re-derived from LISTED.length (not a bare literal) so it still tracks the
 // collection's size.
-const availableCount = OWNED.length;
+const availableCount = LISTED.length;
 
 // A known story fragment (invariant 2: never rendered on /browse). Any
 // story works; the first 40 characters is enough to prove presence/absence
 // without matching on punctuation the grid might coincidentally share.
-const KNOWN_STORY = ([...DOCUMENTED, ...OWNED].find((d) => d.story)?.story ?? "").slice(0, 40);
+const KNOWN_STORY = ([...DOCUMENTED, ...LISTED].find((d) => d.story)?.story ?? "").slice(0, 40);
 // Design ids are stable addresses, not 1..N (seed.ts): an owned design's id is
 // its charm number, which has gaps where a number was never seeded, and
 // documented designs sit at 1001+. Walk the real ids, not a range.
-const designIds = [...DOCUMENTED.map((d) => d.id), ...OWNED.map((d) => Number(d.no))];
+const designIds = [...DOCUMENTED.map((d) => d.id), ...LISTED.map((d) => Number(d.no))];
 
 // ---------------------------------------------------------------------------
 // D5 — the three grep traps this project has been bitten by, handled once.

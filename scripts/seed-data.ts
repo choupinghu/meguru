@@ -617,3 +617,15 @@ export const OWNED: OwnedDesign[] = OWNED_RAW.map((r) => {
     region: r.region ?? null,
   };
 });
+
+/**
+ * The owned charms the site shows. Owner rule, 2026-11-09: a charm is listed
+ * only once it has both a cut-out (a sourced reference or our own figure) and
+ * its full photograph. The rest stay in OWNED, complete and checked, and appear
+ * on their own the moment a cut-out is installed and its number added to
+ * REFERENCE_NOS or OWN_PHOTO_NOS. check:content asserts that every image a
+ * listed charm points at exists, so "has" means the file is really there.
+ */
+export const LISTED: OwnedDesign[] = OWNED.filter(
+  (d) => (d.imageUrl != null || d.photoUrl != null) && d.photoUrls.length > 0
+);
