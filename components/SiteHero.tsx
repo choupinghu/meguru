@@ -1,19 +1,15 @@
-import type { StatEntry } from "@/lib/stats";
-
 /**
- * The hero copy and the live stat row — the bottom half of the shared
- * chrome (see SiteHeader for the top half). Identical on every route; the
- * numbers come from `lib/stats.ts`, computed once per page from the charm
- * list that page already queried for its own content.
+ * The hero copy — the bottom half of the shared chrome (see SiteHeader for
+ * the top half). Identical on every route. It used to carry a live stat row
+ * ("In the collection"); that went on 2026-11-10 once every listed charm was
+ * owned and the figure only restated the map.
  */
-export default function SiteHero({ stats }: { stats: StatEntry[] }) {
+export default function SiteHero() {
   return (
     <section className="hero">
       {/* No eyebrow above the headline (owner, 2026-08-12). Two rewrites of
           "Collect the …, one … at a time" both read oddly, and the headline
           carries the idea on its own. */}
-      {/* Headline and copy together, so the stats can sit beside them rather
-          than under them on a wide screen -- see `.hero` in globals.css. */}
       <div className="hero-copy">
         <h2>
           Every charm a <em>postcard</em>
@@ -64,14 +60,6 @@ export default function SiteHero({ stats }: { stats: StatEntry[] }) {
           <span>Meguru (巡る) means to wander from place to place</span>
           <span>Come explore Japan one charm at a time!</span>
         </p>
-      </div>
-      <div className="stat-row">
-        {stats.map((stat) => (
-          <div className="stat" key={stat.label}>
-            <b>{stat.value}</b>
-            <span>{stat.label}</span>
-          </div>
-        ))}
       </div>
     </section>
   );

@@ -208,8 +208,8 @@ body {
   font-style: normal;
   color: var(--vermilion);
 }
-/* Wide screens: the copy and the stats share the row instead of stacking, and
-   the headline runs on one line. Left alone, the hero filled about 700px of a
+/* Wide screens: the headline runs on one line. (The copy used to share the row
+   with a stat figure, dropped 2026-11-10.) Left alone, the hero filled about 700px of a
    1180px page and left a third of it empty -- and `max-width: 16ch` broke a
    22-character headline across two lines for no reason at that size. */
 @media (min-width: 901px) {
@@ -221,10 +221,6 @@ body {
   }
   .hero h2 {
     max-width: none;
-  }
-  .hero .stat-row {
-    margin-top: 0;
-    flex: 0 0 auto;
   }
 }
 .hero-lines {
@@ -249,54 +245,6 @@ body {
   max-width: 56ch;
   margin: 0;
 }
-.stat-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 28px;
-  margin-top: 24px;
-}
-@media (max-width: 560px) {
-  /* Smaller figures, side by side. This was a 2x2 grid holding four stats,
-     which stacked one per line and pushed the map off the screen; there are two
-     now, so one row does it. */
-  .stat-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 14px 18px;
-    margin-top: 18px;
-  }
-  .stat b {
-    font-size: 22px;
-  }
-  .stat span {
-    font-size: 10px;
-    letter-spacing: 0.16em;
-  }
-  /* buildStats shows a single figure while every design is owned; alone in a
-     half-width column its label wrapped to two rows on a 375px phone. */
-  .stat:only-child {
-    grid-column: 1 / -1;
-  }
-}
-.stat {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-.stat b {
-  font-family: var(--font-display);
-  font-size: 26px;
-  font-weight: 600;
-  color: var(--ink);
-  font-variant-numeric: tabular-nums;
-}
-.stat span {
-  font-size: 11px;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: var(--ink-faint);
-}
-
 /* ---------- map ---------- */
 .explore {
   max-width: var(--maxw);

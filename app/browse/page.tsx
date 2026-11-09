@@ -1,6 +1,5 @@
 import { db } from "@/db";
 import { toDesignView } from "@/lib/charms";
-import { buildStats } from "@/lib/stats";
 import CharmCard from "@/components/CharmCard";
 import SiteHeader from "@/components/SiteHeader";
 import SiteHero from "@/components/SiteHero";
@@ -16,8 +15,7 @@ export const dynamic = "force-dynamic";
  * cards render condition/price/status alongside motif; a documented design
  * has no item and so no condition/price/status to show, and `CharmCard`
  * renders it as an explicit "Documented" state rather than omitting it
- * (buildStats has always seen the full set for "Charms catalogued" — see
- * D6). Sorted owned-first, then documented, `id` ascending within each
+ * (D6). Sorted owned-first, then documented, `id` ascending within each
  * block (D2) so the collection's on-page order does not shuffle. Deliberately
  * no story text here — that's the one thing this surface never shows (see
  * spec 0004/0008).
@@ -25,7 +23,6 @@ export const dynamic = "force-dynamic";
 export default async function BrowsePage() {
   const rows = await db.query.designs.findMany({ with: { items: true } });
   const designViews = rows.map((row) => toDesignView(row, row.items));
-  const stats = buildStats(designViews);
   const ordered = [...designViews].sort((a, b) => {
     const aOwned = a.items.length > 0 ? 0 : 1;
     const bOwned = b.items.length > 0 ? 0 : 1;
@@ -38,7 +35,7 @@ export default async function BrowsePage() {
           already-tight hero + map budget, but /browse is a long scroll of
           cards with no other way back to the map once you're past the hero. */}
       <SiteHeader active="browse" sticky />
-      <SiteHero stats={stats} />
+      <SiteHero />
       <section className="section">
         <div className="sec-head">
           <div>
