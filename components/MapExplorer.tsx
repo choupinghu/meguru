@@ -678,6 +678,39 @@ export default function MapExplorer({ charms }: { charms: DesignView[] }) {
               </button>
             ))}
           </div>
+          {/* Phone-only, in place of the chip row (owner, 2026-11-10). On a phone
+              the chips were a sideways filter few reached for, and nothing on
+              screen said where you were -- so the strip's label carried the whole
+              place name and ran long. A kanji trail is short enough to fit any
+              screen: 全国, then 全国・中部, then 全国・中部・山梨. Earlier steps are
+              links back, the way a breadcrumb reads; the last is where you are. */}
+          <nav className="maptrail" aria-label="Where you are on the map">
+            {state.level === "japan" ? (
+              <span aria-current="location">全国</span>
+            ) : (
+              <button type="button" onClick={resetToOverview}>
+                全国
+              </button>
+            )}
+            {state.level !== "japan" ? (
+              <>
+                <span className="sep" aria-hidden="true">・</span>
+                {state.level === "region" ? (
+                  <span aria-current="location">{REGIONS[state.regionKey].ja}</span>
+                ) : (
+                  <button type="button" onClick={backToRegion}>
+                    {REGIONS[state.regionKey].ja}
+                  </button>
+                )}
+              </>
+            ) : null}
+            {state.level === "prefecture" ? (
+              <>
+                <span className="sep" aria-hidden="true">・</span>
+                <span aria-current="location">{PREFECTURES[state.code]?.ja}</span>
+              </>
+            ) : null}
+          </nav>
           <div className="mapstage">
             <JapanMapSvg ref={svgRef}>
               {selOutline ? (

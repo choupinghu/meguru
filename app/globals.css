@@ -1462,6 +1462,12 @@ footer .mark {
   }
 }
 
+/* The map's kanji trail (全国・中部・山梨). Phone-only: on a wide screen the
+   region chips and the panel's own heading already say where you are. */
+.maptrail {
+  display: none;
+}
+
 /* ----------------------------------------------------------------------------
    Mobile (<=640px). MUST STAY LAST in this file.
 
@@ -1649,5 +1655,44 @@ footer .mark {
     font-weight: 600;
     color: var(--vermilion);
     text-decoration: none;
+  }
+}
+
+/* Phone: the trail replaces the region chips (owner, 2026-11-10). Kept in its
+   own block at the very end for the reason given at the top of the mobile
+   block -- these override base rules of equal specificity. */
+@media (max-width: 640px) {
+  .legend {
+    display: none;
+  }
+  .maptrail {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 2px;
+    margin: 0 0 6px;
+    font-family: var(--font-display);
+    font-size: 16px;
+    letter-spacing: 0.08em;
+    color: var(--ink-faint);
+  }
+  .maptrail span[aria-current] {
+    color: var(--ink);
+    font-weight: 600;
+  }
+  .maptrail button {
+    font: inherit;
+    letter-spacing: inherit;
+    color: var(--ink-soft);
+    background: none;
+    border: 0;
+    padding: 4px 0;
+    cursor: pointer;
+    text-decoration: underline;
+    text-decoration-color: var(--line);
+    text-underline-offset: 4px;
+  }
+  .maptrail .sep {
+    color: var(--ink-faint);
   }
 }

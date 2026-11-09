@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import type { DesignView } from "@/lib/charms";
 import { charmColor, locationLabel, toCharmView } from "@/lib/charms";
+import { PREFECTURES } from "@/lib/prefectures";
 import CharmThumb from "./CharmThumb";
 
 /**
@@ -308,6 +309,18 @@ export default function CharmStrip({
   if (list.length === 0) return null;
   const centre = list.find((c) => c.id === centreId) ?? list[0];
 
+  // The place beside the name says only what the map's trail (全国・中部・山梨)
+  // does not: inside the charm's own prefecture that is the city, and anywhere
+  // wider it is the prefecture. Collabs and placeless charms keep their full
+  // label -- the trail has nothing to say about them. The whole label used to
+  // run "Name · PREFECTURE · CITY" and spill past a phone's width.
+  const place =
+    centre.isCollab || centre.prefectureCode == null
+      ? locationLabel(centre)
+      : focusedCode === centre.prefectureCode
+        ? (centre.city ?? "")
+        : (PREFECTURES[centre.prefectureCode]?.en ?? locationLabel(centre));
+
   // A charm the map is not yet showing, and can show. One with no prefecture
   // has nothing to fly to, so it opens on the first tap rather than swallowing
   // one that appears to do nothing.
@@ -348,7 +361,7 @@ export default function CharmStrip({
       ) : null}
       <div className="strip-label" aria-live="polite">
         <b>{centre.name}</b>
-        <span>{locationLabel(centre)}</span>
+        {place ? <span>{place}</span> : null}
       </div>
       {/* Keyed on the list's contents, so every new list -- a drill into a
           region or prefecture, a Discover, a step back -- gets a fresh scroll
