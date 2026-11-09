@@ -339,7 +339,14 @@ export default function CharmStrip({
         <b>{centre.name}</b>
         <span>{locationLabel(centre)}</span>
       </div>
-      <div className="strip-track" ref={setTrack}>
+      {/* Keyed on the list's contents, so every new list -- a drill into a
+          region or prefecture, a Discover, a step back -- gets a fresh scroll
+          container. iOS Safari would otherwise keep the one whose contents were
+          swapped and whose scrollLeft/snap were set from script, and that
+          scroller stopped answering a finger drag (2026-11-09: stuck after
+          entering a prefecture, and after Discover, until a reload). A rotation
+          within the same list keeps the key, so it does not remount. */}
+      <div className="strip-track" key={key} ref={setTrack}>
         {list.map((design) => {
           const isCentre = design.id === centreId;
           return (
