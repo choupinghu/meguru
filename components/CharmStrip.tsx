@@ -314,12 +314,23 @@ export default function CharmStrip({
   // wider it is the prefecture. Collabs and placeless charms keep their full
   // label -- the trail has nothing to say about them. The whole label used to
   // run "Name · PREFECTURE · CITY" and spill past a phone's width.
-  const place =
+  const rawPlace =
     centre.isCollab || centre.prefectureCode == null
       ? locationLabel(centre)
       : focusedCode === centre.prefectureCode
         ? (centre.city ?? "")
-        : (PREFECTURES[centre.prefectureCode]?.en ?? locationLabel(centre));
+        : PREFECTURES[centre.prefectureCode]
+          ? `${PREFECTURES[centre.prefectureCode].en} ${PREFECTURES[centre.prefectureCode].ja}`
+          : locationLabel(centre);
+  // Kanji before English, as on the trail above (owner, 2026-11-10): the data
+  // writes places "Uenohara 上野原", so split at the first Japanese character
+  // and lead with that part. Places with no Japanese (a collab's brand) pass
+  // through unchanged.
+  const jaAt = rawPlace.search(/[぀-ヿ㐀-鿿]/);
+  const place =
+    jaAt > 0
+      ? `${rawPlace.slice(jaAt).trim()} ${rawPlace.slice(0, jaAt).trim()}`
+      : rawPlace;
 
   // A charm the map is not yet showing, and can show. One with no prefecture
   // has nothing to fly to, so it opens on the first tap rather than swallowing
