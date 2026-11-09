@@ -380,9 +380,21 @@ body {
      ~8px past the box on each side. overflow-x: auto forces overflow-y to
      compute as auto too, which clipped exactly that -- the middle card came out
      with its top and bottom shaved. 14px clears it with room to spare.
-     Horizontal: half the track minus half an item, so the first and last charm
-     can reach the centre like any other. */
-  padding: 14px calc(50% - 30px);
+     Horizontal: none -- see the spacers below. */
+  padding: 14px 0;
+}
+/* Half the track minus half an item at each end, so the first and last charm
+   can reach the centre like any other. These were inline padding, but iOS
+   Safari leaves a flex scroller's END padding out of its scrollable width:
+   on a 393px phone a prefecture of 3 charms came to 366px, fitting the screen,
+   so the band had nothing to scroll and a tap on a neighbour could not move it
+   -- every prefecture under 4 charms looked frozen (2026-11-09). Real flex
+   items are always counted. 40px, not 30: the 10px gap also falls between
+   each spacer and its neighbouring charm. */
+.strip-track::before,
+.strip-track::after {
+  content: "";
+  flex: 0 0 calc(50% - 40px);
 }
 .strip-track::-webkit-scrollbar {
   display: none;
