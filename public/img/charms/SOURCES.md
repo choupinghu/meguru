@@ -35,4 +35,4 @@ If any rights holder objects, delete the file and its row below.
 | `0038-reference.webp` | Nagashima Resort Steel Dragon 2000 ナガシマリゾート | Mie | [listing](https://gotochikitty.com/wp-content/uploads/2024/08/三重ナガシマスパーランド.png) | 2026-09-28 |
 
 Full verdict log, including rejections and the reasons, is kept locally in
-`photos/reference.csv` (not tracked).
+`photos/staging/sourcing/reference.csv` (not tracked).

@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Install hand-made cut-outs from photos/drafts/ into the site.
+"""Install cut-outs from photos/staging/cutouts/ into the site.
 
 Drop a PNG with transparency named NNNN.png (e.g. 0007.png) into
-photos/drafts/, then run:
+photos/staging/cutouts/, then run:
 
     npm run photos:install
 
@@ -11,16 +11,18 @@ For each file it:
      -- a JPEG renamed .png, or a PNG saved without transparency, is the most
      common mistake and produces a charm sitting on a white brick
   2. trims fully transparent margins so framing is consistent with the rest
-  3. writes the master to photos/cutouts/ (same name as the served file) (ours)
+  3. writes the master to photos/prod/cutouts/ (same name as the served file) (ours)
   4. writes the served WebP to public/img/charms/
   5. tells you whether scripts/seed-data.ts needs the number adding
 
-Nothing is deleted; re-running overwrites in place.
+Each installed draft is moved to photos/staging/archive/installed-drafts/, so
+staging/cutouts/ only ever holds work still pending. Nothing is deleted.
 """
 import os, sys, glob, re
 from PIL import Image
 
-DRAFTS = "photos/drafts"
+DRAFTS = "photos/staging/cutouts"
+DONE = "photos/staging/archive/installed-drafts"
 OWN = {"0026","0027","0029","0030","0031","0034","0035","0036","0037","0039","0040","0041","0042"}  # our own photos
 
 def main():
@@ -54,14 +56,15 @@ def main():
         if bbox and bbox != (0, 0, im.width, im.height):
             im = im.crop(bbox)
         kind = "figure" if no in OWN else "reference"
-        master = f"photos/cutouts/{no}-{kind}.png"
+        master = f"photos/prod/cutouts/{no}-{kind}.png"
         os.makedirs(os.path.dirname(master), exist_ok=True)
         im.save(master)
         out = f"public/img/charms/{no}-{kind}.webp"
         im.save(out, "WEBP", quality=92, method=6)
         listed = f'"{no}"' in seed
         installed.append((no, kind, im.size, os.path.getsize(out) // 1024, listed))
-        os.rename(f, f"{f}.installed")
+        os.makedirs(DONE, exist_ok=True)
+        os.rename(f, os.path.join(DONE, os.path.basename(f) + ".installed"))
 
     for no, kind, sz, kb, listed in installed:
         flag = "" if listed else "   <-- ADD TO seed-data.ts"

@@ -10,7 +10,7 @@
  *   node scripts/sync-photos.mjs            (report only, changes nothing)
  *   node scripts/sync-photos.mjs --apply    (copy new and updated files down)
  *
- * Reports four things against photos/manifest.csv:
+ * Reports four things against photos/prod/manifest.csv:
  *   new in Drive        - a photo nobody has identified yet
  *   updated in Drive    - re-shot; the local copy is stale
  *   missing from Drive  - renamed or deleted upstream; the manifest is stale
@@ -25,8 +25,8 @@ import { join } from "node:path";
 
 const DRIVE =
   "/Users/aaronchou/Library/CloudStorage/GoogleDrive-aaronchouhx@gmail.com/.shortcut-targets-by-id/17rgedbgi_VhzMwRtAKVeuCbZbc0LMc22/Hello Kitty Gotochis";
-const LOCAL = "photos/references/mine";
-const MANIFEST = "photos/manifest.csv";
+const LOCAL = "photos/prod/raw";
+const MANIFEST = "photos/prod/manifest.csv";
 const apply = process.argv.includes("--apply");
 
 if (!existsSync(DRIVE)) {

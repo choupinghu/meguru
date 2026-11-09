@@ -21,7 +21,7 @@
  * not merely happen to lack them (their old `note` becomes `designs.story`
  * instead, since it was a cultural fact sitting on the wrong table).
  *
- * OWNED (25) — the real, photographed designs from `photos/manifest.csv`
+ * OWNED (25) — the real, photographed designs from `photos/prod/manifest.csv`
  * (spec 0006). Each gets exactly one item: BNIB, available, a price set by
  * a stated policy (not per-charm market data — see specs/0006), and the
  * manifest's `notes` column copied verbatim into `items.note`. `imageUrl`
@@ -68,7 +68,7 @@ export type DocumentedDesign = {
 
 /**
  * One of the 25 photographed, actually-owned designs (from
- * `photos/manifest.csv`). Exactly one item is created per row.
+ * `photos/prod/manifest.csv`). Exactly one item is created per row.
  */
 export type OwnedDesign = {
   no: string; // manifest row number, e.g. "0001"
@@ -162,7 +162,7 @@ export const UNPLACED: Record<string, { isCollab: boolean; brand: string | null 
   "0008": { isCollab: true, brand: null }, // Aquarium exclusive
 };
 
-// The 25 rows of photos/manifest.csv, transcribed by hand (several `notes`
+// The 25 rows of photos/prod/manifest.csv, transcribed by hand (several `notes`
 // fields are quoted and contain commas, so this was read row-by-row rather
 // than naively comma-split).
 export const OWNED_RAW: {

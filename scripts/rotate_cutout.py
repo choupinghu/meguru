@@ -8,7 +8,7 @@
 Positive is anticlockwise, matching how you would describe it out loud
 ("tilt it left"). Negative is clockwise.
 
-Rotates the master in photos/cutouts/, re-trims the transparent margin so
+Rotates the master in photos/prod/cutouts/, re-trims the transparent margin so
 framing stays tight, and rewrites the served WebP. Preview can only do 90
 degree steps without pain; this does arbitrary angles with bicubic resampling.
 
@@ -25,10 +25,10 @@ def main():
     if len(args) < 2:
         print(__doc__); return 64
     no, deg = args[0], float(args[1])
-    hits = glob.glob(f"photos/cutouts/{no}-*.png")
+    hits = glob.glob(f"photos/prod/cutouts/{no}-*.png")
     if not hits:
         print(f"No cut-out for {no}. Have: "
-              f"{', '.join(sorted(os.path.basename(f)[:4] for f in glob.glob('photos/cutouts/*.png')))}")
+              f"{', '.join(sorted(os.path.basename(f)[:4] for f in glob.glob('photos/prod/cutouts/*.png')))}")
         return 1
     master = hits[0]
     kind = "figure" if "figure" in master else "reference"
@@ -39,18 +39,18 @@ def main():
     if bb:
         out = out.crop(bb)
     if dry:
-        p = f"photos/drafts/{no}-rotated-{deg:g}.png"
+        p = f"photos/staging/cutouts/{no}-rotated-{deg:g}.png"
         out.save(p)
         print(f"  {no}  {before[0]}x{before[1]} -> {out.size[0]}x{out.size[1]}  preview: {p}")
         return 0
     # keep one undo step
-    os.makedirs("photos/archive/pre-rotate", exist_ok=True)
-    Image.open(master).save(f"photos/archive/pre-rotate/{os.path.basename(master)}")
+    os.makedirs("photos/staging/archive/pre-rotate", exist_ok=True)
+    Image.open(master).save(f"photos/staging/archive/pre-rotate/{os.path.basename(master)}")
     out.save(master)
     served = f"public/img/charms/{no}-{kind}.webp"
     out.save(served, "WEBP", quality=92, method=6)
     print(f"  {no}  {before[0]}x{before[1]} -> {out.size[0]}x{out.size[1]}  rotated {deg:g} deg")
-    print(f"  previous version kept in photos/archive/pre-rotate/")
+    print(f"  previous version kept in photos/staging/archive/pre-rotate/")
     print("  run: npm run db:seed   (paths unchanged, but restart the dev server to see it)")
     return 0
 
