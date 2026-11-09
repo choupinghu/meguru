@@ -147,6 +147,23 @@ for (const d of OWNED) {
   }
 }
 
+// 10. Design ids are stable addresses (/charm/[id]): owned ids are their charm
+// number (1-999), documented ids are fixed at 1001+, and none repeat.
+{
+  const seen = new Map<number, string>();
+  for (const d of DOCUMENTED) {
+    if (!Number.isInteger(d.id) || d.id <= 1000) fail(`DOCUMENTED "${d.name}": id ${d.id} must be a fixed integer above 1000`);
+    if (seen.has(d.id)) fail(`Duplicate design id ${d.id}: ${seen.get(d.id)} and DOCUMENTED "${d.name}"`);
+    seen.set(d.id, `DOCUMENTED "${d.name}"`);
+  }
+  for (const d of OWNED) {
+    const id = Number(d.no);
+    if (!(id >= 1 && id <= 999)) fail(`OWNED ${d.no}: charm number does not make a valid id (1-999)`);
+    if (seen.has(id)) fail(`Duplicate design id ${id}: ${seen.get(id)} and OWNED ${d.no}`);
+    seen.set(id, `OWNED ${d.no}`);
+  }
+}
+
 // ---------------------------------------------------------------------------
 // Structure (invariant 1: nothing unowned can show a price)
 // ---------------------------------------------------------------------------
@@ -177,5 +194,5 @@ const designCount = DOCUMENTED.length + OWNED.length;
 const withStory = [...DOCUMENTED, ...OWNED].filter((d) => d.story).length;
 console.log(
   `check:content OK — ${designCount} designs (${DOCUMENTED.length} documented, ${OWNED.length} owned), ` +
-    `${withStory} write-ups, ${OWNED_RAW.length} notes checked, 9/9 assertions passed.`
+    `${withStory} write-ups, ${OWNED_RAW.length} notes checked, 10/10 assertions passed.`
 );

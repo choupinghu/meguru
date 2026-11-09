@@ -4,7 +4,8 @@
 Drop a PNG with transparency named NNNN.png (e.g. 0007.png) into
 photos/staging/cutouts/, then run:
 
-    npm run photos:install
+    npm run photos:install                     every draft in the folder
+    npm run photos:install -- 0044 0045       only these numbers; the rest stay put
 
 For each file it:
   1. checks the image actually has an alpha channel and is not fully opaque
@@ -32,6 +33,9 @@ def main():
     files = sorted(f for f in glob.glob(f"{DRAFTS}/*")
                    if re.match(r"^\d{4}", os.path.basename(f))
                    and os.path.splitext(f)[1].lower() in (".png", ".jpg", ".jpeg", ".webp", ".tif", ".tiff"))
+    only = {a.zfill(4) for a in sys.argv[1:] if a.isdigit()}
+    if only:
+        files = [f for f in files if os.path.basename(f)[:4] in only]
     if not files:
         print(f"Nothing to install. Put NNNN.png files in {DRAFTS}/ first.")
         return 0

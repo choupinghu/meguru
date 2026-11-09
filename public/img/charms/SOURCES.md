@@ -33,6 +33,21 @@ If any rights holder objects, delete the file and its row below.
 | `0024-reference.webp` | Lake Tazawa Tatsuko 田沢湖辰子 | Akita | [listing](https://gotochikitty.com/wp-content/uploads/2025/04/05-田沢湖.png) | 2026-08-11 |
 | `0025-reference.webp` | Mt Haguro 羽黒山 | Yamagata | [listing](https://gotochikitty.com/wp-content/uploads/2024/07/山形06.png) | 2026-08-11 |
 | `0038-reference.webp` | Nagashima Resort Steel Dragon 2000 ナガシマリゾート | Mie | [listing](https://gotochikitty.com/wp-content/uploads/2024/08/三重ナガシマスパーランド.png) | 2026-09-28 |
+| `0044-reference.webp` | Umeda HEP Five 梅田 | Osaka | [listing](https://gotochikitty.com/wp-content/uploads/2024/07/大阪梅田.png) | 2026-11-03 |
+| `0045-reference.webp` | Ojiya Nishikigoi 小千谷錦鯉 | Niigata | [listing](https://gotochikitty.com/wp-content/uploads/2024/09/新潟錦鯉.png) | 2026-11-03 |
+| `0050-reference.webp` | Matsusaka Beef 松阪牛 | Mie | [listing](https://gotochikitty.com/wp-content/uploads/2024/08/三重松坂牛.png) | 2026-11-03 |
+| `0052-reference.webp` | Osaka Castle 大阪城 | Osaka | [listing](https://gotochikitty.com/wp-content/uploads/2024/07/大阪城.png) | 2026-11-03 |
+| `0057-reference.webp` | Kaga Hosho 加賀宝生 | Ishikawa | [listing](https://gotochikitty.com/wp-content/uploads/2024/08/石川加賀宝生.png) | 2026-11-03 |
+| `0064-reference.webp` | Kurobe Gorge Railway 黒部峡谷トロッコ | Toyama | [listing](https://gotochikitty.com/wp-content/uploads/2024/08/富山黒部トロッコ.png) | 2026-11-09 |
+| `0070-reference.webp` | Sakura Shrimp 桜えび | Shizuoka | [listing](https://gotochikitty.com/wp-content/uploads/2024/08/静岡桜えび.png) | 2026-11-09 |
+| `0073-reference.webp` | Izu Dried Horse Mackerel 伊豆あじの開き | Shizuoka | [listing](https://gotochikitty.com/wp-content/uploads/2024/08/静岡伊豆あじの開き.png) | 2026-11-09 |
+| `0074-reference.webp` | Kanazawa Yuzen 金沢友禅 | Ishikawa | [listing](https://gotochikitty.com/wp-content/uploads/2024/08/石川金沢友禅お座り.png) | 2026-11-09 |
+| `0075-reference.webp` | Kaki no Tane 柿の種 | Niigata | [listing](https://gotochikitty.com/wp-content/uploads/2024/09/新潟柿の種.png) | 2026-11-09 |
+| `0083-reference.webp` | Bunbuku Chagama ぶんぶく茶釜 | Gunma | [listing](https://gotochikitty.com/wp-content/uploads/2024/10/群馬ぶんぶく茶釜.png) | 2026-11-09 |
+| `0087-reference.webp` | Shogi Piece 将棋駒 | Yamagata | [listing](https://gotochikitty.com/wp-content/uploads/2024/10/山形将棋駒.png) | 2026-11-09 |
+| `0088-reference.webp` | Prince Shōtoku 聖徳太子 | Nara | [listing](https://gotochikitty.com/wp-content/uploads/2024/07/奈良聖徳太子.png) | 2026-11-09 |
+| `0092-reference.webp` | Ako Ronin 赤穂浪士 | Hyogo | [listing](https://gotochikitty.com/wp-content/uploads/2024/07/兵庫赤穂浪士.png) | 2026-11-09 |
+| `0095-reference.webp` | Hikone Castle 彦根城 | Shiga | [listing](https://gotochikitty.com/wp-content/uploads/2024/07/滋賀彦根城.png) | 2026-11-09 |
 
 Full verdict log, including rejections and the reasons, is kept locally in
 `photos/staging/sourcing/reference.csv` (not tracked).

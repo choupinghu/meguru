@@ -53,6 +53,7 @@ function regionForCode(code: number): Region {
 function toDocumentedDesignRow(d: DocumentedDesign): NewDesign {
   const isCollab = !!d.collab;
   return {
+    id: d.id,
     name: d.name,
     nameJa: d.ja,
     isCollab,
@@ -69,6 +70,9 @@ function toDocumentedDesignRow(d: DocumentedDesign): NewDesign {
 
 function toOwnedDesignRow(d: OwnedDesign): NewDesign {
   return {
+    // An owned design's id is its charm number (0088 -> /charm/88), so the
+    // address of a charm page never moves when the lists above it change.
+    id: Number(d.no),
     name: d.name,
     nameJa: d.ja,
     isCollab: d.isCollab,
@@ -153,6 +157,10 @@ async function main() {
   const itemRows = OWNED.map((d, i) => toOwnedItemRow(d, ownedDesignIds[i].id));
   console.log(`Inserting ${itemRows.length} items (owned designs only) ...`);
   await db.insert(items).values(itemRows);
+
+  // Ids were given explicitly, so move the serial past them; anything inserted
+  // later without an id (the admin, 0014) must not collide.
+  await sql`SELECT setval(pg_get_serial_sequence('designs', 'id'), (SELECT MAX(id) FROM designs))`;
 
   const ownedPrefectures = new Set(
     OWNED.filter((d) => d.prefectureCode != null).map((d) => d.prefectureCode)

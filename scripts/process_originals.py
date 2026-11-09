@@ -11,21 +11,30 @@ That folder holds whatever each cut-out was cut from, which for a sourced charm
 is someone else's listing photo -- publishing one cut-out of it under a stated
 rationale is one thing, republishing their whole frame is another.
 
-All of them come from photos/staging/raw/, the local mirror of the shared Drive
-folder (NNNN_slug.jpg). Run `npm run photos:sync -- --apply` first so it is current.
+They come from photos/prod/display/ (NNNN_slug.jpg): the Drive photos with the
+background evened out to white for the carded charms (owner decision 2026-11-09),
+and untouched for the loose ones, where the swap looked artificial. That folder is
+built from photos/staging/raw/ by photos/staging/tools/brighten/.
+
+The owned numbers are read from scripts/seed-data.ts, so a new batch is picked up
+without editing this file.
 
 Never upscales: the long edge is min(1200, source), matching 0012/D7. Reports
 anything landing under 900px so weak sources are visible without being dropped.
 """
-import glob, os, sys
+import glob, os, re, sys
 from PIL import Image
 
+SOURCE = "photos/prod/display"
+
 def main():
-    owned = [f"{i:04d}" for i in range(1, 26)] + ["0026","0027","0029","0030","0031","0034","0035","0036","0037","0038","0039","0040","0041","0042"]
+    seed = open("scripts/seed-data.ts", encoding="utf-8").read()
+    # Only OWNED_RAW rows open with `{ no: "NNNN"`; DOCUMENTED rows have no number.
+    owned = sorted(set(re.findall(r'\{ no: "(\d{4})"', seed)))
     os.makedirs("public/img/charms", exist_ok=True)
     written, small, missing = 0, [], []
     for no in owned:
-        hits = glob.glob(f"photos/staging/raw/{no}_*.jpg")
+        hits = glob.glob(f"{SOURCE}/{no}_*.jpg")
         if not hits:
             missing.append(no); continue
         im = Image.open(hits[0]).convert("RGB")
