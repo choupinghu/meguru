@@ -1666,22 +1666,19 @@ footer .mark {
     display: none;
   }
   .maptrail {
-    display: flex;
-    align-items: baseline;
-    flex-wrap: wrap;
-    /* Centred over the map, like the strip's label under it (owner,
-       2026-11-10): where you are reads as the map's title. */
-    justify-content: center;
-    gap: 2px;
+    /* The box -- where you are -- sits in the exact centre over the map, like
+       the strip's label under it; the steps already passed sit just to its
+       left (owner, 2026-11-10). Two equal flexible columns either side of the
+       box are what keep it centred whatever comes before it. */
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    column-gap: 4px;
     margin: 0 0 6px;
     font-family: var(--font-display);
     font-size: 16px;
     letter-spacing: 0.08em;
     color: var(--ink-faint);
-  }
-  .maptrail span[aria-current] {
-    color: var(--ink);
-    font-weight: 600;
   }
   .maptrail button {
     font: inherit;
@@ -1698,14 +1695,55 @@ footer .mark {
   .maptrail .sep {
     color: var(--ink-faint);
   }
-  /* Set like the strip label's place: small, spaced capitals, so it reads as
-     the gloss on the kanji rather than a second trail. */
+  /* The steps already passed are links back, so they sit a size down from the
+     box -- quieter, and narrow enough that 全国・中部・ fits beside a
+     prefecture's box on a 375px phone without nudging it off centre. */
+  .maptrail .before {
+    grid-column: 1;
+    grid-row: 1;
+    justify-self: end;
+    display: inline-flex;
+    align-items: baseline;
+    gap: 1px;
+    white-space: nowrap;
+    font-size: 13.5px;
+    letter-spacing: 0.04em;
+  }
+  .maptrail .here {
+    grid-column: 2;
+    grid-row: 1;
+  }
+  /* Where you are, boxed in the place's own map colour (owner, 2026-11-10):
+     the region hue via --rc, as the chips and cards use it; ink for 全国.
+     A wash of the hue with a full-strength border, not a solid fill: light
+     text on the solid hues measured 2.2:1 on Hokkaido and under 3:1 on Kantō
+     and Shikoku, and Kyūshū and Okinawa reach 4.5:1 with neither light nor
+     dark text. Ink on a wash reads on every region, and the border keeps the
+     colour unmistakably the map's. */
+  .maptrail .here {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 8px;
+    padding: 3px 12px;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--rc, var(--ink)) 22%, var(--surface));
+    border: 1.5px solid var(--rc, var(--ink));
+    color: var(--ink);
+    font-weight: 600;
+  }
+  /* The English name on a second line, centred under the box (owner,
+     2026-11-10) -- a two-line header, so the box holds only the kanji and
+     stays narrow enough to sit centred beside the steps before it. */
   .maptrail .en {
-    margin-left: 10px;
+    grid-column: 1 / -1;
+    grid-row: 2;
+    justify-self: center;
+    margin-top: 3px;
     font-family: var(--font-sans);
     font-size: 10.5px;
+    font-weight: 500;
     letter-spacing: 0.06em;
     text-transform: uppercase;
-    color: var(--ink-faint);
+    color: var(--ink-soft);
   }
 }

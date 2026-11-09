@@ -685,36 +685,49 @@ export default function MapExplorer({ charms }: { charms: DesignView[] }) {
               screen: 全国, then 全国・中部, then 全国・中部・山梨. Earlier steps are
               links back, the way a breadcrumb reads; the last is where you are. */}
           <nav className="maptrail" aria-label="Where you are on the map">
-            {state.level === "japan" ? (
-              <span aria-current="location">全国</span>
-            ) : (
-              <button type="button" onClick={resetToOverview}>
-                全国
-              </button>
-            )}
+            {/* The steps already passed, grouped so the stylesheet can sit them
+                just left of the box while the box itself stays dead centre. */}
             {state.level !== "japan" ? (
-              <>
+              <span className="before">
+                <button type="button" onClick={resetToOverview}>
+                  全国
+                </button>
                 <span className="sep" aria-hidden="true">・</span>
-                {state.level === "region" ? (
-                  <span aria-current="location">{REGIONS[state.regionKey].ja}</span>
-                ) : (
-                  <button type="button" onClick={backToRegion}>
-                    {REGIONS[state.regionKey].ja}
-                  </button>
-                )}
-              </>
+                {state.level === "prefecture" ? (
+                  <>
+                    <button type="button" onClick={backToRegion}>
+                      {REGIONS[state.regionKey].ja}
+                    </button>
+                    <span className="sep" aria-hidden="true">・</span>
+                  </>
+                ) : null}
+              </span>
             ) : null}
-            {state.level === "prefecture" ? (
-              <>
-                <span className="sep" aria-hidden="true">・</span>
-                <span aria-current="location">{PREFECTURES[state.code]?.ja}</span>
-              </>
-            ) : null}
-            {/* The one English word on the trail: where you are now. Only the
-                last step needs it -- the earlier ones are links you have already
-                passed through -- and inside a prefecture it is the only place the
-                prefecture's English name still appears, the strip's label having
-                dropped it in favour of the city. */}
+            {/* Where you are: one pill in the colour the map gives that place --
+                its region's hue, the same --rc the chips and charm cards use --
+                holding the kanji and the one English gloss on the trail. 全国 has
+                no region, so it takes the ink of the active All Japan chip. The
+                gloss matters most inside a prefecture, where it is the only place
+                the prefecture's English name still appears (the strip's label
+                shows the city instead). */}
+            <span
+              className="here"
+              aria-current="location"
+              style={
+                state.level === "japan"
+                  ? undefined
+                  : ({ "--rc": REGIONS[state.regionKey].color } as CSSProperties)
+              }
+            >
+              {state.level === "japan"
+                ? "全国"
+                : state.level === "region"
+                  ? REGIONS[state.regionKey].ja
+                  : PREFECTURES[state.code]?.ja}
+            </span>
+            {/* The English sits on its own line under the box (owner,
+                2026-11-10): inside the box it made it wide enough that, on a
+                small phone, the steps before it no longer fit beside it. */}
             <span className="en">
               {state.level === "japan"
                 ? "All Japan"
