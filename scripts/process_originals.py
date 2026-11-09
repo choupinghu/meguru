@@ -11,7 +11,7 @@ That folder holds whatever each cut-out was cut from, which for a sourced charm
 is someone else's listing photo -- publishing one cut-out of it under a stated
 rationale is one thing, republishing their whole frame is another.
 
-All of them come from photos/prod/raw/, the local mirror of the shared Drive
+All of them come from photos/staging/raw/, the local mirror of the shared Drive
 folder (NNNN_slug.jpg). Run `npm run photos:sync -- --apply` first so it is current.
 
 Never upscales: the long edge is min(1200, source), matching 0012/D7. Reports
@@ -25,7 +25,7 @@ def main():
     os.makedirs("public/img/charms", exist_ok=True)
     written, small, missing = 0, [], []
     for no in owned:
-        hits = glob.glob(f"photos/prod/raw/{no}_*.jpg")
+        hits = glob.glob(f"photos/staging/raw/{no}_*.jpg")
         if not hits:
             missing.append(no); continue
         im = Image.open(hits[0]).convert("RGB")
