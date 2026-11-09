@@ -48,6 +48,7 @@ If any rights holder objects, delete the file and its row below.
 | `0088-reference.webp` | Prince Shōtoku 聖徳太子 | Nara | [listing](https://gotochikitty.com/wp-content/uploads/2024/07/奈良聖徳太子.png) | 2026-11-09 |
 | `0092-reference.webp` | Ako Ronin 赤穂浪士 | Hyogo | [listing](https://gotochikitty.com/wp-content/uploads/2024/07/兵庫赤穂浪士.png) | 2026-11-09 |
 | `0095-reference.webp` | Hikone Castle 彦根城 | Shiga | [listing](https://gotochikitty.com/wp-content/uploads/2024/07/滋賀彦根城.png) | 2026-11-09 |
+| `0051-reference.webp` | Usuki Stone Buddha 臼杵石仏 | Oita | https://jp.mercari.com/item/m25991847279 | 2026-11-09 |
 
 Full verdict log, including rejections and the reasons, is kept locally in
 `photos/staging/sourcing/reference.csv` (not tracked).

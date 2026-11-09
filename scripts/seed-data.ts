@@ -542,6 +542,8 @@ const REFERENCE_NOS = new Set([
   // November batch: official gotochikitty.com product images, owner-verified.
   "0044", "0045", "0050", "0052", "0057", "0064", "0070", "0073", "0074", "0075",
   "0083", "0087", "0088", "0092", "0095",
+  // Cut by the owner from a Mercari listing photo, straightened 16°.
+  "0051",
 ]);
 
 /** Charms where Kitty could be cut out of our own photograph.
