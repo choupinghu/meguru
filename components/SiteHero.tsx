@@ -41,13 +41,28 @@ export default function SiteHero({ stats }: { stats: StatEntry[] }) {
             The warmth sits in "Let's" rather than "together". That drops the comma,
             which was the only punctuation left in the hero and conspicuous for it,
             and it mirrors the site's own Japanese: MapPanel says 巡ってみましょう,
-            and ましょう is exactly this form. */}
+            and ましょう is exactly this form.
+
+            Rewritten 2026-11-10 (owner). "Souvenirs", because a gotochi charm is
+            bought on the trip itself. "Each corner of Japan" rather than "region"
+            or "prefecture", since no one level is right: the collection has
+            cities, a sightseeing boat, a motorway service area and an aquarium.
+            Japanese on one line only -- ご当地 was dropped from the first so two
+            lines in a row do not read as a glossary -- and 巡る stays, being the
+            name. The third line went through "Explore the rich local character
+            of Japan" ("rich" read as selling), relaxed verbs (stroll, meander),
+            openers for an invitation between equals ("tag along" and "follow" put
+            the visitor behind), and "Let's discover", before the owner settled on
+            "Come explore": a plain invitation, without the sales word. Its "!" is
+            the hero's only punctuation, kept on purpose for the warmth. */}
+        {/* One span per statement, not <br>: at these lengths each wraps to two
+            rows on a phone, and with plain breaks the three ran together into one
+            six-row block. A span per statement lets globals.css put a little air
+            between statements, so the line still does the pausing. */}
         <p className="hero-lines">
-          Gotochi (ご当地) Hello Kitty are unique to each region
-          <br />
-          Meguru means to wander
-          <br />
-          Let&apos;s explore Japan one charm at a time
+          <span>Gotochi Hello Kitty are souvenirs unique to each corner of Japan</span>
+          <span>Meguru (巡る) means to wander from place to place</span>
+          <span>Come explore Japan one charm at a time!</span>
         </p>
       </div>
       <div className="stat-row">

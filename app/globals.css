@@ -232,6 +232,17 @@ body {
      survives a phone without re-wrapping into a ragged block. */
   max-width: 34em;
 }
+/* One statement per block. Since the 2026-11-10 copy each wraps to two rows on
+   a phone, so a little air between statements keeps them reading as three. */
+.hero-lines span {
+  display: block;
+  /* Even rows when a statement wraps, rather than a lone last word: "Let's
+     discover Japan one charm at a time" left "time" by itself at 393px. */
+  text-wrap: balance;
+}
+.hero-lines span + span {
+  margin-top: 0.45em;
+}
 .hero p {
   font-size: 17px;
   color: var(--ink-soft);
@@ -260,6 +271,11 @@ body {
   .stat span {
     font-size: 10px;
     letter-spacing: 0.16em;
+  }
+  /* buildStats shows a single figure while every design is owned; alone in a
+     half-width column its label wrapped to two rows on a 375px phone. */
+  .stat:only-child {
+    grid-column: 1 / -1;
   }
 }
 .stat {
