@@ -710,6 +710,18 @@ export default function MapExplorer({ charms }: { charms: DesignView[] }) {
                 <span aria-current="location">{PREFECTURES[state.code]?.ja}</span>
               </>
             ) : null}
+            {/* The one English word on the trail: where you are now. Only the
+                last step needs it -- the earlier ones are links you have already
+                passed through -- and inside a prefecture it is the only place the
+                prefecture's English name still appears, the strip's label having
+                dropped it in favour of the city. */}
+            <span className="en">
+              {state.level === "japan"
+                ? "All Japan"
+                : state.level === "region"
+                  ? REGIONS[state.regionKey].en
+                  : PREFECTURES[state.code]?.en}
+            </span>
           </nav>
           <div className="mapstage">
             <JapanMapSvg ref={svgRef}>

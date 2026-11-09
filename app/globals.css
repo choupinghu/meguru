@@ -1695,4 +1695,14 @@ footer .mark {
   .maptrail .sep {
     color: var(--ink-faint);
   }
+  /* Set like the strip label's place: small, spaced capitals, so it reads as
+     the gloss on the kanji rather than a second trail. */
+  .maptrail .en {
+    margin-left: 10px;
+    font-family: var(--font-sans);
+    font-size: 10.5px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
 }
