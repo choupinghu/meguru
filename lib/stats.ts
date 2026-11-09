@@ -34,6 +34,12 @@ export interface StatEntry {
 export function buildStats(designs: DesignView[]): StatEntry[] {
   const inCollection = designs.filter((d) => d.items.length > 0).length;
 
+  // With the documented designs archived (2026-11-09) every design is owned, and
+  // "Charms catalogued" would only repeat the figure beside it. It returns on its
+  // own if documented designs ever come back.
+  if (designs.length === inCollection) {
+    return [{ value: inCollection, label: "In the collection" }];
+  }
   return [
     { value: designs.length, label: "Charms catalogued" },
     { value: inCollection, label: "In the collection" },

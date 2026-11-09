@@ -46,8 +46,7 @@ export default async function BrowsePage() {
               Browse <span className="ja">一覧</span>
             </h3>
             <p>
-              Every charm catalogued — the 25 in the collection, and 29 more
-              documented but not owned.
+              Every charm in the collection.
             </p>
           </div>
         </div>

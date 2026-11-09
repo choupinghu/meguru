@@ -105,7 +105,13 @@ export type OwnedDesign = {
   region: string | null;
 };
 
-export const DOCUMENTED: DocumentedDesign[] = [
+/**
+ * Archived 2026-11-09 (owner decision): the documented designs — researched,
+ * never owned, and with no photograph of any copy — are off the site. They are
+ * kept here intact, stories and fixed ids included, so restoring one is a
+ * matter of moving its row into DOCUMENTED below. Nothing reads this list.
+ */
+export const ARCHIVED: DocumentedDesign[] = [
   // ---- Hokkaido ----
   { id: 1001, code: 1, name: "Lavender", ja: "ラベンダー", city: "Furano 富良野", motif: "nature", rarity: "grail", special: true, story: "The very first Gotochi Kitty: Hokkaidō, 1998. Where the whole line began." },
 
@@ -154,6 +160,10 @@ export const DOCUMENTED: DocumentedDesign[] = [
   { id: 1026, collab: true, brand: "JR West", name: "Hello Kitty Shinkansen", ja: "ハローキティ新幹線", motif: "landmark", rarity: "rare", special: true, story: "From the 2018 JR West Hello Kitty Shinkansen (Shin-Ōsaka ↔ Hakata)." },
   { id: 1027, collab: true, brand: "Sanrio Puroland", name: "Puroland Exclusive", ja: "ピューロランド限定", motif: "landmark", rarity: "rare", story: "Park-exclusive edition." },
 ];
+
+/** Documented designs on the site: none at present (see ARCHIVED above). The
+ * pipeline still supports them — no item, no price, the dashed card on /browse. */
+export const DOCUMENTED: DocumentedDesign[] = [];
 
 // The 9 designs `special: true` (D4). 0004/0006/0008 are unplaced;
 // the others carry a real prefecture badge.
