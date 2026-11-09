@@ -53,7 +53,11 @@ const availableCount = OWNED.length;
 // A known story fragment (invariant 2: never rendered on /browse). Any
 // story works; the first 40 characters is enough to prove presence/absence
 // without matching on punctuation the grid might coincidentally share.
-const KNOWN_STORY = (DOCUMENTED.find((d) => d.story)?.story ?? "").slice(0, 40);
+const KNOWN_STORY = ([...DOCUMENTED, ...OWNED].find((d) => d.story)?.story ?? "").slice(0, 40);
+// Design ids are stable addresses, not 1..N (seed.ts): an owned design's id is
+// its charm number, which has gaps where a number was never seeded, and
+// documented designs sit at 1001+. Walk the real ids, not a range.
+const designIds = [...DOCUMENTED.map((d) => d.id), ...OWNED.map((d) => Number(d.no))];
 
 // ---------------------------------------------------------------------------
 // D5 — the three grep traps this project has been bitten by, handled once.
@@ -256,7 +260,7 @@ async function checkCharmPages() {
   let pagesWithStory = 0;
   let pagesWithRarity = 0;
 
-  for (let id = 1; id <= designCount; id++) {
+  for (const id of designIds) {
     const res = await fetch(`${BASE_URL}/charm/${id}`);
     if (res.status !== 200) {
       failures.push(`/charm/${id} status: expected 200, got ${res.status}`);

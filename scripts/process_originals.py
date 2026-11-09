@@ -6,32 +6,35 @@
 These are the second slide of the carousel on /charm/[id]: the cut-out first,
 then the object as it actually sits on the shelf.
 
-Deliberately sourced from our own photographs, never from photos/originals/.
+Deliberately sourced from our own photographs, never from photos/prod/cutout-sources/.
 That folder holds whatever each cut-out was cut from, which for a sourced charm
 is someone else's listing photo -- publishing one cut-out of it under a stated
 rationale is one thing, republishing their whole frame is another.
 
-  0001-0025  photos/references/mine/     the blister shots
-  0026-0037  photos/references/camera/   the August batch, per the manifest
-  0038-0042  photos/references/mine/     the September batch
+They come from photos/prod/display/ (NNNN_slug.jpg): the Drive photos with the
+background evened out to white for the carded charms (owner decision 2026-11-09),
+and untouched for the loose ones, where the swap looked artificial. That folder is
+built from photos/staging/raw/ by photos/staging/tools/brighten/.
+
+The owned numbers are read from scripts/seed-data.ts, so a new batch is picked up
+without editing this file.
 
 Never upscales: the long edge is min(1200, source), matching 0012/D7. Reports
 anything landing under 900px so weak sources are visible without being dropped.
 """
-import csv, glob, os, sys
+import glob, os, re, sys
 from PIL import Image
 
+SOURCE = "photos/prod/display"
+
 def main():
-    man = {r[0]: r for r in list(csv.reader(open("photos/manifest.csv", encoding="utf-8")))[1:]}
-    owned = [f"{i:04d}" for i in range(1, 26)] + ["0026","0027","0029","0030","0031","0034","0035","0036","0037","0038","0039","0040","0041","0042"]
+    seed = open("scripts/seed-data.ts", encoding="utf-8").read()
+    # Only OWNED_RAW rows open with `{ no: "NNNN"`; DOCUMENTED rows have no number.
+    owned = sorted(set(re.findall(r'\{ no: "(\d{4})"', seed)))
     os.makedirs("public/img/charms", exist_ok=True)
     written, small, missing = 0, [], []
     for no in owned:
-        hits = glob.glob(f"photos/references/mine/{no}_*.jpg")
-        if not hits:
-            f = man.get(no, [None, None])[1]
-            if f:
-                hits = glob.glob(f"photos/references/camera/{f}")
+        hits = glob.glob(f"{SOURCE}/{no}_*.jpg")
         if not hits:
             missing.append(no); continue
         im = Image.open(hits[0]).convert("RGB")

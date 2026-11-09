@@ -8,14 +8,14 @@ proxy URL. Buyee itself cannot be fetched -- it sits behind AWS WAF bot
 control, which answers every request with a JavaScript challenge -- but its
 URLs carry the source item id, so we rebuild the native URL and fetch that.
 
-Saves to photos/references/listings/ so it sits with everything else you can
+Saves to photos/staging/references/listings/ so it sits with everything else you can
 cut from.
 """
 import os, re, sys, subprocess, urllib.parse
 
 UA = ("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 "
       "(KHTML, like Gecko) Version/17.0 Safari/605.1.15")
-DEST = "photos/references/listings"
+DEST = "photos/staging/references/listings"
 
 def from_buyee(url):
     """Buyee proxy URL -> native listing URL, or None."""

@@ -21,7 +21,7 @@
  * not merely happen to lack them (their old `note` becomes `designs.story`
  * instead, since it was a cultural fact sitting on the wrong table).
  *
- * OWNED (25) — the real, photographed designs from `photos/manifest.csv`
+ * OWNED (25) — the real, photographed designs from `photos/prod/manifest.csv`
  * (spec 0006). Each gets exactly one item: BNIB, available, a price set by
  * a stated policy (not per-charm market data — see specs/0006), and the
  * manifest's `notes` column copied verbatim into `items.note`. `imageUrl`
@@ -53,6 +53,10 @@ export type Rarity = "common" | "uncommon" | "rare" | "grail";
  * type-level guarantee that a design with no item can never carry one.
  */
 export type DocumentedDesign = {
+  /** Fixed database id, 1001 upward. Written here rather than derived from list
+   * position so that adding or removing a documented design never changes the
+   * /charm/[id] address of any other. Never reuse a retired number. */
+  id: number;
   code?: number;
   collab?: true;
   brand?: string;
@@ -68,7 +72,7 @@ export type DocumentedDesign = {
 
 /**
  * One of the 25 photographed, actually-owned designs (from
- * `photos/manifest.csv`). Exactly one item is created per row.
+ * `photos/prod/manifest.csv`). Exactly one item is created per row.
  */
 export type OwnedDesign = {
   no: string; // manifest row number, e.g. "0001"
@@ -101,68 +105,79 @@ export type OwnedDesign = {
   region: string | null;
 };
 
-export const DOCUMENTED: DocumentedDesign[] = [
+/**
+ * Archived 2026-11-09 (owner decision): the documented designs — researched,
+ * never owned, and with no photograph of any copy — are off the site. They are
+ * kept here intact, stories and fixed ids included, so restoring one is a
+ * matter of moving its row into DOCUMENTED below. Nothing reads this list.
+ */
+export const ARCHIVED: DocumentedDesign[] = [
   // ---- Hokkaido ----
-  { code: 1, name: "Lavender", ja: "ラベンダー", city: "Furano 富良野", motif: "nature", rarity: "grail", special: true, story: "The very first Gotochi Kitty: Hokkaidō, 1998. Where the whole line began." },
+  { id: 1001, code: 1, name: "Lavender", ja: "ラベンダー", city: "Furano 富良野", motif: "nature", rarity: "grail", special: true, story: "The very first Gotochi Kitty: Hokkaidō, 1998. Where the whole line began." },
 
   // ---- Tōhoku ----
-  { code: 2, name: "Apple Girl", ja: "りんご娘", city: "Hirosaki 弘前", motif: "food", rarity: "common", story: "Aomori grows over half of Japan's apples and Hirosaki is where that started: a castle town whose samurai lost their stipends in the Meiji Restoration and turned to fruit on land that was too cold for much else. The first Western seedlings reached the prefecture in the 1870s. Ringo musume, apple girl, is what the women who picked and sorted them were called." },
-  { code: 4, name: "Masamune's Armour", ja: "政宗陣羽織", city: "Sendai 仙台", motif: "history", rarity: "rare", special: true, story: "Kitty in Date Masamune's crested war surcoat." },
-  { code: 5, name: "Kiritanpo", ja: "きりたんぽ", city: "Akita 秋田", motif: "food", rarity: "uncommon", story: "New rice, half-mashed and moulded around a skewer of Akita cedar, grilled over coals until it colours, then cut into the pot. It is hunters' food from the Ōdate valley: matagi cooking, made from the rice left in the bag at the end of a day and simmered with whatever bird had been taken. It is still an autumn dish, eaten when the new crop comes in, which is the only time it is really right." },
+  { id: 1002, code: 2, name: "Apple Girl", ja: "りんご娘", city: "Hirosaki 弘前", motif: "food", rarity: "common", story: "Aomori grows over half of Japan's apples and Hirosaki is where that started: a castle town whose samurai lost their stipends in the Meiji Restoration and turned to fruit on land that was too cold for much else. The first Western seedlings reached the prefecture in the 1870s. Ringo musume, apple girl, is what the women who picked and sorted them were called." },
+  { id: 1003, code: 4, name: "Masamune's Armour", ja: "政宗陣羽織", city: "Sendai 仙台", motif: "history", rarity: "rare", special: true, story: "Kitty in Date Masamune's crested war surcoat." },
+  { id: 1004, code: 5, name: "Kiritanpo", ja: "きりたんぽ", city: "Akita 秋田", motif: "food", rarity: "uncommon", story: "New rice, half-mashed and moulded around a skewer of Akita cedar, grilled over coals until it colours, then cut into the pot. It is hunters' food from the Ōdate valley: matagi cooking, made from the rice left in the bag at the end of a day and simmered with whatever bird had been taken. It is still an autumn dish, eaten when the new crop comes in, which is the only time it is really right." },
   // Akabeko (code 7) removed here — deduped against the real, owned copy below (D2).
 
   // ---- Kantō ----
-  { code: 9, name: "Three Wise Monkeys", ja: "日光三猿", city: "Nikkō 日光", motif: "folklore", rarity: "uncommon", story: "The three monkeys are one panel of eight carved on the sacred stable at Tōshō-gū, a sequence that runs through a whole life; this is the childhood one, about what a child should be shielded from. The pun is Japanese and does not survive translation: mizaru, kikazaru, iwazaru, where the negative ending -zaru sounds like saru, monkey. See not, hear not, speak not." },
-  { code: 12, name: "Peanut", ja: "落花生", city: "Chiba 千葉", motif: "food", rarity: "common", story: "Chiba grows something like three-quarters of Japan's peanuts, most of it on the Shimōsa plateau, where the volcanic soil drains far too freely for rice but suits a crop that ripens underground. They arrived in the 1870s. Boiled or roasted in the shell and sold from roadside stands across the prefecture, and the local preference is to eat them while they are still warm." },
-  { code: 13, name: "Tokyo Station", ja: "東京駅", city: "Marunouchi 丸の内", motif: "landmark", rarity: "common", special: true, story: "The Marunouchi side is the 1914 original: red brick, Dutch-inflected, by Tatsuno Kingo, who also built the Bank of Japan. It lost its domes and its top floor to firebombing in 1945 and then spent six decades under a flat makeshift roof, which is how most of the twentieth century knew it. What stands there now is a 2012 restoration back to the first shape." },
-  { code: 14, name: "Yokohama Chinatown", ja: "横浜中華街", city: "Yokohama 横浜", motif: "landmark", rarity: "uncommon", story: "Yokohama's port opened to foreign trade in 1859, and Chinese merchants, many of them arriving as compradors and interpreters for Western firms rather than independently, settled the reclaimed ground beside it. It is the largest Chinatown in Japan. It is also built to be entered: ten gates stand around the edge, each set to a compass direction and its guardian god." },
+  { id: 1005, code: 9, name: "Three Wise Monkeys", ja: "日光三猿", city: "Nikkō 日光", motif: "folklore", rarity: "uncommon", story: "The three monkeys are one panel of eight carved on the sacred stable at Tōshō-gū, a sequence that runs through a whole life; this is the childhood one, about what a child should be shielded from. The pun is Japanese and does not survive translation: mizaru, kikazaru, iwazaru, where the negative ending -zaru sounds like saru, monkey. See not, hear not, speak not." },
+  { id: 1006, code: 12, name: "Peanut", ja: "落花生", city: "Chiba 千葉", motif: "food", rarity: "common", story: "Chiba grows something like three-quarters of Japan's peanuts, most of it on the Shimōsa plateau, where the volcanic soil drains far too freely for rice but suits a crop that ripens underground. They arrived in the 1870s. Boiled or roasted in the shell and sold from roadside stands across the prefecture, and the local preference is to eat them while they are still warm." },
+  { id: 1007, code: 13, name: "Tokyo Station", ja: "東京駅", city: "Marunouchi 丸の内", motif: "landmark", rarity: "common", special: true, story: "The Marunouchi side is the 1914 original: red brick, Dutch-inflected, by Tatsuno Kingo, who also built the Bank of Japan. It lost its domes and its top floor to firebombing in 1945 and then spent six decades under a flat makeshift roof, which is how most of the twentieth century knew it. What stands there now is a 2012 restoration back to the first shape." },
+  { id: 1008, code: 14, name: "Yokohama Chinatown", ja: "横浜中華街", city: "Yokohama 横浜", motif: "landmark", rarity: "uncommon", story: "Yokohama's port opened to foreign trade in 1859, and Chinese merchants, many of them arriving as compradors and interpreters for Western firms rather than independently, settled the reclaimed ground beside it. It is the largest Chinatown in Japan. It is also built to be entered: ten gates stand around the edge, each set to a compass direction and its guardian god." },
 
   // ---- Chūbu ----
-  { code: 15, name: "Sado Crested Ibis", ja: "佐渡トキ", city: "Sado 佐渡", motif: "animal", rarity: "rare", story: "The toki was common enough in the Edo period to be shot as a pest, then hunted for its feathers until it was almost gone. The last five wild Japanese birds were caught on Sado in 1981 to be bred in captivity, and the last of them, Kin, died on the island in 2003 aged thirty-six. Birds released there since 2008 have bred in the wild again, which is why Sado keeps the bird." },
-  { code: 17, name: "Toshiie & Matsu", ja: "利家とまつ", city: "Kanazawa 金沢", motif: "history", rarity: "rare", special: true, story: "The Kaga lord and his wife, a Kanazawa pair." },
-  { code: 19, name: "Mt. Fuji", ja: "富士山", city: "Fujiyoshida 富士吉田", motif: "landmark", rarity: "common", special: true, story: "Fujiyoshida sits at the northern foot, and the old climb begins at Kitaguchi Hongū Fuji Sengen shrine in the town rather than at the road station most people start from now. The place grew on pilgrims: the Fuji-kō confraternities who walked up in white lodged in oshi houses along the main street, and some of those houses are still standing." },
-  { code: 21, name: "Shirakawa-gō", ja: "白川郷", city: "Shirakawa 白川", motif: "landmark", rarity: "uncommon", story: "Gasshō-zukuri means hands joined in prayer, which is what the roof pitch looks like: steep enough to shed metres of snow, thatched a metre thick, and framed without nails. The lofts under them were silkworm floors. UNESCO listed the village together with Gokayama in 1995, and the thatch is still replaced the old way, the whole community on one house at a time." },
-  { code: 23, name: "Ebi Fry", ja: "エビフライ", city: "Nagoya 名古屋", motif: "food", rarity: "uncommon", story: "Nagoya's claim on breaded fried prawn is a joke that stuck. The comedian Tamori, working Nagoya into his act in the early 1980s, had locals calling it ebi furyā in a broad local accent; the city took the teasing and made it a signature instead of denying it. It is now one of the Nagoya-meshi dishes people travel for, on the strength of a gag about vowels." },
+  // Sado Crested Ibis (code 15) moved to OWNED 0062 — the November batch has a real copy (as Akabeko, D2).
+  { id: 1009, code: 17, name: "Toshiie & Matsu", ja: "利家とまつ", city: "Kanazawa 金沢", motif: "history", rarity: "rare", special: true, story: "The Kaga lord and his wife, a Kanazawa pair." },
+  { id: 1010, code: 19, name: "Mt. Fuji", ja: "富士山", city: "Fujiyoshida 富士吉田", motif: "landmark", rarity: "common", special: true, story: "Fujiyoshida sits at the northern foot, and the old climb begins at Kitaguchi Hongū Fuji Sengen shrine in the town rather than at the road station most people start from now. The place grew on pilgrims: the Fuji-kō confraternities who walked up in white lodged in oshi houses along the main street, and some of those houses are still standing." },
+  { id: 1011, code: 21, name: "Shirakawa-gō", ja: "白川郷", city: "Shirakawa 白川", motif: "landmark", rarity: "uncommon", story: "Gasshō-zukuri means hands joined in prayer, which is what the roof pitch looks like: steep enough to shed metres of snow, thatched a metre thick, and framed without nails. The lofts under them were silkworm floors. UNESCO listed the village together with Gokayama in 1995, and the thatch is still replaced the old way, the whole community on one house at a time." },
+  { id: 1012, code: 23, name: "Ebi Fry", ja: "エビフライ", city: "Nagoya 名古屋", motif: "food", rarity: "uncommon", story: "Nagoya's claim on breaded fried prawn is a joke that stuck. The comedian Tamori, working Nagoya into his act in the early 1980s, had locals calling it ebi furyā in a broad local accent; the city took the teasing and made it a signature instead of denying it. It is now one of the Nagoya-meshi dishes people travel for, on the strength of a gag about vowels." },
 
   // ---- Kinki ----
-  { code: 25, name: "Kōga Ninja", ja: "甲賀忍者", city: "Kōka 甲賀", motif: "history", rarity: "rare", special: true, story: "Kōga and Iga sit on either side of the same mountains and are the two traditions Japanese ninjutsu is traced back to: clusters of small self-governing villages that stayed outside anyone's control long enough to make a trade of irregular war. The Kōga hired themselves out to whoever needed them. The place is spelled Kōka today; the ninja kept the older reading." },
-  { code: 26, name: "Kinkaku-ji", ja: "金閣寺", city: "Kyoto 京都", motif: "landmark", rarity: "uncommon", special: true, story: "Properly Rokuon-ji, and properly a retirement villa. Ashikaga Yoshimitsu took the estate in 1397 and it became a temple only when he died. Just the upper two of its three storeys carry gold leaf, and each storey is in a different architectural style. The pavilion standing now dates from 1955: a novice monk burned the original in 1950, which Mishima made a novel from." },
-  { code: 27, name: "Kushikatsu", ja: "串カツ", city: "Shinsekai 新世界", motif: "food", rarity: "common", story: "Shinsekai went up in 1912 as an amusement quarter, came down in the world afterwards, and kushikatsu is what it eats: anything at all on a skewer, crumbed, fried, sold by the piece for very little. The rule everyone knows is about the shared sauce pot: one dip, never a second. The free cabbage on the counter is there to scoop it with instead." },
-  { code: 29, name: "Prince Shōtoku", ja: "聖徳太子", city: "Nara 奈良", motif: "history", rarity: "uncommon", story: "Shōtoku is the figure Japanese Buddhism hangs itself on: regent for Empress Suiko, credited with the seventeen-article constitution and with sending the first embassies to Sui China. Hōryū-ji, which he founded west of Nara, holds the oldest wooden buildings standing anywhere on earth. How much of that biography is his and how much was written onto him later is still argued." },
+  { id: 1013, code: 25, name: "Kōga Ninja", ja: "甲賀忍者", city: "Kōka 甲賀", motif: "history", rarity: "rare", special: true, story: "Kōga and Iga sit on either side of the same mountains and are the two traditions Japanese ninjutsu is traced back to: clusters of small self-governing villages that stayed outside anyone's control long enough to make a trade of irregular war. The Kōga hired themselves out to whoever needed them. The place is spelled Kōka today; the ninja kept the older reading." },
+  { id: 1014, code: 26, name: "Kinkaku-ji", ja: "金閣寺", city: "Kyoto 京都", motif: "landmark", rarity: "uncommon", special: true, story: "Properly Rokuon-ji, and properly a retirement villa. Ashikaga Yoshimitsu took the estate in 1397 and it became a temple only when he died. Just the upper two of its three storeys carry gold leaf, and each storey is in a different architectural style. The pavilion standing now dates from 1955: a novice monk burned the original in 1950, which Mishima made a novel from." },
+  { id: 1015, code: 27, name: "Kushikatsu", ja: "串カツ", city: "Shinsekai 新世界", motif: "food", rarity: "common", story: "Shinsekai went up in 1912 as an amusement quarter, came down in the world afterwards, and kushikatsu is what it eats: anything at all on a skewer, crumbed, fried, sold by the piece for very little. The rule everyone knows is about the shared sauce pot: one dip, never a second. The free cabbage on the counter is there to scoop it with instead." },
+  // Prince Shōtoku (code 29) moved to OWNED 0088 — the November batch has a real copy (as Akabeko, D2).
 
   // ---- Chūgoku ----
-  { code: 31, name: "GeGeGe no Kitarō", ja: "ゲゲゲの鬼太郎", city: "Sakaiminato 境港", motif: "folklore", rarity: "rare", special: true, story: "Yōkai crossover from Mizuki Shigeru's hometown." },
-  { code: 33, name: "Momotarō", ja: "桃太郎", city: "Okayama 岡山", motif: "folklore", rarity: "uncommon", story: "Okayama ties the peach boy to Kibitsuhiko, a prince in the old chronicles who put down a local strongman called Ura, with Ura read as the demon, and his hilltop fortress Kinojō as Onigashima. Whether the tale really began there is disputed by everyone except Okayama. But the millet dumplings the boy pays his animals with pun on Kibi, the province's old name, and the city has sold them ever since." },
-  { code: 34, name: "Momiji", ja: "もみじ", city: "Miyajima 宮島", motif: "nature", rarity: "common", story: "Momijidani, the maple valley behind Itsukushima shrine, is why the island is a maple place at all: the trees there were planted. Momiji manjū, the leaf-shaped cake with bean paste inside, was invented on Miyajima in the early 1900s, and the story told is that an inn asked its confectioner for something shaped like the leaves in the valley above it." },
+  { id: 1016, code: 31, name: "GeGeGe no Kitarō", ja: "ゲゲゲの鬼太郎", city: "Sakaiminato 境港", motif: "folklore", rarity: "rare", special: true, story: "Yōkai crossover from Mizuki Shigeru's hometown." },
+  { id: 1017, code: 33, name: "Momotarō", ja: "桃太郎", city: "Okayama 岡山", motif: "folklore", rarity: "uncommon", story: "Okayama ties the peach boy to Kibitsuhiko, a prince in the old chronicles who put down a local strongman called Ura, with Ura read as the demon, and his hilltop fortress Kinojō as Onigashima. Whether the tale really began there is disputed by everyone except Okayama. But the millet dumplings the boy pays his animals with pun on Kibi, the province's old name, and the city has sold them ever since." },
+  { id: 1018, code: 34, name: "Momiji", ja: "もみじ", city: "Miyajima 宮島", motif: "nature", rarity: "common", story: "Momijidani, the maple valley behind Itsukushima shrine, is why the island is a maple place at all: the trees there were planted. Momiji manjū, the leaf-shaped cake with bean paste inside, was invented on Miyajima in the early 1900s, and the story told is that an inn asked its confectioner for something shaped like the leaves in the valley above it." },
 
   // ---- Shikoku ----
-  { code: 36, name: "Awa Odori", ja: "阿波おどり", city: "Tokushima 徳島", motif: "festival", rarity: "rare", special: true, story: "Awa is what Tokushima used to be called, and the dance is its Obon: four days in mid-August, teams called ren moving through the streets behind shamisen, taiko and a two-note flute figure that everyone in Japan can hum. The men dance low and loose, the women on the front edge of their geta under a folded straw hat. It draws over a million people to a city of a quarter that." },
-  { code: 38, name: "Iyokan", ja: "いよかん", city: "Matsuyama 松山", motif: "food", rarity: "common", story: "Iyo is what Ehime was called before it was Ehime, and the prefecture is Japan's citrus country. The Inland Sea slopes are terraced with it, because fruit will hold on ground too steep to do anything else with. The iyokan itself was found in Yamaguchi in 1886 and brought over, where it took. Easier to peel than an orange, and sourer than a mikan." },
-  { code: 39, name: "Sakamoto Ryōma", ja: "坂本龍馬", city: "Kōchi 高知", motif: "history", rarity: "rare", story: "Ryōma was a low-ranking Tosa samurai who left his domain without leave, which was a capital offence, and spent his short career getting enemies into the same room: the Satsuma–Chōshū alliance that ended the shogunate was largely his brokering. He was assassinated in Kyoto in 1867 aged thirty-one, a month after the shogun gave up power and before anything had replaced it. His statue stands on Katsurahama, looking out to sea." },
+  { id: 1019, code: 36, name: "Awa Odori", ja: "阿波おどり", city: "Tokushima 徳島", motif: "festival", rarity: "rare", special: true, story: "Awa is what Tokushima used to be called, and the dance is its Obon: four days in mid-August, teams called ren moving through the streets behind shamisen, taiko and a two-note flute figure that everyone in Japan can hum. The men dance low and loose, the women on the front edge of their geta under a folded straw hat. It draws over a million people to a city of a quarter that." },
+  { id: 1020, code: 38, name: "Iyokan", ja: "いよかん", city: "Matsuyama 松山", motif: "food", rarity: "common", story: "Iyo is what Ehime was called before it was Ehime, and the prefecture is Japan's citrus country. The Inland Sea slopes are terraced with it, because fruit will hold on ground too steep to do anything else with. The iyokan itself was found in Yamaguchi in 1886 and brought over, where it took. Easier to peel than an orange, and sourer than a mikan." },
+  { id: 1021, code: 39, name: "Sakamoto Ryōma", ja: "坂本龍馬", city: "Kōchi 高知", motif: "history", rarity: "rare", story: "Ryōma was a low-ranking Tosa samurai who left his domain without leave, which was a capital offence, and spent his short career getting enemies into the same room: the Satsuma–Chōshū alliance that ended the shogunate was largely his brokering. He was assassinated in Kyoto in 1867 aged thirty-one, a month after the shogun gave up power and before anything had replaced it. His statue stands on Katsurahama, looking out to sea." },
 
   // ---- Kyūshū & Okinawa ----
-  { code: 40, name: "Hakata Mentaiko", ja: "博多明太子", city: "Hakata 博多", motif: "food", rarity: "uncommon", story: "Karashi mentaiko is a Korean dish naturalised in Hakata. Kawahara Toshio grew up in Busan eating myeongnan-jeot, and after being repatriated spent years reworking it for Japanese palates (less fermented, more chilli) before anyone would buy it. He began selling it in 1949. The Shinkansen reaching Hakata in 1975 turned it into the thing you are expected to bring home." },
-  { code: 43, name: "Mt. Aso", ja: "阿蘇山", city: "Aso 阿蘇", motif: "landmark", rarity: "uncommon", story: "Aso's caldera is among the largest anywhere that people actually live inside: some fifty thousand of them, with towns, rice fields and a railway line on the crater floor. The five peaks standing in the middle are what is left of the original cone; Nakadake is still active and still closes the road when it gases. The grassland on the rim survives because it is burned off every spring." },
-  { code: 46, name: "Yakushima Jōmon Cedar", ja: "屋久島縄文杉", city: "Yakushima 屋久島", motif: "nature", rarity: "rare", story: "Jōmon Sugi is the largest of the island's yakusugi and, by most estimates, the oldest living thing in Japan, somewhere between two and seven thousand years, a range that wide because the trunk is hollow and cannot be cored. It is five hours' walk in and five back. Yakushima's cedars survived the loggers because the ones on the worst ground grew too slowly to be worth the felling." },
-  { code: 47, name: "Gōyā", ja: "ゴーヤー", city: "Naha 那覇", motif: "food", rarity: "uncommon", special: true, story: "Spelled with the long final vowel in Okinawan rather than the mainland's gōya. Bitter melon does what the islands need of it: it grows straight through the heat, and gōyā chanpurū (stir-fried with island tofu, egg and pork) is an everyday dinner rather than a regional speciality anyone makes a fuss of. Okinawa eats several times more of it per head than anywhere else in Japan." },
+  { id: 1022, code: 40, name: "Hakata Mentaiko", ja: "博多明太子", city: "Hakata 博多", motif: "food", rarity: "uncommon", story: "Karashi mentaiko is a Korean dish naturalised in Hakata. Kawahara Toshio grew up in Busan eating myeongnan-jeot, and after being repatriated spent years reworking it for Japanese palates (less fermented, more chilli) before anyone would buy it. He began selling it in 1949. The Shinkansen reaching Hakata in 1975 turned it into the thing you are expected to bring home." },
+  { id: 1023, code: 43, name: "Mt. Aso", ja: "阿蘇山", city: "Aso 阿蘇", motif: "landmark", rarity: "uncommon", story: "Aso's caldera is among the largest anywhere that people actually live inside: some fifty thousand of them, with towns, rice fields and a railway line on the crater floor. The five peaks standing in the middle are what is left of the original cone; Nakadake is still active and still closes the road when it gases. The grassland on the rim survives because it is burned off every spring." },
+  { id: 1024, code: 46, name: "Yakushima Jōmon Cedar", ja: "屋久島縄文杉", city: "Yakushima 屋久島", motif: "nature", rarity: "rare", story: "Jōmon Sugi is the largest of the island's yakusugi and, by most estimates, the oldest living thing in Japan, somewhere between two and seven thousand years, a range that wide because the trunk is hollow and cannot be cored. It is five hours' walk in and five back. Yakushima's cedars survived the loggers because the ones on the worst ground grew too slowly to be worth the felling." },
+  { id: 1025, code: 47, name: "Gōyā", ja: "ゴーヤー", city: "Naha 那覇", motif: "food", rarity: "uncommon", special: true, story: "Spelled with the long final vowel in Okinawan rather than the mainland's gōya. Bitter melon does what the islands need of it: it grows straight through the heat, and gōyā chanpurū (stir-fried with island tofu, egg and pork) is an everyday dinner rather than a regional speciality anyone makes a fuss of. Okinawa eats several times more of it per head than anywhere else in Japan." },
 
   // ---- Off the map (company / venue exclusives, no prefecture) ----
-  { collab: true, brand: "JR West", name: "Hello Kitty Shinkansen", ja: "ハローキティ新幹線", motif: "landmark", rarity: "rare", special: true, story: "From the 2018 JR West Hello Kitty Shinkansen (Shin-Ōsaka ↔ Hakata)." },
-  { collab: true, brand: "Sanrio Puroland", name: "Puroland Exclusive", ja: "ピューロランド限定", motif: "landmark", rarity: "rare", story: "Park-exclusive edition." },
+  { id: 1026, collab: true, brand: "JR West", name: "Hello Kitty Shinkansen", ja: "ハローキティ新幹線", motif: "landmark", rarity: "rare", special: true, story: "From the 2018 JR West Hello Kitty Shinkansen (Shin-Ōsaka ↔ Hakata)." },
+  { id: 1027, collab: true, brand: "Sanrio Puroland", name: "Puroland Exclusive", ja: "ピューロランド限定", motif: "landmark", rarity: "rare", story: "Park-exclusive edition." },
 ];
+
+/** Documented designs on the site: none at present (see ARCHIVED above). The
+ * pipeline still supports them — no item, no price, the dashed card on /browse. */
+export const DOCUMENTED: DocumentedDesign[] = [];
 
 // The 9 designs `special: true` (D4). 0004/0006/0008 are unplaced;
 // the others carry a real prefecture badge.
 export const SPECIAL_NOS = new Set(["0004", "0005", "0009", "0011", "0012", "0016", "0019", "0038", "0041"]);
 
-// The 3 unplaced designs (D5) — null prefectureCode, region "collab".
+// The unplaced designs (D5) — null prefectureCode, region "collab".
 export const UNPLACED: Record<string, { isCollab: boolean; brand: string | null }> = {
   "0004": { isCollab: false, brand: null }, // Yoshitsune & Benkei
   "0006": { isCollab: true, brand: "Miyasaka Jozo" }, // Shinshu-ichi Miso
   "0008": { isCollab: true, brand: null }, // Aquarium exclusive
+  "0072": { isCollab: false, brand: null }, // Rose — the card names no prefecture
 };
 
-// The 25 rows of photos/manifest.csv, transcribed by hand (several `notes`
+// The 25 rows of photos/prod/manifest.csv, transcribed by hand (several `notes`
 // fields are quoted and contain commas, so this was read row-by-row rather
 // than naively comma-split).
 export const OWNED_RAW: {
@@ -233,6 +248,65 @@ export const OWNED_RAW: {
   { no: "0040", code: 19, city: null, name: "Kyoho Grapes", ja: "巨峰", motif: "food", note: "Kitty as a bunch of grapes in a white gift box; card marked 山梨限定" },
   { no: "0041", code: 19, city: "Uenohara 上野原", name: "Dangozaka", ja: "談合坂", motif: "food", note: "Sold only on the Tokyo-bound (上り) side of the service area; Kitty and a rabbit on dango lettered 談合坂" },
   { no: "0042", code: 19, city: null, name: "Takeda Shingen", ja: "武田信玄", motif: "history", note: "Kitty as Shingen with his 風林火山 war fan; card marked 山梨限定" },
+
+  // --- Batches shot 2026-11-03 and 2026-11-09. All carded, so BNIB. Prices are
+  // drawn per charm from the current range (see batchPrice below).
+  { no: "0043", code: 39, city: "Harimaya Bridge はりまや橋", name: "Harimaya Bridge", ja: "はりまや橋", motif: "folklore", note: "Card reads 高知限定 はりまや橋バージョン and ぼんさんかんざし; Kitty and Dear Daniel as the monk and Ouma under a purple parasol" },
+  { no: "0044", code: 27, city: "Umeda 梅田", name: "Umeda HEP Five", ja: "梅田", motif: "landmark", note: "Card reads 大阪限定 梅田バージョン; Kitty in a red dress before the red HEP FIVE Ferris wheel" },
+  { no: "0045", code: 15, city: "Ojiya 小千谷", name: "Ojiya Nishikigoi", ja: "小千谷錦鯉", motif: "animal", note: "Card reads 新潟限定 錦鯉バージョン; Kitty in a headband riding a white-and-orange koi" },
+  { no: "0046", code: 34, city: null, name: "Hiroshima Oyster", ja: "広島カキ", motif: "food", note: "Card reads 広島限定 カキバージョン; Kitty sitting inside an open oyster shell" },
+  { no: "0047", code: 25, city: "Shigaraki 信楽", name: "Shigaraki Tanuki", ja: "信楽たぬき", motif: "folklore", note: "Card reads 滋賀限定 信楽バージョン; Kitty in a brown tanuki costume with its straw hat" },
+  { no: "0048", code: 28, city: "Akashi 明石", name: "Akashi Octopus", ja: "明石だこ", motif: "food", note: "Card reads 兵庫限定, AKASHI; Kitty in an octopus pot marked 明石 with an octopus on her head" },
+  { no: "0049", code: 22, city: "Izu 伊豆", name: "Izu Marine", ja: "伊豆マリン", motif: "nature", note: "Card reads 伊豆限定 マリンバージョン; Kitty as a diver in pink with mask and fins" },
+  { no: "0050", code: 24, city: "Matsusaka 松阪", name: "Matsusaka Beef", ja: "松阪牛", motif: "food", note: "Card reads 三重限定 松阪牛バージョン; Kitty in a black wagyu costume with horns and a nose ring" },
+  { no: "0051", code: 44, city: "Usuki 臼杵", name: "Usuki Stone Buddha", ja: "臼杵石仏", motif: "landmark", note: "Card reads 大分限定 臼杵バージョン; Kitty asleep before the head of a stone Buddha" },
+  { no: "0052", code: 27, city: null, name: "Osaka Castle", ja: "大阪城", motif: "landmark", note: "Card reads 大阪限定, 大阪城; Kitty beside a green-roofed castle keep" },
+  { no: "0053", code: 28, city: "Kobe 神戸", name: "Kobe Port Tower", ja: "神戸ポートタワー", motif: "landmark", note: "Card reads 兵庫限定, KOBE PORT TOWER; Kitty beside the red hourglass tower" },
+  { no: "0054", code: 27, city: "Midosuji 御堂筋", name: "Midosuji Ginkgo", ja: "御堂筋 銀杏並木", motif: "nature", note: "Card reads 大阪限定, 銀杏並木, 大阪御堂筋; Kitty and Dear Daniel under a yellow ginkgo leaf" },
+  { no: "0055", code: 27, city: "Namba 難波", name: "Hozenji Yokocho", ja: "法善寺横丁", motif: "landmark", note: "Card reads 大阪限定 法善寺横丁バージョン; Kitty in kimono with a red paper lantern" },
+  { no: "0056", code: 14, city: "Yokohama 横浜", name: "Keihin-Tohoku Line", ja: "京浜東北線", motif: "landmark", note: "Card reads 京浜東北線バージョン, licensed by JR East; Kitty riding a sky-blue train car" },
+  { no: "0057", code: 17, city: "Kanazawa 金沢", name: "Kaga Hosho", ja: "加賀宝生", motif: "history", note: "Card reads 加賀限定, 加賀宝生; Kitty in noh robes with a mask and a fan lettered 加賀宝生" },
+  { no: "0058", code: 24, city: "Ise-Shima 伊勢志摩", name: "Ise-Shima Ama Diver", ja: "伊勢志摩 海女", motif: "history", note: "Card reads 伊勢志摩限定; Kitty in diving goggles in a wooden tub with pearls" },
+  { no: "0059", code: 14, city: "Enoshima 江ノ島", name: "Enoden", ja: "江ノ電", motif: "landmark", note: "Card reads 神奈川限定 江ノ電バージョン; Kitty with a surfboard on a green Enoden car" },
+  { no: "0060", code: 24, city: null, name: "Ise Lobster", ja: "伊勢海老", motif: "food", note: "Card reads 三重限定 伊勢海老バージョン; Kitty in a red lobster hood, in a tub marked MIE with pearls" },
+  { no: "0061", code: 23, city: "Nagoya 名古屋", name: "Shachihoko Bus Guide", ja: "しゃちほこバスガイド", motif: "landmark", note: "Card reads 名古屋限定 しゃちほこバスガイドバージョン; Kitty as a bus guide with a 名古屋 flag on a golden shachihoko" },
+  { no: "0062", code: 15, city: "Sado 佐渡", name: "Sado Crested Ibis", ja: "佐渡トキ", motif: "animal", note: "Card reads 新潟佐渡限定; Kitty in a pink toki costume, sitting in a tub" },
+  { no: "0063", code: 19, city: null, name: "Yamanashi Peach", ja: "山梨の桃", motif: "food", note: "Card reads 山梨限定; Kitty in a peach hood behind a box marked 特選 桃" },
+  { no: "0064", code: 16, city: "Kurobe 黒部", name: "Kurobe Gorge Railway", ja: "黒部峡谷トロッコ", motif: "landmark", note: "Card reads 富山限定, KUROBE; Kitty in a yellow helmet on an orange trolley car" },
+  { no: "0065", code: 22, city: "Atami 熱海", name: "Atami Fireworks", ja: "熱海花火大会", motif: "festival", note: "Card reads 熱海; Kitty beside a firework shell stamped 熱海 花火大会" },
+  { no: "0066", code: 28, city: "Kobe 神戸", name: "Kobe Chinatown Steamed Bun", ja: "神戸中華街 中華まん", motif: "food", note: "Card reads 神戸限定 中華街バージョン, 日本三大中華街 神戸; Kitty with a giant steamed bun" },
+  { no: "0067", code: 2, city: "Hirosaki 弘前", name: "Hirosaki Cherry Blossom", ja: "弘前桜", motif: "nature", note: "Card reads 青森限定 弘前桜バージョン; Kitty seated in a cherry-blossom cup" },
+  { no: "0068", code: 13, city: "Odaiba お台場", name: "Odaiba Statue of Liberty", ja: "お台場 自由の女神", motif: "landmark", note: "Card reads 東京限定 お台場バージョン; Kitty as the Statue of Liberty in pink" },
+  { no: "0069", code: 23, city: "Gamagori 蒲郡", name: "Gamagori Mandarin", ja: "蒲郡みかん", motif: "food", note: "Card reads 愛知限定 蒲郡みかんバージョン; Kitty and a friend each in half a mandarin" },
+  { no: "0070", code: 22, city: null, name: "Sakura Shrimp", ja: "桜えび", motif: "food", note: "Card reads 静岡限定; Kitty in a pink shrimp costume with a cherry-blossom fan" },
+  { no: "0071", code: 27, city: null, name: "Takoyaki", ja: "たこ焼き", motif: "food", note: "Card reads 大阪限定 たこ焼きバージョン; Kitty in a happi coat with a boat of takoyaki" },
+  { no: "0072", code: null, city: null, name: "Rose", ja: "ローズ", motif: "nature", note: "Card reads ローズバージョン and names no prefecture; Kitty asleep in a red rose" },
+  { no: "0073", code: 22, city: "Izu 伊豆", name: "Izu Dried Horse Mackerel", ja: "伊豆あじの開き", motif: "food", note: "Card reads 静岡限定 あじの開きバージョン; Kitty on a split, dried aji on a round basket" },
+  { no: "0074", code: 17, city: "Kanazawa 金沢", name: "Kanazawa Yuzen", ja: "金沢友禅", motif: "history", note: "Card reads 金沢限定; Kitty kneeling on a red cushion in a pink furisode" },
+  { no: "0075", code: 15, city: null, name: "Kaki no Tane", ja: "柿の種", motif: "food", note: "Card reads 新潟限定 柿の種バージョン; a keychain, with Kitty in a happi coat hugging a smiling rice cracker" },
+  { no: "0076", code: 15, city: null, name: "Koshihikari Rice", ja: "こしひかり", motif: "food", note: "Card reads 新潟限定, こしひかり; Kitty inside a white grain of rice" },
+  { no: "0077", code: 28, city: "Kobe 神戸", name: "Kobe Chinatown Mapo Tofu", ja: "神戸中華街 麻婆豆腐", motif: "food", note: "Card reads 神戸限定 中華街バージョン; Kitty sitting in a bowl of mapo tofu marked 中華街" },
+  { no: "0078", code: 15, city: null, name: "Uesugi Kenshin", ja: "上杉謙信", motif: "history", note: "Card reads 新潟限定; a strap for a folding phone, with Kitty in red armour and a 毘 banner" },
+  { no: "0079", code: 27, city: "Naniwa なにわ", name: "Issun-boshi", ja: "一寸法師", motif: "folklore", note: "Card reads 大阪限定 なにわバージョン; Kitty in a bowl boat with a chopstick oar" },
+  { no: "0080", code: 16, city: "Himi 氷見", name: "Himi Yellowtail", ja: "氷見ブリ", motif: "food", note: "Card reads 富山限定, 氷見ブリ; Kitty in a cap holding a yellowtail" },
+  { no: "0081", code: 16, city: null, name: "Etchu Medicine Peddler", ja: "越中の薬売り", motif: "history", note: "Card reads 富山限定 薬売りバージョン; Kitty as a travelling medicine seller with her pack" },
+  { no: "0082", code: 27, city: "Sonezaki 曽根崎", name: "Ohatsu Tenjin", ja: "お初天神", motif: "history", note: "Card reads 曽根崎お初天神バージョン; Kitty as Ohatsu in a white kimono" },
+  { no: "0083", code: 10, city: "Tatebayashi 館林", name: "Bunbuku Chagama", ja: "ぶんぶく茶釜", motif: "folklore", note: "Card reads 群馬限定 ぶんぶく茶釜バージョン; Kitty as the tanuki in the tea kettle" },
+  { no: "0084", code: 14, city: "Hakone 箱根", name: "Hakone Pirate Ship", ja: "箱根 海賊船", motif: "landmark", note: "Card reads 箱根観光船限定 海賊船バージョン, HAKONE ASHINOKO; Kitty as captain of the red pirate ship" },
+  { no: "0085", code: 14, city: "Yokosuka 横須賀", name: "Yokosuka", ja: "横須賀", motif: "landmark", note: "Card reads 神奈川限定 横須賀バージョン; Kitty in a red embroidered jacket and jeans" },
+  { no: "0086", code: 11, city: "Soka 草加", name: "Soka Senbei", ja: "草加せんべい", motif: "food", note: "Card reads 埼玉限定 草加せんべいバージョン; Kitty holding a big rice cracker" },
+  { no: "0087", code: 6, city: "Tendo 天童", name: "Shogi Piece", ja: "将棋駒", motif: "history", note: "Card reads 山形限定 将棋駒バージョン; two clasps, Kitty in red and a 王将 shogi piece" },
+  { no: "0088", code: 29, city: "Nara 奈良", name: "Prince Shōtoku", ja: "聖徳太子", motif: "history", note: "Card reads 奈良限定, はろうきてぃの聖徳太子" },
+  { no: "0089", code: 19, city: null, name: "Hoto Noodles", ja: "ほうとう", motif: "food", note: "Card reads 山梨限定 ほうとうバージョン; Kitty in an iron pot of hoto" },
+  { no: "0090", code: 39, city: null, name: "Kochi Yosakoi", ja: "高知よさこい", motif: "festival", note: "Card reads 高知限定, よさこい; Kitty in pink with naruko clappers" },
+  { no: "0091", code: 22, city: "Inatori 稲取", name: "Inatori Kinmedai", ja: "稲取キンメダイ", motif: "food", note: "Card reads 静岡限定, IZU INATORI, 東伊豆特産; Kitty in a red fish hood" },
+  { no: "0092", code: 28, city: "Ako 赤穂", name: "Ako Ronin", ja: "赤穂浪士", motif: "history", note: "Card reads 兵庫限定 赤穂バージョン; Kitty in a black helmet with the mitsudomoe crest" },
+  { no: "0093", code: 16, city: "Gokayama 五箇山", name: "Mugiya Festival", ja: "むぎや祭り", motif: "festival", note: "Card reads 富山限定 越中むぎや祭りバージョン; Kitty in black hakama with a golden straw hat" },
+  { no: "0094", code: 15, city: null, name: "Sasa Dango", ja: "笹だんご", motif: "food", note: "Card reads 新潟限定, 新潟名物 笹だんご; Kitty in a dumpling wrapped in bamboo leaves" },
+  { no: "0095", code: 25, city: "Hikone 彦根", name: "Hikone Castle", ja: "彦根城", motif: "landmark", note: "Card reads 滋賀限定, 彦根城; Kitty beside a castle keep" },
+  { no: "0096", code: 32, city: "Izumo 出雲", name: "Izumo Daikoku", ja: "出雲大黒", motif: "folklore", note: "Card reads 島根限定 出雲大黒バージョン; Kitty as Daikoku with a white sack" },
+  { no: "0097", code: 23, city: "Okazaki 岡崎", name: "Okazaki on the Tokaido", ja: "東海道五十三次 岡崎", motif: "history", note: "Card reads 愛知岡崎, はろうきてぃの東海道五十三次; Kitty as a traveller with a 岡崎 sign" },
+  { no: "0098", code: 26, city: "Kyotango 京丹後", name: "Shizuka Gozen", ja: "静御前", motif: "history", note: "From the kabuki series (歌舞伎シリーズ 静御前); a strap" },
 ];
 
 /**
@@ -337,6 +411,123 @@ export const STORIES: Record<string, string> = {
     "Dangozaka is a service area on the Chūō Expressway at Uenohara, and like most of them it is really two: one facing traffic heading out into the mountains, the other facing traffic heading back to Tokyo. This charm was sold only on the Tokyo-bound side. The pun does the rest: 談合 (dangō) sounds like 団子 (dango), so Kitty sits on a skewer of dumplings that spell out the name.",
   "0042":
     "Takeda Shingen ruled Kai, present-day Yamanashi, through the middle of the sixteenth century, and his banner carried four lines from Sunzi: swift as the wind, quiet as the forest, fierce as fire, unmoving as the mountain. He fought Uesugi Kenshin five times at Kawanakajima. The best-known story from those battles has Kenshin riding alone into Shingen's camp, and Shingen, with no time to draw, parrying the sword with his war fan. Kōfu still holds a Shingen festival every April.",
+  // --- November batches (0043–0098). Written to the owner's instruction of
+  // 2026-11-09 that every charm carry a write-up, which relaxes 0007's
+  // researched-only rule for these. They keep to well-established facts about
+  // the place or subject and claim nothing about the charm itself. 0062 and
+  // 0088 carry the researched write-ups their documented designs already had.
+  "0043":
+    "Harimaya Bridge in central Kōchi began as a private crossing put up by two merchant houses, Harimaya and Hitsuya, to reach each other over a canal. It is famous for the Yosakoi-bushi folk song, which tells of a monk seen buying a hairpin there: the scandal of the priest Junshin and a young woman, Ouma, in the 1850s. The bridge is so small that it is often called one of Japan's great disappointments.",
+  "0044":
+    "HEP Five is a shopping building in Umeda, Osaka's northern hub, run by the Hankyu group; HEP stands for Hankyu Entertainment Park. Its red Ferris wheel, built into the building when it opened in 1998, is about 75 metres across and lifts riders some 106 metres above the street.",
+  "0045":
+    "Nishikigoi, the coloured carp, were first bred in the mountain villages around Ojiya and Yamakoshi in Niigata in the nineteenth century, from carp kept in terraced ponds as winter food. Colour mutations were selected over generations into the patterned varieties now exported worldwide, and Ojiya calls itself their birthplace.",
+  "0046":
+    "Hiroshima farms more than half of Japan's oysters, grown on rafts in the calm, nutrient-rich water of Hiroshima Bay. Raft culture there goes back centuries, and winter is the season, when grilled oysters and kaki-meshi fill the stalls around Miyajima.",
+  "0047":
+    "Shigaraki in southern Shiga is one of Japan's Six Ancient Kilns, firing stoneware since the medieval period. The ceramic tanuki that stand outside restaurants all over Japan, with straw hat, sake flask and ledger, became its signature in the twentieth century, and the town's streets are lined with them.",
+  "0048":
+    "The fast currents of the Akashi Strait, between Kobe and Awaji Island, give Akashi octopus its name for firm, sweet flesh. Fishermen traditionally catch them in pots lowered to the seabed, and the town's own dish, akashiyaki, is a soft egg dumpling with octopus inside, dipped in broth.",
+  "0049":
+    "The Izu Peninsula reaches into the Pacific south of Mt Fuji, and the warm Kuroshio current along its coast brings tropical fish and soft coral within easy reach of Tokyo. Its rocky coves are among the most popular diving and snorkelling grounds in Japan.",
+  "0050":
+    "Matsusaka beef comes from black Japanese cattle raised around Matsusaka in Mie, heifers fattened for a long time to give dense, fine marbling. It is counted with Kobe and Ōmi among the three great wagyu of Japan.",
+  "0051":
+    "The Usuki Stone Buddhas are some sixty figures carved into the soft volcanic rock of the hills outside Usuki, Oita, most of them in the Heian and Kamakura periods. For centuries the head of the great Dainichi Buddha rested on the ground below its body; it was set back in place during restoration in the 1990s, and the carvings became the first stone Buddhas in Japan named a National Treasure.",
+  "0052":
+    "Toyotomi Hideyoshi began Osaka Castle in 1583 as the seat of the Japan he had unified; the Tokugawa took and burned it in 1615 and rebuilt it on the same ground. The keep that stands today is a 1931 reconstruction in reinforced concrete, paid for by public subscription, with the green roofs and gold trim that make it Osaka's emblem.",
+  "0053":
+    "Kobe Port Tower opened on the waterfront at Meriken Park in 1963. Its red lattice of steel pipes narrows at the middle like a Japanese hand drum, a shape that made it the symbol of the port and of postwar Kobe.",
+  "0054":
+    "Midōsuji is Osaka's main north–south boulevard, running about four kilometres from Umeda to Namba. Its ginkgo trees, planted when the avenue was widened in the 1930s, turn it into a corridor of gold every late autumn.",
+  "0055":
+    "Hōzenji Yokochō is a pair of flagstone alleys beside Hōzen-ji temple in Namba, lined with small restaurants under paper lanterns. Passers-by splash water on the temple's moss-covered Fudō statue for luck, and the alley is the setting of Oda Sakunosuke's story Meoto Zenzai, named for a sweet-bean shop there.",
+  "0056":
+    "The Keihin–Tōhoku Line is the sky-blue commuter railway running north–south through Tokyo, from Saitama in the north to Yokohama in the south; its name joins Keihin, the Tokyo–Yokohama corridor, with the Tōhoku main line. Its trains have worn the same light-blue stripe for decades, which is how commuters tell it from the green Yamanote beside it.",
+  "0057":
+    "Under the Maeda lords of Kaga, noh of the Hōshō school became the domain's official art, taken up so widely that Kanazawa was said to have chanting fall from the sky: even craftsmen on the rooftops sang noh as they worked. The tradition, Kaga Hōshō, is still performed in the city.",
+  "0058":
+    "Ama are women who dive without breathing gear for abalone, turban shells and seaweed, and Toba and Shima in Mie have more of them than anywhere else in Japan. Records of the practice there go back well over a thousand years, and the divers still work in white garments, traditionally said to ward off sharks.",
+  "0059":
+    "The Enoshima Electric Railway, the Enoden, has run along the Shōnan coast since 1902, linking Fujisawa and Kamakura by way of Enoshima. Its small green-and-cream cars squeeze between houses and then run beside the sea, past the beaches where Shōnan's surf culture grew up.",
+  "0060":
+    "Ise-ebi, the Japanese spiny lobster, takes its name from Ise in Mie, long the most famous source of it, and Mie still lands one of the largest catches in the country. Its curled body and bright red colour when cooked make it a food for New Year and weddings, a wish for long life.",
+  "0061":
+    "The golden shachihoko on Nagoya Castle's roof, tiger-headed fish believed to guard against fire, are the city's emblem, and sightseeing buses have long carried visitors to see them. The pair on the keep today is a postwar replacement; the originals were lost when the castle burned in 1945.",
+  "0062":
+    "The toki was common enough in the Edo period to be shot as a pest, then hunted for its feathers until it was almost gone. The last five wild Japanese birds were caught on Sado in 1981 to be bred in captivity, and the last of them, Kin, died on the island in 2003 aged thirty-six. Birds released there since 2008 have bred in the wild again, which is why Sado keeps the bird.",
+  "0063":
+    "Yamanashi grows more peaches than any other prefecture, in orchards across the Kōfu basin, where long sunny days and cool nights sweeten the fruit. In early spring the whole basin turns pink with peach blossom.",
+  "0064":
+    "The Kurobe Gorge Railway was built in the 1920s to carry workers and materials up one of Japan's deepest V-shaped gorges in Toyama, for the hydroelectric dams there. Opened to passengers after the war, its open trolley cars run about twenty kilometres along the Kurobe River between Unazuki and Keyakidaira.",
+  "0065":
+    "Atami, a hot-spring resort on Sagami Bay, has held fireworks over its harbour since 1952, now many nights a year. The bay is ringed by hills that throw each burst back across the water, an echo the town counts as part of the show.",
+  "0066":
+    "Nankinmachi, Kobe's Chinatown, grew up after the port opened to foreign trade in 1868, and is counted with Yokohama and Nagasaki among Japan's three great Chinatowns. Its street food is the steamed pork bun; the Rōshōki shop there is credited with selling the first butaman in Japan, in 1915.",
+  "0067":
+    "Hirosaki Castle Park holds some 2,600 cherry trees around the moats and the keep, one of only twelve original castle keeps left in Japan. It blooms in late April, later than the south, and when the petals fall they cover the moats in a pink sheet the town calls the flower raft.",
+  "0068":
+    "Odaiba is reclaimed land in Tokyo Bay, grown from Edo-period gun batteries into an entertainment district. A replica of the Statue of Liberty stands on its shore, first brought from France for a year of French cultural events in 1998 and replaced by a permanent copy in 2000, with Rainbow Bridge behind it.",
+  "0069":
+    "Gamagori sits on Mikawa Bay in eastern Aichi, and its mild, sunny hillsides are given over to mandarin orchards. Gamagori mikan is the town's best-known produce, picked from autumn into winter and also grown under glass.",
+  "0070":
+    "Sakura-ebi are tiny, translucent pink shrimp, and Suruga Bay in Shizuoka is the only place in Japan where they are fished commercially. The catch is landed at Yui and Kambara and spread to dry in the sun on the riverbanks, turning the ground pink beneath Mt Fuji.",
+  "0071":
+    "Takoyaki, balls of batter cooked around pieces of octopus in a dimpled iron pan, is Osaka's best-known street food. The dish is credited to Aizuya, a stall that began selling it in 1935, and is eaten from little boats of thin wood with sauce, mayonnaise and bonito flakes.",
+  "0072":
+    "This charm's card names no prefecture, only a rose version, so its home is not known. Japan's best-known rose towns include Fukuyama in Hiroshima, which planted roses to recover after wartime bombing, but nothing on the card ties the charm there.",
+  "0073":
+    "Aji no hiraki, horse mackerel split open and dried, is a staple of the Japanese breakfast, and the coast around Numazu and the Izu Peninsula produces more of it than anywhere else in Japan. The fish are opened, salted and dried in the sea air, then grilled briefly.",
+  "0074":
+    "Kaga Yūzen is the hand-painted silk dyeing of Kanazawa, developed in the eighteenth century and associated with the painter Miyazaki Yūzensai. Its palette of five colours, crimson, indigo, ochre, grass green and ancient purple, and its realistic flowers, leaves sometimes shown worm-eaten, set it apart from the Kyoto style.",
+  "0075":
+    "Kaki no tane are crescent-shaped rice crackers flavoured with soy and chilli, named for their likeness to persimmon seeds. They were first made in Nagaoka, Niigata, in the 1920s, when a dented cutter happened to produce the curved shape, and are usually eaten mixed with peanuts.",
+  "0076":
+    "Koshihikari is Japan's most widely grown rice, a short-grain variety released in Niigata in 1956. Rice from the snowy Uonuma district, where meltwater and cool nights suit it, is sold as the best in the country and fetches the highest prices.",
+  "0077":
+    "Kobe's Chinatown has been the city's window on Chinese food since the port opened in 1868. Mapo tofu, a Sichuan dish of tofu in chilli and fermented bean sauce, was made a Japanese household dish by the chef Chen Kenmin, who toned down its heat for Japanese tastes after the war.",
+  "0078":
+    "Uesugi Kenshin, lord of Echigo, present-day Niigata, in the sixteenth century, was a devotee of Bishamonten, god of war, and carried the character 毘 on his banner. His five battles against Takeda Shingen at Kawanakajima are among the most retold episodes of the Warring States period.",
+  "0079":
+    "Issun-bōshi, the one-inch boy, is a folktale hero who sets off for the capital in a rice bowl, rowing with a chopstick and armed with a needle for a sword. In the best-known version his journey starts from Naniwa, the old name for Osaka, and he defeats an oni to win his full height and a bride.",
+  "0080":
+    "Himi, on Toyama Bay, is famous for its winter yellowtail, kan-buri, caught in fixed nets as the fish come south fat for the cold months. The best of them are branded as Himi kan-buri and sent to the great fish markets of Tokyo and Osaka.",
+  "0081":
+    "From the seventeenth century, peddlers from Toyama walked the country leaving boxes of medicine with households and charging only for what had been used by their next visit. The system, oki-gusuri, made Toyama the centre of Japan's medicine trade, which it still is.",
+  "0082":
+    "Tsuyu no Tenjin shrine in Sonezaki, Osaka, is known as Ohatsu Tenjin after the heroine of Chikamatsu Monzaemon's 1703 puppet play The Love Suicides at Sonezaki, based on a real double suicide in the shrine's woods. The play made it a place where couples come to pray for love.",
+  "0083":
+    "Bunbuku Chagama is the tale of a tea kettle that turns out to be a tanuki, and Morin-ji, a temple in Tatebayashi, Gunma, keeps the kettle itself. In the temple's version it never runs dry, however much tea is poured from it.",
+  "0084":
+    "Sightseeing boats dressed as pirate ships cross Lake Ashi in Hakone, carrying visitors between Tōgendai, Hakone-machi and Moto-Hakone. On a clear day Mt Fuji rises over the lake beyond the red torii of Hakone Shrine standing in the water.",
+  "0085":
+    "Yokosuka has been a naval port since the 1860s and is home to a large United States Navy base. The sukajan, the embroidered satin souvenir jacket, takes its name from the city: they were made there for American servicemen after the war and became a Japanese fashion staple.",
+  "0086":
+    "Sōka, a post town on the Nikkō road north of Edo, grew famous for senbei, rice crackers grilled by hand over charcoal and brushed with soy sauce. Travellers carried them away along the road, and Sōka senbei became the byword for the soy-glazed cracker.",
+  "0087":
+    "Tendō in Yamagata makes nearly all of Japan's shogi pieces, a craft begun as side work for poor samurai of the Tendō domain in the Edo period. Each spring the town stages human shogi, with people in costume as the pieces on a giant board under the cherry blossom.",
+  "0088":
+    "Shōtoku is the figure Japanese Buddhism hangs itself on: regent for Empress Suiko, credited with the seventeen-article constitution and with sending the first embassies to Sui China. Hōryū-ji, which he founded west of Nara, holds the oldest wooden buildings standing anywhere on earth. How much of that biography is his and how much was written onto him later is still argued.",
+  "0089":
+    "Hōtō is Yamanashi's home dish: thick, flat wheat noodles simmered with pumpkin and vegetables in miso and served in the iron pot. Wheat suited the mountain land where rice was hard to grow, and local lore credits Takeda Shingen with making it a field ration for his army.",
+  "0090":
+    "Yosakoi began in Kōchi in 1954 as a summer festival to lift the postwar city, with dancers shaking naruko, the wooden clappers once used to scare birds from the rice fields. Each August around two hundred teams dance through the streets, and the style has spread to festivals all over Japan.",
+  "0091":
+    "Inatori, a fishing port on the east coast of the Izu Peninsula, lands kinmedai, the splendid alfonsino: a deep-red fish with large golden eyes. Inatori's catch is sold under its own name, and it is eaten simmered in sweet soy.",
+  "0092":
+    "In 1701 the lord of Akō was made to commit seppuku for drawing his sword on an official inside Edo Castle. Nearly two years later forty-seven of his retainers, led by Ōishi Kuranosuke, avenged him, and their story, Chūshingura, became Japan's favourite tale of loyalty; Akō marks it every December.",
+  "0093":
+    "Mugiya-bushi is the folk song of Gokayama, the remote Toyama valley whose thatched gasshō-zukuri farmhouses are a World Heritage site. It is said to come from Heike warriors who fled into the mountains, and at the Mugiya festival each September dancers in black, with straw hats, perform it slowly.",
+  "0094":
+    "Sasa-dango are mugwort rice dumplings filled with sweet bean paste, wrapped in bamboo leaves and tied with sedge. They began as a keeping food in Niigata's rice country, where the leaves kept them fresh, and are now the prefecture's classic souvenir.",
+  "0095":
+    "Hikone Castle, completed in the early seventeenth century for the Ii family, keeps one of only twelve original castle keeps in Japan and is one of five castles designated a National Treasure. It looks out over Lake Biwa from a hill in Hikone.",
+  "0096":
+    "Izumo Taisha honours Ōkuninushi, god of nation-building and of marriage, long identified with Daikoku, the god of plenty who carries a sack of treasures. In the tenth lunar month the gods of Japan are said to gather at Izumo, which is why that month is called kamiarizuki there, the month with gods.",
+  "0097":
+    "Okazaki was the thirty-eighth of the fifty-three stations on the Tōkaidō, the road between Edo and Kyoto, and the birthplace of Tokugawa Ieyasu. Hiroshige's print of the station shows the long Yahagi Bridge with Okazaki Castle beyond it.",
+  "0098":
+    "Shizuka Gozen was a shirabyōshi dancer of the twelfth century and the lover of Minamoto no Yoshitsune. Captured after his fall, she was made to dance before his brother Yoritomo at Tsurugaoka Hachimangū and sang of her longing for Yoshitsune instead. Tradition places her birth in Iso, in the Tango district of northern Kyoto.",
 };
 
 /** Manifest rows with an owner-verified design-level reference image in
@@ -348,6 +539,11 @@ const REFERENCE_NOS = new Set([
   "0009", "0010", "0011", "0012", "0013", "0014", "0015", "0016",
   "0017", "0018", "0019", "0020", "0021", "0022", "0023", "0024",
   "0025", "0038",
+  // November batch: official gotochikitty.com product images, owner-verified.
+  "0044", "0045", "0050", "0052", "0057", "0064", "0070", "0073", "0074", "0075",
+  "0083", "0087", "0088", "0092", "0095",
+  // Cut by the owner from a Mercari listing photo, straightened 16°.
+  "0051",
 ]);
 
 /** Charms where Kitty could be cut out of our own photograph.
@@ -366,6 +562,22 @@ const OWN_PHOTO_NOS = new Set([
   "0037", "0039", "0040", "0041", "0042",
 ]);
 
+/** Price for the November batches (0043 onward). Owner decision 2026-11-09: a
+ * whole-dollar price anywhere in the range the policy below already spans
+ * (S$18–32), rather than a per-tier figure. Hashed from the charm number, not
+ * Math.random(), because the seed truncates and re-inserts on every run and a
+ * listed price must not change each time it does. */
+const PRICE_MIN = 18;
+const PRICE_MAX = 32;
+function batchPrice(no: string): number {
+  // A 32-bit integer mix, so neighbouring numbers land on unrelated prices.
+  let h = Number(no) | 0;
+  h = Math.imul(h ^ (h >>> 16), 0x45d9f3b);
+  h = Math.imul(h ^ (h >>> 16), 0x45d9f3b);
+  h = (h ^ (h >>> 16)) >>> 0;
+  return PRICE_MIN + (h % (PRICE_MAX - PRICE_MIN + 1));
+}
+
 export const OWNED: OwnedDesign[] = OWNED_RAW.map((r) => {
   const unplaced = UNPLACED[r.no];
   const special = SPECIAL_NOS.has(r.no);
@@ -373,7 +585,9 @@ export const OWNED: OwnedDesign[] = OWNED_RAW.map((r) => {
   // D3 remains a policy, not a per-charm valuation — extended here for the
   // first non-BNIB charms, since condition is the one thing a buyer can see.
   const condition = r.condition ?? "bnib";
-  const price = unplaced
+  const price = Number(r.no) >= 43
+    ? batchPrice(r.no)
+    : unplaced
     ? 32
     : special
       ? 28
