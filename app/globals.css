@@ -1669,6 +1669,9 @@ footer .mark {
     display: flex;
     align-items: baseline;
     flex-wrap: wrap;
+    /* Centred over the map, like the strip's label under it (owner,
+       2026-11-10): where you are reads as the map's title. */
+    justify-content: center;
     gap: 2px;
     margin: 0 0 6px;
     font-family: var(--font-display);
