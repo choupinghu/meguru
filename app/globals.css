@@ -672,57 +672,69 @@ body {
   margin: 0 0 8px;
 }
 
-/* region overview grid (default panel state) */
+/* All Japan in the panel (owner, 2026-11-11): one line of total, then the
+   nine regions as a 3x3 grid of bubbles that fills the rest of the panel --
+   each solid in its region's colour, kanji over English, no counts. Text is
+   ink or paper per region (--rt, from textOnRegionColour), whichever reads. */
+.overview {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  gap: 16px;
+}
+.overview-title {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 1.2;
+  margin: 2px 0 0;
+  text-wrap: balance;
+}
 .reg-grid {
+  flex: 1;
+  min-height: 0;
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
+  grid-template-columns: repeat(3, 1fr);
+  grid-auto-rows: 1fr;
+  gap: 10px;
 }
 .reg-cell {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 10px;
-  padding: 10px 11px;
-  border: 1px solid var(--line-soft);
-  border-radius: 10px;
-  background: var(--surface-2);
+  justify-content: center;
+  gap: 4px;
+  padding: 8px;
+  border: 0;
+  border-radius: 16px;
+  background: var(--rc);
+  color: var(--rt, var(--ink));
   cursor: pointer;
-  text-align: left;
   font: inherit;
-  transition: 0.18s;
-  color: var(--ink);
+  transition: transform 0.18s, filter 0.18s;
 }
 .reg-cell:hover {
-  border-color: var(--ink-faint);
-  transform: translateY(-1px);
+  transform: translateY(-2px);
+  filter: brightness(1.06);
 }
 .reg-cell:disabled {
-  opacity: 0.45;
+  opacity: 0.35;
   cursor: default;
   transform: none;
-}
-.reg-cell .sw {
-  width: 14px;
-  height: 14px;
-  border-radius: 4px;
-  flex: none;
-  background: var(--rc);
-}
-.reg-cell .rn {
-  font-size: 13px;
-  font-weight: 600;
-  line-height: 1.2;
+  filter: none;
 }
 .reg-cell .rj {
-  font-size: 11px;
-  color: var(--ink-faint);
   font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: 0.04em;
 }
-.reg-cell .rc {
-  margin-left: auto;
-  font-size: 13px;
-  color: var(--ink-soft);
-  font-variant-numeric: tabular-nums;
+.reg-cell .rn {
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 /* region/prefecture panel charm listing -- cards themselves are the shared

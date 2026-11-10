@@ -81,3 +81,21 @@ export function regionForCode(code: number): RegionKey | null {
   }
   return null;
 }
+
+/**
+ * Whether text set on a region's solid colour should be dark (the ink token)
+ * or light (the surface token). Measured against the site's ink (#2b2621,
+ * relative luminance about 0.019) and paper (#f7f2e8, about 0.89): the two
+ * give equal contrast at a background luminance of about 0.205, so anything
+ * lighter takes ink. Kept here, beside the colours it reads, so components
+ * never handle a colour value themselves.
+ */
+export function textOnRegionColour(hex: string): "ink" | "light" {
+  const v = hex.replace("#", "");
+  const [r, g, b] = [0, 2, 4].map((i) => {
+    const c = parseInt(v.slice(i, i + 2), 16) / 255;
+    return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+  });
+  const luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  return luminance > 0.205 ? "ink" : "light";
+}

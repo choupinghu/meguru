@@ -3,14 +3,13 @@ import Link from "next/link";
 import CharmThumb from "./CharmThumb";
 import type { CharmView, DesignView } from "@/lib/charms";
 import { locationLabel, motifLabel, toCharmView } from "@/lib/charms";
-import { COLLAB_REGION, REGIONS, REGION_LIST, type RegionKey } from "@/lib/regions";
-import { PREFECTURES } from "@/lib/prefectures";
+import { COLLAB_REGION, REGIONS, REGION_LIST, textOnRegionColour, type RegionKey } from "@/lib/regions";
 
 /**
  * The four states of the drill-down side panel, ported from the
  * prototype's `renderOverview` / `selectRegion` / `selectPref`, plus a
  * fourth added by spec 0010:
- *  - `overview`  -- All Japan: headline + a clickable region grid with counts.
+ *  - `overview`  -- All Japan: a one-line total + the nine regions as bubbles.
  *  - `region`    -- that region's designs, with a back-to-all-Japan control.
  *  - `prefecture`-- that prefecture's designs, with a back-to-region control.
  *  - `charm`     -- a single Discover pick (0010): a preview, not a second
@@ -38,7 +37,6 @@ interface MapPanelProps {
    * the panel into that charm's preview *in place*, without navigating off
    * `/` or moving the map (`MapExplorer` owns that distinction). */
   onReset: () => void;
-  onBackToRegion: () => void;
 }
 
 /** aria-live="polite" so screen readers announce the panel's new contents
@@ -47,16 +45,15 @@ export default function MapPanel({
   view,
   onSelectRegion,
   onReset,
-  onBackToRegion,
 }: MapPanelProps) {
   return (
     <aside className="panel" aria-live="polite">
       {view.kind === "overview" ? (
         <OverviewPanel view={view} onSelectRegion={onSelectRegion} />
       ) : view.kind === "region" ? (
-        <RegionPanel view={view} onReset={onReset} />
+        <RegionPanel view={view} />
       ) : view.kind === "prefecture" ? (
-        <PrefecturePanel view={view} onBack={onBackToRegion} />
+        <PrefecturePanel view={view} />
       ) : (
         // A Discover pick's "← Back" resets to the overview (D4 item 9) --
         // there's no single drill-down level to unwind back to, since a
@@ -81,20 +78,16 @@ function OverviewPanel({
   view: Extract<PanelView, { kind: "overview" }>;
   onSelectRegion: (region: RegionKey) => void;
 }) {
+  // Owner, 2026-11-11: no "All Japan" heading (the map's trail says it), no
+  // 巡ってみましょう line, no note that the map glows where the collection
+  // reaches (it plainly does), and no per-region counts -- the point is to go
+  // and look, not to tally. The nine regions fill the panel as a 3x3 grid of
+  // bubbles in their own colour, kanji first.
   return (
-    <>
-      <div className="panel-head">
-        <div>
-          <div className="crumb">All Japan · 全国</div>
-          <h3>
-            {view.totalCharms} charms across {view.prefecturesReached} prefectures
-          </h3>
-          <div className="ja">巡ってみましょう — pick a region to wander</div>
-        </div>
-      </div>
-      <p className="panel-note">
-        The map glows only where the collection reaches. Tap a region to zoom in.
-      </p>
+    <div className="overview">
+      <h3 className="overview-title">
+        {view.totalCharms} charms across {view.prefecturesReached} prefectures
+      </h3>
       <div className="reg-grid">
         {REGION_LIST.map((region) => {
           const count = view.regionCounts[region.key];
@@ -104,92 +97,51 @@ function OverviewPanel({
               type="button"
               className="reg-cell"
               disabled={count === 0}
-              style={{ "--rc": region.color } as CSSProperties}
+              style={
+                {
+                  "--rc": region.color,
+                  "--rt":
+                    textOnRegionColour(region.color) === "ink"
+                      ? "var(--ink)"
+                      : "var(--surface)",
+                } as CSSProperties
+              }
               onClick={() => onSelectRegion(region.key)}
             >
-              <span className="sw" />
-              <span>
-                <span className="rn">{region.en}</span>
-                <br />
-                <span className="rj">{region.ja}</span>
-              </span>
-              <span className="rc">{count}</span>
+              <span className="rj">{region.ja}</span>
+              <span className="rn">{region.en}</span>
             </button>
           );
         })}
       </div>
-    </>
+    </div>
   );
 }
 
 function RegionPanel({
   view,
-  onReset,
 }: {
   view: Extract<PanelView, { kind: "region" }>;
-  onReset: () => void;
 }) {
-  const region = REGIONS[view.region];
-  return (
-    <>
-      <div className="panel-head">
-        <div>
-          <div className="crumb" style={{ "--rc": region.color } as CSSProperties}>
-            {region.ja} · Region
-          </div>
-          <h3>{region.en}</h3>
-          <div className="ja">
-            {view.charms.length} charm{view.charms.length !== 1 ? "s" : ""} here
-          </div>
-        </div>
-        <button type="button" className="reset" onClick={onReset}>
-          ← All Japan
-        </button>
-      </div>
-      {view.charms.length ? (
-        <p className="panel-note">
-          Pick one from the column beside the map to read it here.
-        </p>
-      ) : (
-        <p className="panel-note">No charms from this region yet.</p>
-      )}
-    </>
+  // No heading or back button (owner, 2026-11-11): the map's trail names the
+  // region and its back button leaves it.
+  return view.charms.length ? (
+    <p className="panel-note">Pick one from the column beside the map to read it here.</p>
+  ) : (
+    <p className="panel-note">No charms from this region yet.</p>
   );
 }
 
 function PrefecturePanel({
   view,
-  onBack,
 }: {
   view: Extract<PanelView, { kind: "prefecture" }>;
-  onBack: () => void;
 }) {
-  const region = REGIONS[view.region];
-  const name = PREFECTURES[view.code];
-  return (
-    <>
-      <div className="panel-head">
-        <div>
-          <div className="crumb" style={{ "--rc": region.color } as CSSProperties}>
-            {region.ja} · {region.en}
-          </div>
-          <h3>{name?.en ?? `Prefecture ${view.code}`}</h3>
-          <div className="ja">
-            {name?.ja} — {view.charms.length} charm{view.charms.length !== 1 ? "s" : ""}
-          </div>
-        </div>
-        <button type="button" className="reset" onClick={onBack}>
-          ← Back
-        </button>
-      </div>
-      {view.charms.length ? (
-        <p className="panel-note">
-          Pick one from the column beside the map to read it here.
-        </p>
-      ) : (
-        <p className="panel-note">No charms from this prefecture yet.</p>
-      )}
-    </>
+  // As RegionPanel: the trail names the prefecture and the map leads back.
+  return view.charms.length ? (
+    <p className="panel-note">Pick one from the column beside the map to read it here.</p>
+  ) : (
+    <p className="panel-note">No charms from this prefecture yet.</p>
   );
 }
 
