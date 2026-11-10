@@ -539,11 +539,11 @@ body {
   font-weight: 600;
   cursor: pointer;
   color: var(--ink);
-  /* In the current region's colour, the same wash and border as the trail's
-     box (owner, 2026-11-10); --rc is set inline, and the button only appears
-     inside a region. Falls back to the neutral chip look without one. */
-  background: color-mix(in srgb, var(--rc, var(--line)) 22%, var(--surface));
-  border: 1.5px solid var(--rc, var(--line));
+  /* In the colour of where it leads, the same wash and border as the trail's
+     boxes (owner, 2026-11-10): a region's hue via --rc when it leads to a
+     region, and 全国's ink when it leads back to all of Japan. */
+  background: color-mix(in srgb, var(--rc, var(--ink)) 22%, var(--surface));
+  border: 1.5px solid var(--rc, var(--ink));
   border-radius: 999px;
   padding: 6px 14px 6px 9px;
   display: inline-flex;
@@ -558,7 +558,7 @@ body {
   flex: none;
 }
 .back-btn:hover {
-  background: color-mix(in srgb, var(--rc, var(--line)) 34%, var(--surface));
+  background: color-mix(in srgb, var(--rc, var(--ink)) 34%, var(--surface));
   transform: translateY(-1px);
 }
 /* On touch there's no hover and no cursor: pointer to show the map is

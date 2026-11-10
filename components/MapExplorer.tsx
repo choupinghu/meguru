@@ -737,9 +737,14 @@ export default function MapExplorer({ charms }: { charms: DesignView[] }) {
                 <button
                   type="button"
                   className="back-btn"
-                  // In the current region's colour, matching the trail's box
-                  // (owner, 2026-11-10). It only exists inside a region.
-                  style={{ "--rc": REGIONS[state.regionKey].color } as CSSProperties}
+                  // In the colour of where it leads, like the trail's boxes (owner,
+                  // 2026-11-10): back to a region wears that region's hue; back to
+                  // 全国 wears 全国's neutral ink, so no --rc is set.
+                  style={
+                    state.level === "prefecture"
+                      ? ({ "--rc": REGIONS[state.regionKey].color } as CSSProperties)
+                      : undefined
+                  }
                   onClick={state.level === "prefecture" ? backToRegion : resetToOverview}
                 >
                   {/* A drawn chevron rather than the "←" character (owner,
