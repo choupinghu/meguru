@@ -545,19 +545,17 @@ body {
   background: color-mix(in srgb, var(--rc, var(--line)) 22%, var(--surface));
   border: 1.5px solid var(--rc, var(--line));
   border-radius: 999px;
-  /* A round button holding only the chevron. */
-  width: 36px;
-  height: 36px;
-  padding: 0;
+  padding: 6px 14px 6px 9px;
   display: inline-flex;
   align-items: center;
-  justify-content: center;
+  gap: 4px;
+  white-space: nowrap;
   flex: none;
   transition: 0.18s;
 }
 .back-btn svg {
   display: block;
-  margin-left: -1px;
+  flex: none;
 }
 .back-btn:hover {
   background: color-mix(in srgb, var(--rc, var(--line)) 34%, var(--surface));

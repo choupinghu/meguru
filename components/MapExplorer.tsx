@@ -612,7 +612,7 @@ export default function MapExplorer({ charms }: { charms: DesignView[] }) {
 
   const hint =
     state.level === "prefecture"
-      ? "Tap the arrow to return to the region"
+      ? "Tap “Region” to go back"
       : state.level === "region"
         ? "Tap a prefecture for its charms"
         : "Tap a glowing prefecture to explore";
@@ -741,15 +741,10 @@ export default function MapExplorer({ charms }: { charms: DesignView[] }) {
                   // (owner, 2026-11-10). It only exists inside a region.
                   style={{ "--rc": REGIONS[state.regionKey].color } as CSSProperties}
                   onClick={state.level === "prefecture" ? backToRegion : resetToOverview}
-                  // Just the arrow (owner, 2026-11-10): the trail above already
-                  // says where back leads, so the words only repeated it.
-                  aria-label={
-                    state.level === "prefecture"
-                      ? `Back to ${REGIONS[state.regionKey].en}`
-                      : "Back to all Japan"
-                  }
                 >
-                  <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
+                  {/* A drawn chevron rather than the "←" character (owner,
+                      2026-11-10), with the word kept beside it. */}
+                  <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
                     <path
                       d="M10 3.5 5.5 8l4.5 4.5"
                       fill="none"
@@ -759,6 +754,7 @@ export default function MapExplorer({ charms }: { charms: DesignView[] }) {
                       strokeLinejoin="round"
                     />
                   </svg>
+                  {state.level === "prefecture" ? "Region" : "All Japan"}
                 </button>
               ) : null}
               <span className="hint">{hint}</span>
