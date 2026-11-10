@@ -852,9 +852,15 @@ body {
   margin-top: 4px;
   line-height: 1.2;
 }
-/* The picture sits straight under the heading's rule. */
+/* The picture sits straight under the heading's rule; both names centred
+   over it (owner, 2026-11-11). */
 .charm-panel .panel-head {
   margin-bottom: 0;
+  justify-content: center;
+  text-align: center;
+}
+.charm-panel .panel-head h3 {
+  text-wrap: balance;
 }
 .charm-panel-art {
   width: 100%;
