@@ -3,6 +3,7 @@ import Link from "next/link";
 import CharmThumb from "./CharmThumb";
 import type { CharmView, DesignView } from "@/lib/charms";
 import { locationLabel, motifLabel, toCharmView } from "@/lib/charms";
+import { PREFECTURES } from "@/lib/prefectures";
 import { COLLAB_REGION, REGIONS, REGION_LIST, textOnRegionColour, type RegionKey } from "@/lib/regions";
 
 /**
@@ -26,13 +27,14 @@ export type PanelView =
       prefecturesReached: number;
       regionCounts: Record<RegionKey, number>;
     }
-  | { kind: "region"; region: RegionKey; charms: DesignView[] }
+  | { kind: "region"; region: RegionKey; charms: DesignView[]; reached: number[] }
   | { kind: "prefecture"; region: RegionKey; code: number; charms: DesignView[] }
   | { kind: "charm"; design: DesignView; region: RegionKey | null };
 
 interface MapPanelProps {
   view: PanelView;
   onSelectRegion: (region: RegionKey) => void;
+  onSelectPrefecture: (code: number) => void;
   /** Picking a card in the region/prefecture panels (spec 0010): switches
    * the panel into that charm's preview *in place*, without navigating off
    * `/` or moving the map (`MapExplorer` owns that distinction). */
@@ -44,6 +46,7 @@ interface MapPanelProps {
 export default function MapPanel({
   view,
   onSelectRegion,
+  onSelectPrefecture,
   onReset,
 }: MapPanelProps) {
   return (
@@ -51,7 +54,7 @@ export default function MapPanel({
       {view.kind === "overview" ? (
         <OverviewPanel view={view} onSelectRegion={onSelectRegion} />
       ) : view.kind === "region" ? (
-        <RegionPanel view={view} />
+        <RegionPanel view={view} onSelectPrefecture={onSelectPrefecture} />
       ) : view.kind === "prefecture" ? (
         <PrefecturePanel view={view} />
       ) : (
@@ -121,15 +124,48 @@ function OverviewPanel({
 
 function RegionPanel({
   view,
+  onSelectPrefecture,
 }: {
   view: Extract<PanelView, { kind: "region" }>;
+  onSelectPrefecture: (code: number) => void;
 }) {
-  // No heading or back button (owner, 2026-11-11): the map's trail names the
-  // region and its back button leaves it.
-  return view.charms.length ? (
-    <p className="panel-note">Pick one from the column beside the map to read it here.</p>
-  ) : (
-    <p className="panel-note">No charms from this region yet.</p>
+  // Every prefecture in the region as a box in the region's colour, kanji over
+  // English (owner, 2026-11-11) -- the region-level counterpart of the All
+  // Japan bubbles. One with no charms yet is faded and cannot be picked. No
+  // pattern for now. The trail names the region and its button leads back,
+  // so no heading here.
+  const region = REGIONS[view.region];
+  const reached = new Set(view.reached);
+  const cols = region.codes.length === 1 ? 1 : region.codes.length <= 4 ? 2 : 3;
+  return (
+    <div className="overview">
+      <div className="reg-grid" style={{ "--cols": cols } as CSSProperties}>
+        {region.codes.map((code) => {
+          const name = PREFECTURES[code];
+          return (
+            <button
+              key={code}
+              type="button"
+              className="reg-cell"
+              disabled={!reached.has(code)}
+              style={
+                {
+                  "--rc": region.color,
+                  "--rt":
+                    textOnRegionColour(region.color) === "ink"
+                      ? "var(--ink)"
+                      : "var(--surface)",
+                } as CSSProperties
+              }
+              onClick={() => onSelectPrefecture(code)}
+            >
+              <span className="rj">{name?.ja}</span>
+              <span className="rn">{name?.en}</span>
+            </button>
+          );
+        })}
+      </div>
+    </div>
   );
 }
 

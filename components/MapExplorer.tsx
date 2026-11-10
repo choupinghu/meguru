@@ -440,6 +440,20 @@ export default function MapExplorer({ charms }: { charms: DesignView[] }) {
   }, [bumpEntry]);
 
   // "All Japan" always returns to the top level.
+  // A prefecture box in the region panel: the same drill-in as tapping the
+  // prefecture on the map at region level.
+  const selectPrefecture = useCallback(
+    (code: number) => {
+      const region = regionForCode(code);
+      if (!region) return;
+      setDiscoveredCharm(null);
+      setBandFocusId(null);
+      bumpEntry();
+      setState({ level: "prefecture", regionKey: region, code });
+    },
+    [bumpEntry]
+  );
+
   const resetToOverview = useCallback(() => {
     setDiscoveredCharm(null);
     setBandFocusId(null);
@@ -600,6 +614,7 @@ export default function MapExplorer({ charms }: { charms: DesignView[] }) {
         kind: "region",
         region: state.regionKey,
         charms: REGIONS[state.regionKey].codes.flatMap((code) => byCode.get(code) ?? []),
+        reached: REGIONS[state.regionKey].codes.filter((code) => (byCode.get(code)?.length ?? 0) > 0),
       };
     }
     return {
@@ -791,6 +806,7 @@ export default function MapExplorer({ charms }: { charms: DesignView[] }) {
         <MapPanel
           view={panelView}
           onSelectRegion={selectRegion}
+          onSelectPrefecture={selectPrefecture}
           onReset={resetToOverview}
         />
       </div>
