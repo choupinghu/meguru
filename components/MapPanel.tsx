@@ -96,6 +96,7 @@ function OverviewPanel({
               key={region.key}
               type="button"
               className="reg-cell"
+              data-region={region.key}
               disabled={count === 0}
               style={
                 {

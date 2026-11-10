@@ -737,6 +737,81 @@ body {
   text-transform: uppercase;
 }
 
+/* 和柄 behind each region bubble (owner, 2026-11-11): one traditional pattern
+   per region, as a mask -- the tiles carry no colour, so the pattern takes the
+   bubble's own text tone (--rt) at low strength and stays behind the kanji.
+   Hokkaido 青海波, Tōhoku 麻の葉, Kantō 亀甲, Chūbu 七宝, Kinki 立涌,
+   Chūgoku 市松, Shikoku 鱗, Kyūshū 菱, Okinawa 鹿の子. */
+.reg-cell {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+.reg-cell::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: var(--rt, var(--ink));
+  opacity: 0.16;
+  -webkit-mask-repeat: repeat;
+  mask-repeat: repeat;
+}
+.reg-cell[data-region="hokkaido"]::before {
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2724%27 height=%2724%27 viewBox=%270 0 24 24%27%3E%3Cg fill=%27none%27 stroke=%27black%27 stroke-width=%271.1%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3E%3Cpath d=%27M0 12a12 12 0 0 1 24 0 M4.08 12a7.92 7.92 0 0 1 15.84 0 M8.04 12a3.96 3.96 0 0 1 7.92 0 M-12 24a12 12 0 0 1 24 0 M-7.92 24a7.92 7.92 0 0 1 15.84 0 M-3.96 24a3.96 3.96 0 0 1 7.92 0 M12 24a12 12 0 0 1 24 0 M16.08 24a7.92 7.92 0 0 1 15.84 0 M20.04 24a3.96 3.96 0 0 1 7.92 0 M-12 0a12 12 0 0 1 24 0 M-7.92 0a7.92 7.92 0 0 1 15.84 0 M-3.96 0a3.96 3.96 0 0 1 7.92 0 M12 0a12 12 0 0 1 24 0 M16.08 0a7.92 7.92 0 0 1 15.84 0 M20.04 0a3.96 3.96 0 0 1 7.92 0%27/%3E%3C/g%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2724%27 height=%2724%27 viewBox=%270 0 24 24%27%3E%3Cg fill=%27none%27 stroke=%27black%27 stroke-width=%271.1%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3E%3Cpath d=%27M0 12a12 12 0 0 1 24 0 M4.08 12a7.92 7.92 0 0 1 15.84 0 M8.04 12a3.96 3.96 0 0 1 7.92 0 M-12 24a12 12 0 0 1 24 0 M-7.92 24a7.92 7.92 0 0 1 15.84 0 M-3.96 24a3.96 3.96 0 0 1 7.92 0 M12 24a12 12 0 0 1 24 0 M16.08 24a7.92 7.92 0 0 1 15.84 0 M20.04 24a3.96 3.96 0 0 1 7.92 0 M-12 0a12 12 0 0 1 24 0 M-7.92 0a7.92 7.92 0 0 1 15.84 0 M-3.96 0a3.96 3.96 0 0 1 7.92 0 M12 0a12 12 0 0 1 24 0 M16.08 0a7.92 7.92 0 0 1 15.84 0 M20.04 0a3.96 3.96 0 0 1 7.92 0%27/%3E%3C/g%3E%3C/svg%3E");
+  -webkit-mask-size: 24px 24px;
+  mask-size: 24px 24px;
+}
+.reg-cell[data-region="tohoku"]::before {
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2720%27 height=%2734.641%27 viewBox=%270 0 20 34.641%27%3E%3Cg fill=%27none%27 stroke=%27black%27 stroke-width=%270.9%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3E%3Cpath d=%27M-20 17.32L0 17.32L-10 0ZM-10 11.55L-20 17.32M-10 11.55L0 17.32M-10 11.55L-10 0M-10 0L10 0L0 17.32ZM0 5.77L-10 0M0 5.77L10 0M0 5.77L0 17.32M0 17.32L20 17.32L10 0ZM10 11.55L0 17.32M10 11.55L20 17.32M10 11.55L10 0M10 0L30 0L20 17.32ZM20 5.77L10 0M20 5.77L30 0M20 5.77L20 17.32M20 17.32L40 17.32L30 0ZM30 11.55L20 17.32M30 11.55L40 17.32M30 11.55L30 0M30 0L50 0L40 17.32ZM40 5.77L30 0M40 5.77L50 0M40 5.77L40 17.32M40 17.32L60 17.32L50 0ZM50 11.55L40 17.32M50 11.55L60 17.32M50 11.55L50 0M50 0L70 0L60 17.32ZM60 5.77L50 0M60 5.77L70 0M60 5.77L60 17.32M-30 34.64L-10 34.64L-20 17.32ZM-20 28.87L-30 34.64M-20 28.87L-10 34.64M-20 28.87L-20 17.32M-20 17.32L0 17.32L-10 34.64ZM-10 23.09L-20 17.32M-10 23.09L0 17.32M-10 23.09L-10 34.64M-10 34.64L10 34.64L0 17.32ZM0 28.87L-10 34.64M0 28.87L10 34.64M0 28.87L0 17.32M0 17.32L20 17.32L10 34.64ZM10 23.09L0 17.32M10 23.09L20 17.32M10 23.09L10 34.64M10 34.64L30 34.64L20 17.32ZM20 28.87L10 34.64M20 28.87L30 34.64M20 28.87L20 17.32M20 17.32L40 17.32L30 34.64ZM30 23.09L20 17.32M30 23.09L40 17.32M30 23.09L30 34.64M30 34.64L50 34.64L40 17.32ZM40 28.87L30 34.64M40 28.87L50 34.64M40 28.87L40 17.32M40 17.32L60 17.32L50 34.64ZM50 23.09L40 17.32M50 23.09L60 17.32M50 23.09L50 34.64%27/%3E%3C/g%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2720%27 height=%2734.641%27 viewBox=%270 0 20 34.641%27%3E%3Cg fill=%27none%27 stroke=%27black%27 stroke-width=%270.9%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3E%3Cpath d=%27M-20 17.32L0 17.32L-10 0ZM-10 11.55L-20 17.32M-10 11.55L0 17.32M-10 11.55L-10 0M-10 0L10 0L0 17.32ZM0 5.77L-10 0M0 5.77L10 0M0 5.77L0 17.32M0 17.32L20 17.32L10 0ZM10 11.55L0 17.32M10 11.55L20 17.32M10 11.55L10 0M10 0L30 0L20 17.32ZM20 5.77L10 0M20 5.77L30 0M20 5.77L20 17.32M20 17.32L40 17.32L30 0ZM30 11.55L20 17.32M30 11.55L40 17.32M30 11.55L30 0M30 0L50 0L40 17.32ZM40 5.77L30 0M40 5.77L50 0M40 5.77L40 17.32M40 17.32L60 17.32L50 0ZM50 11.55L40 17.32M50 11.55L60 17.32M50 11.55L50 0M50 0L70 0L60 17.32ZM60 5.77L50 0M60 5.77L70 0M60 5.77L60 17.32M-30 34.64L-10 34.64L-20 17.32ZM-20 28.87L-30 34.64M-20 28.87L-10 34.64M-20 28.87L-20 17.32M-20 17.32L0 17.32L-10 34.64ZM-10 23.09L-20 17.32M-10 23.09L0 17.32M-10 23.09L-10 34.64M-10 34.64L10 34.64L0 17.32ZM0 28.87L-10 34.64M0 28.87L10 34.64M0 28.87L0 17.32M0 17.32L20 17.32L10 34.64ZM10 23.09L0 17.32M10 23.09L20 17.32M10 23.09L10 34.64M10 34.64L30 34.64L20 17.32ZM20 28.87L10 34.64M20 28.87L30 34.64M20 28.87L20 17.32M20 17.32L40 17.32L30 34.64ZM30 23.09L20 17.32M30 23.09L40 17.32M30 23.09L30 34.64M30 34.64L50 34.64L40 17.32ZM40 28.87L30 34.64M40 28.87L50 34.64M40 28.87L40 17.32M40 17.32L60 17.32L50 34.64ZM50 23.09L40 17.32M50 23.09L60 17.32M50 23.09L50 34.64%27/%3E%3C/g%3E%3C/svg%3E");
+  -webkit-mask-size: 20px 34.64px;
+  mask-size: 20px 34.64px;
+}
+.reg-cell[data-region="kanto"]::before {
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2719.0526%27 height=%2733%27 viewBox=%270 0 19.0526 33%27%3E%3Cg fill=%27none%27 stroke=%27black%27 stroke-width=%271.1%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3E%3Cpath d=%27M9.53 5.5L0 11L-9.53 5.5L-9.53 -5.5L-0 -11L9.53 -5.5ZM28.58 5.5L19.05 11L9.53 5.5L9.53 -5.5L19.05 -11L28.58 -5.5ZM19.05 22L9.53 27.5L-0 22L0 11L9.53 5.5L19.05 11ZM9.53 38.5L0 44L-9.53 38.5L-9.53 27.5L-0 22L9.53 27.5ZM28.58 38.5L19.05 44L9.53 38.5L9.53 27.5L19.05 22L28.58 27.5Z%27/%3E%3C/g%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2719.0526%27 height=%2733%27 viewBox=%270 0 19.0526 33%27%3E%3Cg fill=%27none%27 stroke=%27black%27 stroke-width=%271.1%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3E%3Cpath d=%27M9.53 5.5L0 11L-9.53 5.5L-9.53 -5.5L-0 -11L9.53 -5.5ZM28.58 5.5L19.05 11L9.53 5.5L9.53 -5.5L19.05 -11L28.58 -5.5ZM19.05 22L9.53 27.5L-0 22L0 11L9.53 5.5L19.05 11ZM9.53 38.5L0 44L-9.53 38.5L-9.53 27.5L-0 22L9.53 27.5ZM28.58 38.5L19.05 44L9.53 38.5L9.53 27.5L19.05 22L28.58 27.5Z%27/%3E%3C/g%3E%3C/svg%3E");
+  -webkit-mask-size: 19.05px 33px;
+  mask-size: 19.05px 33px;
+}
+.reg-cell[data-region="chubu"]::before {
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2722%27 height=%2722%27 viewBox=%270 0 22 22%27%3E%3Cg fill=%27none%27 stroke=%27black%27 stroke-width=%271.1%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3E%3Ccircle cx=%270%27 cy=%270%27 r=%2711%27/%3E%3Ccircle cx=%2722%27 cy=%270%27 r=%2711%27/%3E%3Ccircle cx=%270%27 cy=%2722%27 r=%2711%27/%3E%3Ccircle cx=%2722%27 cy=%2722%27 r=%2711%27/%3E%3Ccircle cx=%2711%27 cy=%2711%27 r=%2711%27/%3E%3C/g%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2722%27 height=%2722%27 viewBox=%270 0 22 22%27%3E%3Cg fill=%27none%27 stroke=%27black%27 stroke-width=%271.1%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3E%3Ccircle cx=%270%27 cy=%270%27 r=%2711%27/%3E%3Ccircle cx=%2722%27 cy=%270%27 r=%2711%27/%3E%3Ccircle cx=%270%27 cy=%2722%27 r=%2711%27/%3E%3Ccircle cx=%2722%27 cy=%2722%27 r=%2711%27/%3E%3Ccircle cx=%2711%27 cy=%2711%27 r=%2711%27/%3E%3C/g%3E%3C/svg%3E");
+  -webkit-mask-size: 22px 22px;
+  mask-size: 22px 22px;
+}
+.reg-cell[data-region="kinki"]::before {
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2724%27 height=%2732%27 viewBox=%270 0 24 32%27%3E%3Cg fill=%27none%27 stroke=%27black%27 stroke-width=%271.2%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3E%3Cpath d=%27M9 0C4 8 4 8 9 16S14 24 9 32M15 0C20 8 20 8 15 16S10 24 15 32%27/%3E%3C/g%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2724%27 height=%2732%27 viewBox=%270 0 24 32%27%3E%3Cg fill=%27none%27 stroke=%27black%27 stroke-width=%271.2%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3E%3Cpath d=%27M9 0C4 8 4 8 9 16S14 24 9 32M15 0C20 8 20 8 15 16S10 24 15 32%27/%3E%3C/g%3E%3C/svg%3E");
+  -webkit-mask-size: 24px 32px;
+  mask-size: 24px 32px;
+}
+.reg-cell[data-region="chugoku"]::before {
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2728%27 height=%2728%27 viewBox=%270 0 28 28%27%3E%3Cg fill=%27none%27 stroke=%27black%27 stroke-width=%271%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3E%3Cpath d=%27M0 0H14V14H0ZM14 14H28V28H14Z%27 fill=%27black%27 fill-opacity=%270.55%27 stroke=%27none%27/%3E%3C/g%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2728%27 height=%2728%27 viewBox=%270 0 28 28%27%3E%3Cg fill=%27none%27 stroke=%27black%27 stroke-width=%271%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3E%3Cpath d=%27M0 0H14V14H0ZM14 14H28V28H14Z%27 fill=%27black%27 fill-opacity=%270.55%27 stroke=%27none%27/%3E%3C/g%3E%3C/svg%3E");
+  -webkit-mask-size: 28px 28px;
+  mask-size: 28px 28px;
+}
+.reg-cell[data-region="shikoku"]::before {
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2720%27 height=%2734.64%27 viewBox=%270 0 20 34.64%27%3E%3Cg fill=%27none%27 stroke=%27black%27 stroke-width=%271.1%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3E%3Cpath d=%27M0 17.32L10 0L20 17.32ZM-10 34.64L0 17.32L10 34.64ZM10 34.64L20 17.32L30 34.64Z%27/%3E%3C/g%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2720%27 height=%2734.64%27 viewBox=%270 0 20 34.64%27%3E%3Cg fill=%27none%27 stroke=%27black%27 stroke-width=%271.1%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3E%3Cpath d=%27M0 17.32L10 0L20 17.32ZM-10 34.64L0 17.32L10 34.64ZM10 34.64L20 17.32L30 34.64Z%27/%3E%3C/g%3E%3C/svg%3E");
+  -webkit-mask-size: 20px 34.64px;
+  mask-size: 20px 34.64px;
+}
+.reg-cell[data-region="kyushu"]::before {
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2718%27 height=%2726%27 viewBox=%270 0 18 26%27%3E%3Cg fill=%27none%27 stroke=%27black%27 stroke-width=%271.0%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3E%3Cpath d=%27M9 0L18 13L9 26L0 13ZM9 7.8L12.6 13L9 18.2L5.4 13Z%27/%3E%3C/g%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2718%27 height=%2726%27 viewBox=%270 0 18 26%27%3E%3Cg fill=%27none%27 stroke=%27black%27 stroke-width=%271.0%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3E%3Cpath d=%27M9 0L18 13L9 26L0 13ZM9 7.8L12.6 13L9 18.2L5.4 13Z%27/%3E%3C/g%3E%3C/svg%3E");
+  -webkit-mask-size: 18px 26px;
+  mask-size: 18px 26px;
+}
+.reg-cell[data-region="okinawa"]::before {
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2714%27 height=%2714%27 viewBox=%270 0 14 14%27%3E%3Cg fill=%27none%27 stroke=%27black%27 stroke-width=%271.1%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3E%3Ccircle cx=%270%27 cy=%270%27 r=%273.6%27/%3E%3Ccircle cx=%270%27 cy=%270%27 r=%270.9%27 fill=%27black%27/%3E%3Ccircle cx=%2714%27 cy=%270%27 r=%273.6%27/%3E%3Ccircle cx=%2714%27 cy=%270%27 r=%270.9%27 fill=%27black%27/%3E%3Ccircle cx=%277%27 cy=%277%27 r=%273.6%27/%3E%3Ccircle cx=%277%27 cy=%277%27 r=%270.9%27 fill=%27black%27/%3E%3Ccircle cx=%270%27 cy=%2714%27 r=%273.6%27/%3E%3Ccircle cx=%270%27 cy=%2714%27 r=%270.9%27 fill=%27black%27/%3E%3Ccircle cx=%2714%27 cy=%2714%27 r=%273.6%27/%3E%3Ccircle cx=%2714%27 cy=%2714%27 r=%270.9%27 fill=%27black%27/%3E%3C/g%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2714%27 height=%2714%27 viewBox=%270 0 14 14%27%3E%3Cg fill=%27none%27 stroke=%27black%27 stroke-width=%271.1%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3E%3Ccircle cx=%270%27 cy=%270%27 r=%273.6%27/%3E%3Ccircle cx=%270%27 cy=%270%27 r=%270.9%27 fill=%27black%27/%3E%3Ccircle cx=%2714%27 cy=%270%27 r=%273.6%27/%3E%3Ccircle cx=%2714%27 cy=%270%27 r=%270.9%27 fill=%27black%27/%3E%3Ccircle cx=%277%27 cy=%277%27 r=%273.6%27/%3E%3Ccircle cx=%277%27 cy=%277%27 r=%270.9%27 fill=%27black%27/%3E%3Ccircle cx=%270%27 cy=%2714%27 r=%273.6%27/%3E%3Ccircle cx=%270%27 cy=%2714%27 r=%270.9%27 fill=%27black%27/%3E%3Ccircle cx=%2714%27 cy=%2714%27 r=%273.6%27/%3E%3Ccircle cx=%2714%27 cy=%2714%27 r=%270.9%27 fill=%27black%27/%3E%3C/g%3E%3C/svg%3E");
+  -webkit-mask-size: 14px 14px;
+  mask-size: 14px 14px;
+}
+
 /* region/prefecture panel charm listing -- cards themselves are the shared
    .card styling above (from CharmCard), this just lays them out in the
    narrower panel column. */
