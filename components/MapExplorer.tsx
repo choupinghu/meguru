@@ -181,7 +181,6 @@ export default function MapExplorer({ charms }: { charms: DesignView[] }) {
   const animationFrame = useRef<number | null>(null);
   const discoverTimeout = useRef<number | null>(null);
   const discoverBtnRef = useRef<HTMLButtonElement>(null);
-  const legendRef = useRef<HTMLDivElement>(null);
   // Discover's no-repeat window (D2): most-recent-first design ids, trimmed
   // to WINDOW on every pick. A ref, not state -- it must never itself
   // trigger a re-render; only the picks it produces do that.
@@ -424,35 +423,6 @@ export default function MapExplorer({ charms }: { charms: DesignView[] }) {
     };
   }, [bumpEntry]);
 
-  // The region chips are one horizontally scrolling row on a phone, which a
-  // touch swipe drives perfectly. A wheel does not: a vertical trackpad gesture
-  // over the row scrolls the page instead, so on a laptop -- and in the phone
-  // preview window, which is where this gets reviewed -- the regions look
-  // unscrollable even though they are not. Measured: a vertical wheel left
-  // scrollLeft at 0 and moved the page 9px; a horizontal one moved the row
-  // 433px.
-  //
-  // So put a vertical wheel onto the row's own axis, but only while the row can
-  // still move that way. At either end the gesture falls back to the page, so
-  // the row never traps a scroll -- and on a screen wide enough for the chips
-  // to wrap there is no overflow, so this does nothing at all.
-  useEffect(() => {
-    const row = legendRef.current;
-    if (!row) return;
-    const onWheel = (event: WheelEvent) => {
-      if (Math.abs(event.deltaY) <= Math.abs(event.deltaX)) return;
-      const max = row.scrollWidth - row.clientWidth;
-      if (max <= 0) return;
-      if (event.deltaY < 0 && row.scrollLeft <= 0) return;
-      if (event.deltaY > 0 && row.scrollLeft >= max) return;
-      event.preventDefault();
-      row.scrollLeft = Math.max(0, Math.min(max, row.scrollLeft + event.deltaY));
-    };
-    // Not passive: the whole point is to take the gesture off the page.
-    row.addEventListener("wheel", onWheel, { passive: false });
-    return () => row.removeEventListener("wheel", onWheel);
-  }, []);
-
   // Cancel any in-flight zoom animation / pending Discover jump on unmount.
   useEffect(() => {
     return () => {
@@ -642,10 +612,10 @@ export default function MapExplorer({ charms }: { charms: DesignView[] }) {
 
   const hint =
     state.level === "prefecture"
-      ? "Tap “← Back” to return to the region"
+      ? "Tap the arrow to return to the region"
       : state.level === "region"
         ? "Tap a prefecture for its charms"
-        : "Tap a region chip or a glowing prefecture to explore";
+        : "Tap a glowing prefecture to explore";
 
   // A drill-down shows that region's or prefecture's charms, in their own
   // order; the top level shows the whole pool, shuffled.
@@ -674,37 +644,13 @@ export default function MapExplorer({ charms }: { charms: DesignView[] }) {
     <section className="explore">
       <div className="explore-grid">
         <div className="mapcard">
-          <div className="legend" ref={legendRef}>
-            <button
-              type="button"
-              className={`chip all${state.level === "japan" ? " active" : ""}`}
-              onClick={resetToOverview}
-            >
-              <span className="sw" />
-              All Japan
-            </button>
-            {REGION_LIST.map((region) => (
-              <button
-                key={region.key}
-                type="button"
-                className={`chip${
-                  state.level !== "japan" && state.regionKey === region.key ? " active" : ""
-                }`}
-                style={{ "--rc": region.color } as CSSProperties}
-                onClick={() => selectRegion(region.key)}
-              >
-                <span className="sw" />
-                {region.en}
-                <span className="cnt">{regionCounts[region.key]}</span>
-              </button>
-            ))}
-          </div>
-          {/* Phone-only, in place of the chip row (owner, 2026-11-10). On a phone
-              the chips were a sideways filter few reached for, and nothing on
-              screen said where you were -- so the strip's label carried the whole
-              place name and ran long. A kanji trail is short enough to fit any
-              screen: 全国, then 全国・中部, then 全国・中部・山梨. Earlier steps are
-              links back, the way a breadcrumb reads; the last is where you are. */}
+          {/* The map's heading, in place of the region chips (owner, 2026-11-10:
+              phones first, then every width). The chips were a filter that also
+              announced how many charms each region holds, and the site is not
+              asking anyone to count -- it is asking them to explore. Where you
+              are, as a kanji trail: 全国, then 全国・中部, then 全国・中部・山梨.
+              Earlier steps are links back; the current place is boxed in its map
+              colour with its English name beneath. */}
           <nav className="maptrail" aria-label="Where you are on the map">
             {/* The steps already passed, grouped so the stylesheet can sit them
                 just left of the box while the box itself stays dead centre. */}
@@ -791,9 +737,28 @@ export default function MapExplorer({ charms }: { charms: DesignView[] }) {
                 <button
                   type="button"
                   className="back-btn"
+                  // In the current region's colour, matching the trail's box
+                  // (owner, 2026-11-10). It only exists inside a region.
+                  style={{ "--rc": REGIONS[state.regionKey].color } as CSSProperties}
                   onClick={state.level === "prefecture" ? backToRegion : resetToOverview}
+                  // Just the arrow (owner, 2026-11-10): the trail above already
+                  // says where back leads, so the words only repeated it.
+                  aria-label={
+                    state.level === "prefecture"
+                      ? `Back to ${REGIONS[state.regionKey].en}`
+                      : "Back to all Japan"
+                  }
                 >
-                  {state.level === "prefecture" ? "\u2190 Region" : "\u2190 All Japan"}
+                  <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
+                    <path
+                      d="M10 3.5 5.5 8l4.5 4.5"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.8"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
                 </button>
               ) : null}
               <span className="hint">{hint}</span>

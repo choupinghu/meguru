@@ -88,7 +88,7 @@ body {
    docked header on top of its already-tight hero + map budget, but a
    54-card scroll needs a way back to the map on screen. An explicit
    background stops cards showing through as they scroll underneath; the
-   highest z-index elsewhere on the site today is 2 (.legend/.maptools, both
+   highest z-index elsewhere on the site today is 2 (.maptools,
    /-only), so 50 clears everything without needing to fight for the top. */
 .top.is-sticky {
   position: sticky;
@@ -391,64 +391,6 @@ body {
   pointer-events: none;
 }
 
-/* region legend chips -- their swatch colours come from the --rc custom
-   property set inline from lib/regions.ts data, the same convention
-   CharmCard/CharmThumb use; no literal colours live here. */
-.legend {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 7px;
-  margin-bottom: 10px;
-  position: relative;
-  z-index: 2;
-}
-.chip {
-  font: inherit;
-  font-size: 12.5px;
-  cursor: pointer;
-  border: 1px solid var(--line);
-  background: var(--surface-2);
-  color: var(--ink-soft);
-  border-radius: 999px;
-  padding: 6px 11px 6px 8px;
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  transition: 0.18s;
-  line-height: 1;
-}
-.chip:hover {
-  color: var(--ink);
-  border-color: var(--ink-faint);
-  transform: translateY(-1px);
-}
-.chip .sw {
-  width: 11px;
-  height: 11px;
-  border-radius: 3px;
-  flex: none;
-  background: var(--rc, var(--land));
-  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.15);
-}
-.chip .cnt {
-  font-size: 10.5px;
-  color: var(--ink-faint);
-  font-variant-numeric: tabular-nums;
-}
-.chip.active {
-  background: var(--ink);
-  color: var(--surface);
-  border-color: var(--ink);
-}
-.chip.active .cnt {
-  color: rgba(255, 255, 255, 0.65);
-}
-.chip.all {
-  font-weight: 600;
-}
-.chip.all .sw {
-  background: linear-gradient(135deg, var(--vermilion), var(--indigo));
-}
 
 .mapstage {
   position: relative;
@@ -597,15 +539,28 @@ body {
   font-weight: 600;
   cursor: pointer;
   color: var(--ink);
-  background: var(--surface-2);
-  border: 1px solid var(--line);
+  /* In the current region's colour, the same wash and border as the trail's
+     box (owner, 2026-11-10); --rc is set inline, and the button only appears
+     inside a region. Falls back to the neutral chip look without one. */
+  background: color-mix(in srgb, var(--rc, var(--line)) 22%, var(--surface));
+  border: 1.5px solid var(--rc, var(--line));
   border-radius: 999px;
-  padding: 6px 13px;
-  white-space: nowrap;
+  /* A round button holding only the chevron. */
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
   transition: 0.18s;
 }
+.back-btn svg {
+  display: block;
+  margin-left: -1px;
+}
 .back-btn:hover {
-  border-color: var(--ink-faint);
+  background: color-mix(in srgb, var(--rc, var(--line)) 34%, var(--surface));
   transform: translateY(-1px);
 }
 /* On touch there's no hover and no cursor: pointer to show the map is
@@ -1462,17 +1417,95 @@ footer .mark {
   }
 }
 
-/* The map's kanji trail (全国・中部・山梨). Phone-only: on a wide screen the
-   region chips and the panel's own heading already say where you are. */
+/* The map's heading: a kanji trail of where you are (全国・中部・山梨), in
+   place of the region chips at every width (owner, 2026-11-10). */
 .maptrail {
-  display: none;
+  /* The box -- where you are -- sits in the exact centre over the map, like
+     the strip's label under it; the steps already passed sit just to its
+     left (owner, 2026-11-10). Two equal flexible columns either side of the
+     box are what keep it centred whatever comes before it. */
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  column-gap: 4px;
+  margin: 0 0 6px;
+  font-family: var(--font-display);
+  font-size: 16px;
+  letter-spacing: 0.08em;
+  color: var(--ink-faint);
+}
+.maptrail button {
+  font: inherit;
+  letter-spacing: inherit;
+  color: var(--ink-soft);
+  background: none;
+  border: 0;
+  padding: 4px 0;
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-color: var(--line);
+  text-underline-offset: 4px;
+}
+.maptrail .sep {
+  color: var(--ink-faint);
+}
+/* The steps already passed are links back, so they sit a size down from the
+   box -- quieter, and narrow enough that 全国・中部・ fits beside a
+   prefecture's box on a 375px phone without nudging it off centre. */
+.maptrail .before {
+  grid-column: 1;
+  grid-row: 1;
+  justify-self: end;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 1px;
+  white-space: nowrap;
+  font-size: 13.5px;
+  letter-spacing: 0.04em;
+}
+.maptrail .here {
+  grid-column: 2;
+  grid-row: 1;
+}
+/* Where you are, boxed in the place's own map colour (owner, 2026-11-10):
+   the region hue via --rc, as the chips and cards use it; ink for 全国.
+   A wash of the hue with a full-strength border, not a solid fill: light
+   text on the solid hues measured 2.2:1 on Hokkaido and under 3:1 on Kantō
+   and Shikoku, and Kyūshū and Okinawa reach 4.5:1 with neither light nor
+   dark text. Ink on a wash reads on every region, and the border keeps the
+   colour unmistakably the map's. */
+.maptrail .here {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 3px 12px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--rc, var(--ink)) 22%, var(--surface));
+  border: 1.5px solid var(--rc, var(--ink));
+  color: var(--ink);
+  font-weight: 600;
+}
+/* The English name on a second line, centred under the box (owner,
+   2026-11-10) -- a two-line header, so the box holds only the kanji and
+   stays narrow enough to sit centred beside the steps before it. */
+.maptrail .en {
+  grid-column: 1 / -1;
+  grid-row: 2;
+  justify-self: center;
+  margin-top: 3px;
+  font-family: var(--font-sans);
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
 }
 
 /* ----------------------------------------------------------------------------
    Mobile (<=640px). MUST STAY LAST in this file.
 
    These are overrides of the base component styles above, and most of them
-   match a base rule's specificity exactly -- .legend, .mapcard, .panel,
+   match a base rule's specificity exactly -- .mapcard, .panel,
    #jpmap. CSS then decides on source order, so while this block sat near the
    top of the file every one of those rules silently lost to the base rule
    defined later. The map stayed full height, the region chips kept wrapping to
@@ -1485,30 +1518,6 @@ footer .mark {
     scroll-snap-type: y proximity;
   }
 
-  /* Ten region chips wrapped to five rows and pushed the map most of a screen
-     down the page. One swipeable row instead -- they are a filter you reach
-     for, not a legend you read top to bottom. */
-  .legend {
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    scroll-snap-type: x proximity;
-    scrollbar-width: none;
-    padding-bottom: 2px;
-    margin-right: -16px;
-    padding-right: 16px;
-    /* Without this the row just looks truncated. Fading the trailing edge is
-       what tells you it slides -- the scrollbar is hidden and a touch device
-       shows none anyway. */
-    -webkit-mask-image: linear-gradient(to right, black calc(100% - 34px), transparent);
-    mask-image: linear-gradient(to right, black calc(100% - 34px), transparent);
-  }
-  .legend::-webkit-scrollbar {
-    display: none;
-  }
-  .legend .chip {
-    flex: 0 0 auto;
-    scroll-snap-align: start;
-  }
 
   /* The hint restates the button sitting next to it. */
   .hint {
@@ -1655,95 +1664,5 @@ footer .mark {
     font-weight: 600;
     color: var(--vermilion);
     text-decoration: none;
-  }
-}
-
-/* Phone: the trail replaces the region chips (owner, 2026-11-10). Kept in its
-   own block at the very end for the reason given at the top of the mobile
-   block -- these override base rules of equal specificity. */
-@media (max-width: 640px) {
-  .legend {
-    display: none;
-  }
-  .maptrail {
-    /* The box -- where you are -- sits in the exact centre over the map, like
-       the strip's label under it; the steps already passed sit just to its
-       left (owner, 2026-11-10). Two equal flexible columns either side of the
-       box are what keep it centred whatever comes before it. */
-    display: grid;
-    grid-template-columns: 1fr auto 1fr;
-    align-items: center;
-    column-gap: 4px;
-    margin: 0 0 6px;
-    font-family: var(--font-display);
-    font-size: 16px;
-    letter-spacing: 0.08em;
-    color: var(--ink-faint);
-  }
-  .maptrail button {
-    font: inherit;
-    letter-spacing: inherit;
-    color: var(--ink-soft);
-    background: none;
-    border: 0;
-    padding: 4px 0;
-    cursor: pointer;
-    text-decoration: underline;
-    text-decoration-color: var(--line);
-    text-underline-offset: 4px;
-  }
-  .maptrail .sep {
-    color: var(--ink-faint);
-  }
-  /* The steps already passed are links back, so they sit a size down from the
-     box -- quieter, and narrow enough that 全国・中部・ fits beside a
-     prefecture's box on a 375px phone without nudging it off centre. */
-  .maptrail .before {
-    grid-column: 1;
-    grid-row: 1;
-    justify-self: end;
-    display: inline-flex;
-    align-items: baseline;
-    gap: 1px;
-    white-space: nowrap;
-    font-size: 13.5px;
-    letter-spacing: 0.04em;
-  }
-  .maptrail .here {
-    grid-column: 2;
-    grid-row: 1;
-  }
-  /* Where you are, boxed in the place's own map colour (owner, 2026-11-10):
-     the region hue via --rc, as the chips and cards use it; ink for 全国.
-     A wash of the hue with a full-strength border, not a solid fill: light
-     text on the solid hues measured 2.2:1 on Hokkaido and under 3:1 on Kantō
-     and Shikoku, and Kyūshū and Okinawa reach 4.5:1 with neither light nor
-     dark text. Ink on a wash reads on every region, and the border keeps the
-     colour unmistakably the map's. */
-  .maptrail .here {
-    display: inline-flex;
-    align-items: baseline;
-    gap: 8px;
-    padding: 3px 12px;
-    border-radius: 999px;
-    background: color-mix(in srgb, var(--rc, var(--ink)) 22%, var(--surface));
-    border: 1.5px solid var(--rc, var(--ink));
-    color: var(--ink);
-    font-weight: 600;
-  }
-  /* The English name on a second line, centred under the box (owner,
-     2026-11-10) -- a two-line header, so the box holds only the kanji and
-     stays narrow enough to sit centred beside the steps before it. */
-  .maptrail .en {
-    grid-column: 1 / -1;
-    grid-row: 2;
-    justify-self: center;
-    margin-top: 3px;
-    font-family: var(--font-sans);
-    font-size: 10.5px;
-    font-weight: 500;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: var(--ink-soft);
   }
 }
