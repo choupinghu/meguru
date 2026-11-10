@@ -1321,6 +1321,18 @@ footer .mark {
     grid-template-columns: 1.32fr 96px 0.95fr;
     gap: 20px;
   }
+  /* The panel is exactly as tall as the map card beside it (owner,
+     2026-11-11). It used to take its content's height -- 625px on All Japan
+     beside a 599px map, and its 340px minimum in a region, just over half the
+     map. contain: size stops its content setting the row's height, so the row
+     is the map's and the stretched panel fills it; anything longer scrolls
+     inside the panel rather than stretching the page. */
+  .explore-grid > .panel {
+    align-self: stretch;
+    contain: size;
+    min-height: 0;
+    overflow-y: auto;
+  }
   .rail {
     display: block;
     position: relative;
