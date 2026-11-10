@@ -836,7 +836,9 @@ body {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  min-height: 100%;
+  /* Exactly the panel's height, so the picture gives way when space is short. */
+  height: 100%;
+  container-type: inline-size;
 }
 /* Both names at one visual weight (owner, 2026-11-11): the same Mincho, the
    same ink and weight, the kanji a touch smaller in px because CJK glyphs
@@ -862,13 +864,27 @@ body {
 .charm-panel .panel-head h3 {
   text-wrap: balance;
 }
+/* The full width of the panel (owner, 2026-11-11), so the charm is the
+   panel's centrepiece rather than a 240px inset. */
 .charm-panel-art {
   width: 100%;
-  max-width: 240px;
   margin: 0 auto;
+  /* Full width at its 5:4 shape (80cqi = 80% of the panel's content width)
+     when the panel has the height, and shorter when it does not, rather than
+     scrolling. Its image is `contain`, so a shorter frame crops nothing. */
+  flex: 1 1 0;
+  min-height: 140px;
+  max-height: 80cqi;
+}
+/* Only the picture gives way; the text keeps its natural size. The note
+   borrows .item-note from the charm page, whose `flex-basis: 100%` would make
+   it claim the whole column's height here. */
+.charm-panel > :not(.charm-panel-art) {
+  flex: 0 0 auto;
 }
 .charm-panel-art .thumb {
-  aspect-ratio: 5 / 4;
+  height: 100%;
+  aspect-ratio: auto;
 }
 /* Clamped with CSS, never by splitting sentences (D5). */
 .charm-panel-story {
