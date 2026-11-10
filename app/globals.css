@@ -1214,6 +1214,18 @@ button.card-link {
   display: block;
   margin-bottom: 44px;
 }
+/* The identity block sits centred over the centred carousel (owner,
+   2026-11-11): crumb, both names, place and motif. */
+.charm-head {
+  text-align: center;
+}
+.charm-head h1 {
+  text-wrap: balance;
+}
+.charm-head .charm-loc,
+.charm-head .charm-meta {
+  justify-content: center;
+}
 
 /* ---------- carousel (/charm/[id]) ---------- */
 .carousel {
