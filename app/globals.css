@@ -835,19 +835,36 @@ body {
 .charm-panel {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
+  min-height: 100%;
+}
+/* Both names at one visual weight (owner, 2026-11-11): the same Mincho, the
+   same ink and weight, the kanji a touch smaller in px because CJK glyphs
+   fill more of their em box than Latin capitals and lowercase do. */
+.charm-panel .panel-head h3 {
+  font-size: 24px;
+}
+.charm-panel .panel-head .ja {
+  font-size: 21px;
+  font-weight: 600;
+  color: var(--ink);
+  letter-spacing: 0.04em;
+  margin-top: 4px;
+  line-height: 1.2;
+}
+/* The picture sits straight under the heading's rule. */
+.charm-panel .panel-head {
+  margin-bottom: 0;
 }
 .charm-panel-art {
   width: 100%;
-  max-width: 220px;
-  margin: 2px auto 0;
+  max-width: 240px;
+  margin: 0 auto;
 }
 .charm-panel-art .thumb {
   aspect-ratio: 5 / 4;
 }
-/* Clamped with CSS, never by splitting sentences (D5) -- these write-ups
-   mix Japanese punctuation with abbreviations, so a naive split on "."
-   would misfire either way. */
+/* Clamped with CSS, never by splitting sentences (D5). */
 .charm-panel-story {
   display: -webkit-box;
   -webkit-line-clamp: 3;
@@ -860,15 +877,41 @@ body {
   margin: 0;
   white-space: pre-line;
 }
+/* The foot: place and motif, then the link as a centred pill, held at the
+   bottom of the panel. */
+.charm-panel-foot {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding-top: 4px;
+}
+.charm-panel-tags {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 8px 12px;
+}
+.charm-panel-tags .loc {
+  margin: 0;
+}
 .charm-panel-link {
-  align-self: flex-start;
-  font-size: 13px;
+  display: inline-block;
+  padding: 9px 22px;
+  border-radius: 999px;
+  border: 1.5px solid var(--rc);
+  background: color-mix(in srgb, var(--rc) 22%, var(--surface));
+  color: var(--ink);
+  font-size: 13.5px;
   font-weight: 600;
-  color: var(--vermilion);
   text-decoration: none;
+  transition: background 0.18s, transform 0.18s;
 }
 .charm-panel-link:hover {
-  text-decoration: underline;
+  background: color-mix(in srgb, var(--rc) 34%, var(--surface));
+  transform: translateY(-1px);
 }
 
 /* ---------- section shell ---------- */

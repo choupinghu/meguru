@@ -35,10 +35,6 @@ interface MapPanelProps {
   view: PanelView;
   onSelectRegion: (region: RegionKey) => void;
   onSelectPrefecture: (code: number) => void;
-  /** Picking a card in the region/prefecture panels (spec 0010): switches
-   * the panel into that charm's preview *in place*, without navigating off
-   * `/` or moving the map (`MapExplorer` owns that distinction). */
-  onReset: () => void;
 }
 
 /** aria-live="polite" so screen readers announce the panel's new contents
@@ -47,7 +43,6 @@ export default function MapPanel({
   view,
   onSelectRegion,
   onSelectPrefecture,
-  onReset,
 }: MapPanelProps) {
   return (
     <aside className="panel" aria-live="polite">
@@ -67,7 +62,6 @@ export default function MapPanel({
           thumbCharm={toCharmView(view.design)}
           region={view.region}
           note={view.design.items[0]?.note ?? null}
-          onBack={onReset}
         />
       )}
     </aside>
@@ -184,8 +178,8 @@ function PrefecturePanel({
 
 /**
  * A Discover pick (spec 0010): a preview, not a second `/charm/[id]` page --
- * crumb, name, place, motif, artwork, a 3-line clamp of the story, the
- * item's own note, then a link out to the full record. Deliberately does
+ * name, artwork, a 3-line clamp of the story, the item's own note, then the
+ * place and motif and a link out to the full record. Deliberately does
  * not take a `charms`/`items` array the way the other three panels do (D6):
  * the caller hands down only the single `note` string and a pre-flattened
  * `thumbCharm`, never the item's `priceSgd`/condition/status, so there is
@@ -196,13 +190,11 @@ function CharmPanel({
   thumbCharm,
   region,
   note,
-  onBack,
 }: {
   design: Omit<DesignView, "items">;
   thumbCharm: CharmView;
   region: RegionKey | null;
   note: string | null;
-  onBack: () => void;
 }) {
   const regionInfo = region ? REGIONS[region] : null;
   const motif = motifLabel(design.motif);
@@ -210,36 +202,19 @@ function CharmPanel({
   // back to the collab tint rather than the panel's default vermilion.
   const color = regionInfo?.color ?? COLLAB_REGION.color;
 
+  // Owner, 2026-11-11: no back button and no region crumb (the map's trail
+  // and its own back button cover both); the English and Japanese names set
+  // at the same visual weight; the picture straight under the heading's
+  // rule; the place and motif tags gathered at the foot, above a centred
+  // "Full record" pill.
   return (
     <div className="charm-panel" style={{ "--rc": color } as CSSProperties}>
       <div className="panel-head">
         <div>
-          {/* D4 item 1: the region's "ja · en" for a placed charm, or just
-              COLLAB_REGION.en ("Off the map") for a placeless one. */}
-          <div className="crumb">
-            {regionInfo ? `${regionInfo.ja} · ${regionInfo.en}` : COLLAB_REGION.en}
-          </div>
           <h3>{design.name}</h3>
           {design.nameJa ? <div className="ja">{design.nameJa}</div> : null}
         </div>
-        <button type="button" className="reset" onClick={onBack}>
-          ← Back
-        </button>
       </div>
-      {/* locationLabel (D4 item 3) deliberately gives the three placeless
-          owned charms three different answers depending on *why* they have
-          no place -- a collab with a brand, a collab without one, and a
-          non-collab with no prefecture at all. Not a bug to normalise. */}
-      <div className="loc">
-        <span className="dot" />
-        {locationLabel(design)}
-      </div>
-      {/* Motif only -- never rarity (invariant 4, not displayed anywhere). */}
-      {motif ? (
-        <div className="chips">
-          <span className="tag motif">{motif}</span>
-        </div>
-      ) : null}
       <div className="charm-panel-art">
         <CharmThumb charm={thumbCharm} />
       </div>
@@ -248,12 +223,24 @@ function CharmPanel({
           two sentences" split on "." would misfire. */}
       {design.story ? <p className="charm-panel-story">{design.story}</p> : null}
       {/* The item's own note (D4 item 7) -- reuses .item-note from the charm
-          page. Its `flex-basis: 100%` is inert here (no flex parent), which
-          is fine: safe to reuse, not worth building a flex row just for it. */}
+          page. */}
       {note ? <p className="item-note">{note}</p> : null}
-      <Link href={`/charm/${design.id}`} className="charm-panel-link">
-        Full record →
-      </Link>
+      <div className="charm-panel-foot">
+        <div className="charm-panel-tags">
+          {/* locationLabel (D4 item 3) deliberately gives the three placeless
+              owned charms three different answers depending on *why* they
+              have no place. Not a bug to normalise. */}
+          <span className="loc">
+            <span className="dot" />
+            {locationLabel(design)}
+          </span>
+          {/* Motif only -- never rarity (invariant 4). */}
+          {motif ? <span className="tag motif">{motif}</span> : null}
+        </div>
+        <Link href={`/charm/${design.id}`} className="charm-panel-link">
+          Full record
+        </Link>
+      </div>
     </div>
   );
 }
