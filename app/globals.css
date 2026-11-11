@@ -814,17 +814,18 @@ body {
 
 /* A prefecture is an omamori (owner, 2026-11-11, after a photo of a real
    one): a pouch with clipped shoulders and a thin edge line, the prefecture's
-   motif woven over the face like brocade, a braided gold cord wound three
-   times into an ∞ bow round a knot, and a pale name label (a wash of the
-   region colour, gold-edged) below it with large kanji running downward. Every label is the same size: a three-character name or a long
-   romaji one gets smaller type rather than a bigger label. Capped in size so a
-   region with a single prefecture shows one pouch rather than a slab. The
-   button itself is bare: .om-body is the pouch, .om-knot sits over it. */
+   motif woven over the face like brocade, a braided gold cord wound twice
+   into an ∞ bow round a knot, and a pale name label (a wash of the region
+   colour, gold-edged) below it with large kanji running downward. Every label
+   is the same size: a three-character name or a long romaji one gets smaller
+   type rather than a bigger label. The button itself is bare: .om-body is
+   the pouch, .om-knot sits over it. */
 .reg-cell[data-pref] {
-  width: 100%;
-  height: 100%;
-  max-width: 190px;
-  max-height: 370px;
+  /* one size everywhere -- the size the omamori come out at in the three-row
+     regions (Kantō, Chūbu, Kinki, Kyūshū), so a region with fewer prefectures
+     shows the same pouches with more room, not bigger ones */
+  width: 114px;
+  height: 190px;
   justify-self: center;
   align-self: center;
   justify-content: flex-start;
@@ -841,9 +842,16 @@ body {
   transform-origin: 50% 0;
   --om-clip: polygon(24% 0, 76% 0, 100% 34px, 100% 100%, 0 100%, 0 34px);
 }
-/* a little more air between omamori than between region bubbles */
+/* a little more air between omamori than between region bubbles. The
+   pouches are a fixed size, so the grid packs to them -- each pouch spans two
+   half-columns of (114px - 16px gap) / 2 -- and the cluster sits centred in
+   the panel, keeping the gaps even however few prefectures a region has. */
 .om-grid {
   gap: 22px 16px;
+  grid-template-columns: repeat(var(--cols, 6), 49px);
+  grid-auto-rows: auto;
+  justify-content: center;
+  align-content: center;
 }
 /* On hover a pouch lifts and swings from its top for a moment, as if
    knocked, then settles back to its own tilt. Faded pouches stay still, and
