@@ -838,11 +838,11 @@ body {
 .reg-cell[data-pref]:hover .om-body {
   filter: brightness(1.06);
 }
-/* The knot sits on the drawstring band, tied there: the svg overlaps the top
-   of the pouch so the knot's centre lands on the band (22px down), the loop
-   rises above the pouch and the two ends hang over the band. */
+/* The cord is tied on the drawstring band: only the ∞ bow shows on the band
+   (its centre 22px down the pouch), and the string runs up from it, past the
+   top of the pouch, into a hanging loop. */
 .reg-cell[data-pref] {
-  padding-top: 18px;
+  padding-top: 26px;
 }
 .om-cord {
   position: relative;

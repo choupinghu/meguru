@@ -187,7 +187,7 @@ function RegionPanel({
               onClick={() => onSelectPrefecture(code)}
             >
               <svg className="om-cord" viewBox="0 0 40 40" aria-hidden="true">
-                <path d="M20 14C9 2 12-14 20-14S31 2 20 14M20 14L24 18L20 22L16 18ZM16 18C9 14 8 23 16 20.5M24 18C31 14 32 23 24 20.5M18.5 22L15.5 35M21.5 22L24.5 35" />
+                <path d="M19 18L17.5-14M21 18L22.5-14M17.5-14C16-28 24-28 22.5-14M20 18C16 13 9 13 9 18S16 23 20 18C24 13 31 13 31 18S24 23 20 18Z" />
               </svg>
               <span className="om-body">
                 <span className="om-label">
