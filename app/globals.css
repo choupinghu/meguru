@@ -812,16 +812,19 @@ body {
   mask-size: 14px 14px;
 }
 
-/* A prefecture is an omamori (owner, 2026-11-11): a cord tied in a decorative
-   knot above a pouch with clipped shoulders, a drawstring band at its neck, a
-   stitched frame, and a name panel with the kanji running downward as on the
-   real thing. Capped in size so a region with a single prefecture shows one
-   pouch rather than a slab. The button itself is bare; .om-body is the pouch. */
+/* A prefecture is an omamori (owner, 2026-11-11, after a photo of a real
+   one): a pouch with clipped shoulders and a thin edge line, the prefecture's
+   motif woven over the face like brocade, a braided gold cord wound three
+   times into an ∞ bow round a knot, and a pale name label (a wash of the
+   region colour, gold-edged) below it with large kanji running downward. Every label is the same size: a three-character name or a long
+   romaji one gets smaller type rather than a bigger label. Capped in size so a
+   region with a single prefecture shows one pouch rather than a slab. The
+   button itself is bare: .om-body is the pouch, .om-knot sits over it. */
 .reg-cell[data-pref] {
   width: 100%;
   height: 100%;
   max-width: 190px;
-  max-height: 360px;
+  max-height: 370px;
   justify-self: center;
   align-self: center;
   justify-content: flex-start;
@@ -831,90 +834,174 @@ body {
   background: none;
   overflow: visible;
   --cord: color-mix(in srgb, var(--rc) 45%, var(--ink));
+  --gold-deep: color-mix(in srgb, var(--gold) 60%, var(--ink));
+  /* hung from the top, a degree or two askew (set per prefecture in RegionPanel);
+     `rotate` stays clear of the hover lift's transform */
+  rotate: var(--tilt, 0deg);
+  transform-origin: 50% 0;
+  --om-clip: polygon(24% 0, 76% 0, 100% 34px, 100% 100%, 0 100%, 0 34px);
 }
-.reg-cell[data-pref]:hover {
-  filter: none;
+/* a little more air between omamori than between region bubbles */
+.om-grid {
+  gap: 22px 16px;
 }
-.reg-cell[data-pref]:hover .om-body {
-  filter: brightness(1.06);
-}
-/* The cord is tied on the drawstring band: only the ∞ bow shows on the band
-   (its centre 22px down the pouch), and the string runs up from it, past the
-   top of the pouch, into a hanging loop. */
+/* On hover a pouch lifts and swings from its top for a moment, as if
+   knocked, then settles back to its own tilt. Faded pouches stay still, and
+   reduced motion keeps the lift but drops the swing. */
 .reg-cell[data-pref] {
-  padding-top: 26px;
+  transition: transform 0.22s ease-out, filter 0.18s;
 }
-.om-cord {
-  position: relative;
-  z-index: 1;
-  flex: none;
-  width: 34px;
-  height: 34px;
-  margin-bottom: -40px;
+.reg-cell[data-pref]:not(:disabled):is(:hover, :focus-visible) {
+  transform: translateY(-7px) scale(1.04);
+  filter: brightness(1.06);
+  animation: om-swing 0.7s ease-out;
+}
+@keyframes om-swing {
+  0% {
+    rotate: var(--tilt, 0deg);
+  }
+  20% {
+    rotate: calc(var(--tilt, 0deg) - 5deg);
+  }
+  42% {
+    rotate: calc(var(--tilt, 0deg) + 3.5deg);
+  }
+  64% {
+    rotate: calc(var(--tilt, 0deg) - 2deg);
+  }
+  84% {
+    rotate: calc(var(--tilt, 0deg) + 0.8deg);
+  }
+  100% {
+    rotate: var(--tilt, 0deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .reg-cell[data-pref]:not(:disabled):is(:hover, :focus-visible) {
+    animation: none;
+  }
+}
+/* The knot (54 down its 80-unit box, drawn 10% up at 88px) sits 32px into
+   the pouch, just below where the long shoulders meet the sides:
+   32px - 54 * 1.1px = -27.4px. */
+.om-knot {
+  position: absolute;
+  z-index: 2;
+  top: -27.4px;
+  left: 50%;
+  width: 53px;
+  height: 88px;
+  margin-left: -26.5px;
   overflow: visible;
   fill: none;
-  stroke: var(--cord);
-  stroke-width: 2.4;
   stroke-linecap: round;
   stroke-linejoin: round;
 }
+/* each round: a dark edge under the gold so it reads as lying over the round
+   before it, short dark bands across it for the twist of the strands, and a
+   thin highlight along its upper side so it looks round. The whole bow casts
+   a soft shadow on the fabric. */
+.om-knot {
+  filter: drop-shadow(0 1px 0.8px color-mix(in srgb, var(--ink) 40%, transparent));
+}
+.om-knot .edge {
+  stroke: var(--gold-deep);
+  stroke-width: 4;
+}
+.om-knot .cord {
+  stroke: var(--gold);
+  stroke-width: 2.8;
+}
+.om-knot .twist {
+  stroke: var(--gold-deep);
+  stroke-width: 2.8;
+  stroke-linecap: butt;
+  stroke-dasharray: 0.7 1.5;
+  stroke-opacity: 0.55;
+}
+.om-knot .shine {
+  stroke: color-mix(in srgb, var(--gold) 35%, var(--surface));
+  stroke-width: 0.8;
+  stroke-opacity: 0.8;
+  translate: -0.35px -0.55px;
+}
+.om-knot .knot {
+  fill: var(--gold);
+  stroke: var(--gold-deep);
+  stroke-width: 1.2;
+}
+.om-knot .wrap {
+  stroke: var(--gold-deep);
+  stroke-width: 0.9;
+}
+/* The pouch is the edge colour; its face (::after) is inset 2px inside the
+   same clipped outline, and the motif (::before) is woven over the face. */
 .om-body {
   position: relative;
   isolation: isolate;
   flex: 1;
   align-self: stretch;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  padding: 34px 12px 12px;
-  border-radius: 0 0 14px 14px;
-  clip-path: polygon(18% 0, 82% 0, 100% 14px, 100% 100%, 0 100%, 0 14px);
-  background:
-    linear-gradient(
-      transparent 17px,
-      var(--cord) 17px 18.5px,
-      color-mix(in srgb, var(--rc) 82%, var(--ink)) 18.5px 25px,
-      var(--cord) 25px 26.5px,
-      transparent 26.5px
-    ),
-    var(--rc);
+  justify-content: flex-start;
+  padding: 62px 12px 16px;
+  clip-path: var(--om-clip);
+  border-radius: 0 0 6px 6px;
+  background: var(--cord);
 }
-/* the stitched brocade frame below the band */
 .om-body::after {
   content: "";
   position: absolute;
-  inset: 31px 6px 6px;
-  border: 1.5px dashed color-mix(in srgb, var(--rt, var(--ink)) 32%, transparent);
-  border-radius: 0 0 9px 9px;
-  pointer-events: none;
+  inset: 2px;
+  z-index: -2;
+  clip-path: var(--om-clip);
+  border-radius: 0 0 4px 4px;
+  background: var(--rc);
 }
 .om-label {
+  flex: none;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
-  padding: 10px 7px 8px;
-  border: 1px solid color-mix(in srgb, var(--rt, var(--ink)) 40%, transparent);
-  border-radius: 3px;
-  background: color-mix(in srgb, var(--rc) 86%, var(--rt, var(--ink)));
+  justify-content: center;
+  gap: 8px;
+  width: 64px;
+  height: 132px;
+  box-sizing: border-box;
+  border: 1.5px solid var(--gold);
+  background: color-mix(in srgb, var(--rc) 22%, var(--surface));
+  color: var(--ink);
 }
 .om-label .rj {
   writing-mode: vertical-rl;
-  letter-spacing: 0.12em;
+  font-size: 30px;
+  letter-spacing: 0.1em;
 }
 .om-label .rn {
-  font-size: 10px;
+  font-size: 8px;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+}
+.om-label[data-long-ja] .rj {
+  font-size: 24px;
+  letter-spacing: 0.04em;
+}
+.om-label[data-long-en] .rn {
+  font-size: 7px;
+  letter-spacing: 0.03em;
 }
 
 /* Local motif behind each prefecture box (owner, 2026-11-11): one thing the
    prefecture is known for, drawn as a thin line tile in the same spirit as the
    region 和柄 and applied the same way. `round` fits a whole number of tiles
-   so no motif is cut off at the edge. It sits below the omamori's cord line.
+   so no motif is cut off at the edge; it covers the omamori's face like
+   brocade, under the name label.
    Sources in Meguru-notes/motifs-v2. */
 .reg-cell[data-pref] .om-body::before {
   content: "";
   position: absolute;
-  inset: 34px 10px 10px;
+  inset: 6px;
   z-index: -1;
   background: var(--rt, var(--ink));
   opacity: 0.16;

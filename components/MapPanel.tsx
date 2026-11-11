@@ -116,6 +116,17 @@ function OverviewPanel({
   );
 }
 
+// The omamori's cord, in a 48x80 box with the knot at (24, 54): an ∞ bow of
+// two rounds of cord either side of a wound knot, lying side by side like
+// the doubled cord on a real one (owner's photo). Each lobe is a teardrop
+// that sags a little; the second round sits a cord's width up and right of
+// the first on the left loop, down and left on the right, so the coil
+// turns the same way on both sides.
+const OMAMORI_ROUNDS = [
+  "M22.60 55.40C16.72 46.09 3.98 45.60 3.00 53.93C2.22 60.79 12.80 65.69 22.60 55.40M25.40 52.60C31.28 43.29 44.02 42.80 45.00 51.13C45.78 57.99 35.20 62.89 25.40 52.60",
+  "M25.40 52.60C19.28 42.91 6.02 42.40 5.00 51.07C4.18 58.21 15.20 63.31 25.40 52.60M22.60 55.40C28.72 45.71 41.98 45.20 43.00 53.87C43.82 61.01 32.80 66.11 22.60 55.40",
+];
+
 // Rows of omamori for a region of n prefectures, each row centred: 5 is
 // 2-1-2 and 7 is 2-3-2, so an odd count stays balanced rather than leaving one
 // hanging. Anything else fills rows of three, with the short row on top.
@@ -164,7 +175,7 @@ function RegionPanel({
   );
   return (
     <div className="overview">
-      <div className="reg-grid" style={{ "--cols": cols * 2 } as CSSProperties}>
+      <div className="reg-grid om-grid" style={{ "--cols": cols * 2 } as CSSProperties}>
         {region.codes.map((code, i) => {
           const name = PREFECTURES[code];
           return (
@@ -177,6 +188,8 @@ function RegionPanel({
               style={
                 {
                   ...place[i],
+                  // each hangs a touch askew, the same way every visit
+                  "--tilt": `${((code * 7) % 5) - 2}deg`,
                   "--rc": region.color,
                   "--rt":
                     textOnRegionColour(region.color) === "ink"
@@ -186,11 +199,25 @@ function RegionPanel({
               }
               onClick={() => onSelectPrefecture(code)}
             >
-              <svg className="om-cord" viewBox="0 0 40 40" aria-hidden="true">
-                <path d="M19 18L17.5-14M21 18L22.5-14M17.5-14C16-28 24-28 22.5-14M20 18C16 13 9 13 9 18S16 23 20 18C24 13 31 13 31 18S24 23 20 18Z" />
+              <svg className="om-knot" viewBox="0 0 48 80" aria-hidden="true">
+                {OMAMORI_ROUNDS.map((d) => (
+                  <g key={d}>
+                    <path className="edge" d={d} />
+                    <path className="cord" d={d} />
+                    <path className="twist" d={d} />
+                    <path className="shine" d={d} />
+                  </g>
+                ))}
+                <ellipse className="knot" cx="24" cy="54" rx="5.2" ry="6" />
+                <path className="wrap" d="M19.4 51Q24 52 28.2 48.9M18.9 54.5Q24 55.6 29.1 52.4M19.6 58.1Q24 59.1 28.4 56" />
+                <path className="shine" d="M21 50.4Q22.6 49 24.6 48.8" />
               </svg>
               <span className="om-body">
-                <span className="om-label">
+                <span
+                  className="om-label"
+                  data-long-ja={(name?.ja.length ?? 0) > 2 || undefined}
+                  data-long-en={(name?.en.length ?? 0) > 7 || undefined}
+                >
                   <span className="rj">{name?.ja}</span>
                   <span className="rn">{name?.en}</span>
                 </span>
