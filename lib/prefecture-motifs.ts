@@ -2,8 +2,11 @@
  * What each prefecture is known for -- the thing its omamori's motif draws
  * (owner, 2026-11-11). Chosen to be nameable from a small outline and plainly
  * local; the research behind each, with sources, is in
- * Meguru-notes/designs (motif research table). Shown on the prefecture panel
- * as "Known for …".
+ * Meguru-notes/designs (motif research table).
+ *
+ * NOT SHOWN for now (owner, 2026-11-11): it appeared on the prefecture panel as
+ * "Known for …, and here for <its charms>" and was taken out until the wording
+ * is tightened. Kept so that work starts from here.
  */
 export const KNOWN_FOR: Record<number, string> = {
   1: "lavender fields",

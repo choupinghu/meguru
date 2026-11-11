@@ -3,7 +3,6 @@ import Link from "next/link";
 import CharmThumb from "./CharmThumb";
 import type { CharmView, DesignView } from "@/lib/charms";
 import { charmColor, locationLabel, motifLabel, toCharmView } from "@/lib/charms";
-import { KNOWN_FOR } from "@/lib/prefecture-motifs";
 import { PREFECTURES } from "@/lib/prefectures";
 import { COLLAB_REGION, REGIONS, REGION_LIST, textOnRegionColour, type RegionKey } from "@/lib/regions";
 
@@ -263,14 +262,6 @@ function OmamoriFace({ code }: { code: number }) {
 // the rail, lit up alongside.
 const SHOWN = 3;
 
-/** "A", "A and B", "A, B and C", or "A, B, C and 2 more" past `max`. */
-function listNames(names: string[], max: number): string {
-  const shown = names.slice(0, max);
-  const rest = names.length - shown.length;
-  if (rest > 0) return `${shown.join(", ")} and ${rest} more`;
-  if (shown.length <= 1) return shown.join("");
-  return `${shown.slice(0, -1).join(", ")} and ${shown[shown.length - 1]}`;
-}
 
 function PrefecturePanel({
   view,
@@ -282,13 +273,13 @@ function PrefecturePanel({
   onSelectCharm: (design: DesignView) => void;
 }) {
   // The place, then its charms (owner, 2026-11-11): the prefecture's own
-  // omamori, larger, with what it is known for -- naming its charms here too --
-  // then a card for each of up to three of them, naming what the rail (lit up
-  // alongside) only pictures. Nothing is picked for the
+  // omamori, larger, then a card for each of up to three of its charms, naming
+  // what the rail (lit up alongside) only pictures. A "Known for" line sat
+  // between them and was taken out until its wording is tightened (see
+  // lib/prefecture-motifs.ts). Nothing is picked for the
   // visitor -- the cards and the rail are two ways to the same choice. The
   // trail names the prefecture and the map leads back, so no heading here.
   const region = REGIONS[view.region];
-  const known = KNOWN_FOR[view.code];
   const n = view.charms.length;
   return (
     <div className="pref-panel">
@@ -311,16 +302,6 @@ function PrefecturePanel({
       >
         <OmamoriFace code={view.code} />
       </button>
-      {known ? (
-        <p className="pref-known">
-          Known for <b>{known}</b>
-          {n ? (
-            <>
-              , and here for <b>{listNames(view.charms.map((d) => d.name), SHOWN)}</b>
-            </>
-          ) : null}
-        </p>
-      ) : null}
       {n ? (
         <>
           <p className="pref-count">

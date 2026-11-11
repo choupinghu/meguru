@@ -1006,8 +1006,8 @@ body {
   letter-spacing: 0.03em;
 }
 
-/* The prefecture panel: the place's own omamori, larger and still, then what
-   it is known for, then a card per charm (see PrefecturePanel). */
+/* The prefecture panel: the place's own omamori, larger, then a card per
+   charm (see PrefecturePanel). */
 .pref-panel {
   display: flex;
   flex-direction: column;
@@ -1027,18 +1027,6 @@ body {
 }
 .reg-cell.om-hero[data-pref]:not(:disabled):is(:hover, :focus-visible) {
   transform: scale(1.4);
-}
-.pref-known {
-  margin: 0;
-  max-width: 34ch;
-  font-size: 14px;
-  line-height: 1.45;
-  color: var(--ink-soft);
-  text-align: center;
-}
-.pref-known b {
-  color: var(--ink);
-  font-weight: 600;
 }
 .pref-more {
   margin: 2px 0 0;
