@@ -116,9 +116,9 @@ function OverviewPanel({
   );
 }
 
-// Rows of boxes for a region of n prefectures, after the pip layouts of the
-// mahjong bamboo tiles: 5 is 2-1-2, 7 is 1-3-3. Anything else fills rows of
-// three, with the short row on top.
+// Rows of omamori for a region of n prefectures, each row centred: 5 is
+// 2-1-2 and 7 is 2-3-2, so an odd count stays balanced rather than leaving one
+// hanging. Anything else fills rows of three, with the short row on top.
 function pipRows(n: number): number[] {
   const fixed: Record<number, number[]> = {
     1: [1],
@@ -127,8 +127,8 @@ function pipRows(n: number): number[] {
     4: [2, 2],
     5: [2, 1, 2],
     6: [3, 3],
-    7: [1, 3, 3],
-    8: [2, 3, 3],
+    7: [2, 3, 2],
+    8: [3, 2, 3],
     9: [3, 3, 3],
   };
   if (fixed[n]) return fixed[n];
@@ -145,17 +145,17 @@ function RegionPanel({
 }) {
   // Every prefecture in the region as a box in the region's colour, kanji over
   // English (owner, 2026-11-11) -- the region-level counterpart of the All
-  // Japan bubbles. One with no charms yet is faded and cannot be picked. Each
-  // carries its prefecture's motif. The boxes sit like the pips on a mahjong
-  // bamboo tile (owner: "how 7 bamboo is equally spread out"): short rows are
-  // centred, never left hanging. The trail names the region and its button
-  // leads back, so no heading here.
+  // Japan bubbles, but shaped as omamori (owner: boxes felt rigid, and the
+  // charms are hung-up keepsakes much like omamori). One with no charms yet is
+  // faded and cannot be picked. Each carries its prefecture's motif. Rows are
+  // centred and balanced (see pipRows). The trail names the region and its
+  // button leads back, so no heading here.
   const region = REGIONS[view.region];
   const reached = new Set(view.reached);
   const rows = pipRows(region.codes.length);
   const cols = Math.max(...rows);
-  // Each box spans two columns of a grid twice as wide as the longest row, so
-  // a shorter row can start half a box in and sit centred.
+  // Each omamori spans two columns of a grid twice as wide as the longest row, so
+  // a shorter row can start half a step in and sit centred.
   const place = rows.flatMap((n, r) =>
     Array.from({ length: n }, (_, i) => ({
       gridRow: r + 1,
@@ -186,8 +186,15 @@ function RegionPanel({
               }
               onClick={() => onSelectPrefecture(code)}
             >
-              <span className="rj">{name?.ja}</span>
-              <span className="rn">{name?.en}</span>
+              <svg className="om-cord" viewBox="0 0 40 40" aria-hidden="true">
+                <path d="M20 14C9 2 12-14 20-14S31 2 20 14M20 14L24 18L20 22L16 18ZM16 18C9 14 8 23 16 20.5M24 18C31 14 32 23 24 20.5M18.5 22L15.5 35M21.5 22L24.5 35" />
+              </svg>
+              <span className="om-body">
+                <span className="om-label">
+                  <span className="rj">{name?.ja}</span>
+                  <span className="rn">{name?.en}</span>
+                </span>
+              </span>
             </button>
           );
         })}
