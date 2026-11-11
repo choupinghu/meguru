@@ -842,16 +842,19 @@ body {
   transform-origin: 50% 0;
   --om-clip: polygon(24% 0, 76% 0, 100% 34px, 100% 100%, 0 100%, 0 34px);
 }
-/* a little more air between omamori than between region bubbles. The
-   pouches are a fixed size, so the grid packs to them -- each pouch spans two
-   half-columns of (114px - 16px gap) / 2 -- and the cluster sits centred in
-   the panel, keeping the gaps even however few prefectures a region has. */
+/* More air between omamori than between region bubbles, and more again when
+   a region has few (gaps set per region in RegionPanel). The pouches are a
+   fixed size, so the grid packs to them -- each spans two half-columns of
+   (114px - column gap) / 2 -- and the cluster sits centred in the panel,
+   lifted 10px: a pouch's clipped shoulders leave space above it that its flat
+   bottom doesn't, so true centre looks low. */
 .om-grid {
-  gap: 22px 16px;
-  grid-template-columns: repeat(var(--cols, 6), 49px);
+  gap: var(--rg, 22px) var(--cg, 16px);
+  grid-template-columns: repeat(var(--cols, 6), calc((114px - var(--cg, 16px)) / 2));
   grid-auto-rows: auto;
   justify-content: center;
   align-content: center;
+  translate: 0 -10px;
 }
 /* On hover a pouch lifts and swings from its top for a moment, as if
    knocked, then settles back to its own tilt. Faded pouches stay still, and

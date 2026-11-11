@@ -175,7 +175,19 @@ function RegionPanel({
   );
   return (
     <div className="overview">
-      <div className="reg-grid om-grid" style={{ "--cols": cols * 2 } as CSSProperties}>
+      <div
+        className="reg-grid om-grid"
+        style={
+          {
+            "--cols": cols * 2,
+            // fewer prefectures, more air, as far as the panel allows: three
+            // pouches across only fit with a 16px gap, and three rows only
+            // with 22px, so widen whichever the region leaves room for
+            "--cg": cols <= 2 ? "44px" : "16px",
+            "--rg": rows.length <= 2 ? "64px" : "22px",
+          } as CSSProperties
+        }
+      >
         {region.codes.map((code, i) => {
           const name = PREFECTURES[code];
           return (
