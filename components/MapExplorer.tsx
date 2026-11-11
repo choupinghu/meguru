@@ -800,6 +800,7 @@ export default function MapExplorer({ charms }: { charms: DesignView[] }) {
           charms={railCharms}
           selectedId={discoveredCharm?.design.id ?? null}
           centreSelected={Boolean(discoveredCharm?.viaDiscover)}
+          focusCode={state.level === "prefecture" ? state.code : null}
           onSelect={selectCharm}
         />
 

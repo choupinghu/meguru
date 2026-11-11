@@ -1978,6 +1978,18 @@ footer .mark {
   .rail-item.is-selected::after {
     opacity: 1;
   }
+  /* A picked prefecture (see focusCode in CharmRail): its charms come to full
+     strength with a faint ring, and the rest of the region falls back without
+     leaving the rail. */
+  .rail-item.is-focus {
+    opacity: 1;
+  }
+  .rail-item.is-focus::after {
+    opacity: 0.45;
+  }
+  .rail-item.is-dim {
+    opacity: 0.28;
+  }
 }
 
 /* Tablet (641-900px): the same three columns, with the panel paying for them.

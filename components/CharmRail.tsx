@@ -31,6 +31,7 @@ export default function CharmRail({
   charms,
   selectedId,
   centreSelected = false,
+  focusCode = null,
   onSelect,
 }: {
   charms: DesignView[];
@@ -41,6 +42,11 @@ export default function CharmRail({
    * collection; not for a click on a tile, which is already in view and whose
    * neighbours should not jump around under the pointer. */
   centreSelected?: boolean;
+  /** A prefecture picked on the map or in the panel (rather than a charm).
+   * The rail keeps the whole region -- narrowing to one prefecture emptied it
+   * -- but brings that prefecture's charms to its middle and lets the rest
+   * fall back, so picking a place visibly moves the rail too. */
+  focusCode?: number | null;
   onSelect: (design: DesignView) => void;
 }) {
   const trackRef = useRef<HTMLDivElement | null>(null);
@@ -134,6 +140,23 @@ export default function CharmRail({
     return () => cancelAnimationFrame(id);
   }, [selectedId, list, centreSelected]);
 
+  // A picked prefecture: centre its run of charms in the rail. A charm
+  // selection takes precedence (the effect above places that one).
+  useEffect(() => {
+    if (focusCode == null || selectedId != null) return;
+    const track = trackRef.current;
+    const els = track
+      ? [...track.querySelectorAll<HTMLElement>(`[data-code="${focusCode}"]`)]
+      : [];
+    if (!track || els.length === 0) return;
+    const top = els[0].offsetTop;
+    const bottom = els[els.length - 1].offsetTop + els[els.length - 1].offsetHeight;
+    const max = track.scrollHeight - track.clientHeight;
+    const target = Math.max(0, Math.min(max, (top + bottom) / 2 - track.clientHeight / 2));
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    track.scrollTo({ top: target, behavior: reduce ? "auto" : "smooth" });
+  }, [focusCode, selectedId, list]);
+
   if (list.length === 0) return null;
 
   return (
@@ -141,12 +164,16 @@ export default function CharmRail({
       <div className="rail-track" ref={trackRef}>
         {list.map((design) => {
           const selected = design.id === selectedId;
+          const focusing = focusCode != null && selectedId == null;
+          const inFocus = focusing && design.prefectureCode === focusCode;
+          const dim = focusing && !inFocus;
           return (
             <button
               key={design.id}
               type="button"
               data-id={design.id}
-              className={`rail-item${selected ? " is-selected" : ""}`}
+              data-code={design.prefectureCode ?? undefined}
+              className={`rail-item${selected ? " is-selected" : ""}${inFocus ? " is-focus" : ""}${dim ? " is-dim" : ""}`}
               style={{ "--rc": charmColor(toCharmView(design)) } as React.CSSProperties}
               aria-current={selected ? "true" : undefined}
               // The name is not drawn -- the tile is the point -- so it has to
