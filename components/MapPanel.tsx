@@ -2,7 +2,8 @@ import type { CSSProperties } from "react";
 import Link from "next/link";
 import CharmThumb from "./CharmThumb";
 import type { CharmView, DesignView } from "@/lib/charms";
-import { locationLabel, motifLabel, toCharmView } from "@/lib/charms";
+import { charmColor, locationLabel, motifLabel, toCharmView } from "@/lib/charms";
+import { KNOWN_FOR } from "@/lib/prefecture-motifs";
 import { PREFECTURES } from "@/lib/prefectures";
 import { COLLAB_REGION, REGIONS, REGION_LIST, textOnRegionColour, type RegionKey } from "@/lib/regions";
 
@@ -35,6 +36,7 @@ interface MapPanelProps {
   view: PanelView;
   onSelectRegion: (region: RegionKey) => void;
   onSelectPrefecture: (code: number) => void;
+  onSelectCharm: (design: DesignView) => void;
 }
 
 /** aria-live="polite" so screen readers announce the panel's new contents
@@ -43,6 +45,7 @@ export default function MapPanel({
   view,
   onSelectRegion,
   onSelectPrefecture,
+  onSelectCharm,
 }: MapPanelProps) {
   return (
     <aside className="panel" aria-live="polite">
@@ -51,7 +54,7 @@ export default function MapPanel({
       ) : view.kind === "region" ? (
         <RegionPanel view={view} onSelectPrefecture={onSelectPrefecture} />
       ) : view.kind === "prefecture" ? (
-        <PrefecturePanel view={view} />
+        <PrefecturePanel view={view} onSelectRegion={onSelectRegion} onSelectCharm={onSelectCharm} />
       ) : (
         // A Discover pick's "← Back" resets to the overview (D4 item 9) --
         // there's no single drill-down level to unwind back to, since a
@@ -189,7 +192,6 @@ function RegionPanel({
         }
       >
         {region.codes.map((code, i) => {
-          const name = PREFECTURES[code];
           return (
             <button
               key={code}
@@ -211,29 +213,7 @@ function RegionPanel({
               }
               onClick={() => onSelectPrefecture(code)}
             >
-              <svg className="om-knot" viewBox="0 0 48 80" aria-hidden="true">
-                {OMAMORI_ROUNDS.map((d) => (
-                  <g key={d}>
-                    <path className="edge" d={d} />
-                    <path className="cord" d={d} />
-                    <path className="twist" d={d} />
-                    <path className="shine" d={d} />
-                  </g>
-                ))}
-                <ellipse className="knot" cx="24" cy="54" rx="5.2" ry="6" />
-                <path className="wrap" d="M19.4 51Q24 52 28.2 48.9M18.9 54.5Q24 55.6 29.1 52.4M19.6 58.1Q24 59.1 28.4 56" />
-                <path className="shine" d="M21 50.4Q22.6 49 24.6 48.8" />
-              </svg>
-              <span className="om-body">
-                <span
-                  className="om-label"
-                  data-long-ja={(name?.ja.length ?? 0) > 2 || undefined}
-                  data-long-en={(name?.en.length ?? 0) > 7 || undefined}
-                >
-                  <span className="rj">{name?.ja}</span>
-                  <span className="rn">{name?.en}</span>
-                </span>
-              </span>
+              <OmamoriFace code={code} />
             </button>
           );
         })}
@@ -242,16 +222,139 @@ function RegionPanel({
   );
 }
 
+/**
+ * The inside of an omamori -- the gold cord bow over a pouch carrying the
+ * prefecture's motif and its name label. The pouch's shape, colour and motif
+ * come from the `.reg-cell[data-pref]` it is placed in; this is shared by the
+ * region panel's buttons and the prefecture panel's larger one.
+ */
+function OmamoriFace({ code }: { code: number }) {
+  const name = PREFECTURES[code];
+  return (
+    <>
+      <svg className="om-knot" viewBox="0 0 48 80" aria-hidden="true">
+        {OMAMORI_ROUNDS.map((d) => (
+          <g key={d}>
+            <path className="edge" d={d} />
+            <path className="cord" d={d} />
+            <path className="twist" d={d} />
+            <path className="shine" d={d} />
+          </g>
+        ))}
+        <ellipse className="knot" cx="24" cy="54" rx="5.2" ry="6" />
+        <path className="wrap" d="M19.4 51Q24 52 28.2 48.9M18.9 54.5Q24 55.6 29.1 52.4M19.6 58.1Q24 59.1 28.4 56" />
+        <path className="shine" d="M21 50.4Q22.6 49 24.6 48.8" />
+      </svg>
+      <span className="om-body">
+        <span
+          className="om-label"
+          data-long-ja={(name?.ja.length ?? 0) > 2 || undefined}
+          data-long-en={(name?.en.length ?? 0) > 7 || undefined}
+        >
+          <span className="rj">{name?.ja}</span>
+          <span className="rn">{name?.en}</span>
+        </span>
+      </span>
+    </>
+  );
+}
+
+// At most three charm cards on the prefecture panel (owner); the rest are on
+// the rail, lit up alongside.
+const SHOWN = 3;
+
+/** "A", "A and B", "A, B and C", or "A, B, C and 2 more" past `max`. */
+function listNames(names: string[], max: number): string {
+  const shown = names.slice(0, max);
+  const rest = names.length - shown.length;
+  if (rest > 0) return `${shown.join(", ")} and ${rest} more`;
+  if (shown.length <= 1) return shown.join("");
+  return `${shown.slice(0, -1).join(", ")} and ${shown[shown.length - 1]}`;
+}
+
 function PrefecturePanel({
   view,
+  onSelectRegion,
+  onSelectCharm,
 }: {
   view: Extract<PanelView, { kind: "prefecture" }>;
+  onSelectRegion: (region: RegionKey) => void;
+  onSelectCharm: (design: DesignView) => void;
 }) {
-  // As RegionPanel: the trail names the prefecture and the map leads back.
-  return view.charms.length ? (
-    <p className="panel-note">Pick one from the column beside the map to read it here.</p>
-  ) : (
-    <p className="panel-note">No charms from this prefecture yet.</p>
+  // The place, then its charms (owner, 2026-11-11): the prefecture's own
+  // omamori, larger, with what it is known for -- naming its charms here too --
+  // then a card for each of up to three of them, naming what the rail (lit up
+  // alongside) only pictures. Nothing is picked for the
+  // visitor -- the cards and the rail are two ways to the same choice. The
+  // trail names the prefecture and the map leads back, so no heading here.
+  const region = REGIONS[view.region];
+  const known = KNOWN_FOR[view.code];
+  const n = view.charms.length;
+  return (
+    <div className="pref-panel">
+      {/* Clicking the place's own omamori again steps back out to its region
+          (owner) -- the same pouch that brought you here takes you back. */}
+      <button
+        type="button"
+        className="reg-cell om-hero"
+        data-pref={view.code}
+        aria-label={`Back to ${region.en}`}
+        title={`Back to ${region.en}`}
+        onClick={() => onSelectRegion(view.region)}
+        style={
+          {
+            "--rc": region.color,
+            "--rt":
+              textOnRegionColour(region.color) === "ink" ? "var(--ink)" : "var(--surface)",
+          } as CSSProperties
+        }
+      >
+        <OmamoriFace code={view.code} />
+      </button>
+      {known ? (
+        <p className="pref-known">
+          Known for <b>{known}</b>
+          {n ? (
+            <>
+              , and here for <b>{listNames(view.charms.map((d) => d.name), SHOWN)}</b>
+            </>
+          ) : null}
+        </p>
+      ) : null}
+      {n ? (
+        <>
+          <p className="pref-count">
+            {n === 1 ? "One charm" : `${n} charms`} from here
+          </p>
+          <ul className="pref-charms">
+            {view.charms.slice(0, SHOWN).map((design) => (
+              <li key={design.id}>
+                <button
+                  type="button"
+                  className="pref-charm"
+                  style={{ "--rc": charmColor(design) } as CSSProperties}
+                  onClick={() => onSelectCharm(design)}
+                >
+                  <CharmThumb charm={toCharmView(design)} />
+                  <span className="pref-charm-text">
+                    <span className="pref-charm-name">{design.name}</span>
+                    {design.nameJa ? <span className="pref-charm-ja">{design.nameJa}</span> : null}
+                    {design.city ? <span className="pref-charm-city">{design.city}</span> : null}
+                  </span>
+                </button>
+              </li>
+            ))}
+          </ul>
+          {n > SHOWN ? (
+            <p className="pref-more">
+              {n - SHOWN} more in the column beside the map
+            </p>
+          ) : null}
+        </>
+      ) : (
+        <p className="pref-count">No charms from here yet.</p>
+      )}
+    </div>
   );
 }
 

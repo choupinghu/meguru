@@ -956,7 +956,10 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
-  padding: 62px 12px 16px;
+  /* 46 + the 132px label + 12 = the pouch's 190px exactly; any more and the
+     body spills out of its button and past the space the grid gave it */
+  padding: 46px 12px 12px;
+  min-height: 0;
   clip-path: var(--om-clip);
   border-radius: 0 0 6px 6px;
   background: var(--cord);
@@ -1001,6 +1004,109 @@ body {
 .om-label[data-long-en] .rn {
   font-size: 7px;
   letter-spacing: 0.03em;
+}
+
+/* The prefecture panel: the place's own omamori, larger and still, then what
+   it is known for, then a card per charm (see PrefecturePanel). */
+.pref-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding-top: 8px;
+}
+/* drawn 1.4x from its top edge; the margin hands the flow the extra 0.4 of
+   its 190px height so what follows sits below it. It hangs straight, and on
+   hover swings like the small ones but keeps its size -- the region panel's
+   hover would otherwise swap the 1.4x for that panel's lift. Clicking it
+   steps back to the region. */
+.reg-cell.om-hero {
+  --tilt: 0deg;
+  transform: scale(1.4);
+  margin-bottom: 86px;
+}
+.reg-cell.om-hero[data-pref]:not(:disabled):is(:hover, :focus-visible) {
+  transform: scale(1.4);
+}
+.pref-known {
+  margin: 0;
+  max-width: 34ch;
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--ink-soft);
+  text-align: center;
+}
+.pref-known b {
+  color: var(--ink);
+  font-weight: 600;
+}
+.pref-more {
+  margin: 2px 0 0;
+  font-size: 12px;
+  color: var(--ink-faint);
+}
+.pref-count {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+.pref-charms {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.pref-charm {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 8px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface-2);
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.18s, transform 0.18s;
+}
+.pref-charm:hover,
+.pref-charm:focus-visible {
+  border-color: var(--rc);
+  transform: translateY(-1px);
+}
+.pref-charm .thumb {
+  flex: none;
+  width: 56px;
+  aspect-ratio: 1;
+  border-radius: 10px;
+}
+.pref-charm-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.pref-charm-name {
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.25;
+}
+.pref-charm-ja {
+  font-size: 12px;
+  color: var(--ink-soft);
+}
+.pref-charm-city {
+  font-size: 11px;
+  color: var(--ink-faint);
 }
 
 /* Local motif behind each prefecture box (owner, 2026-11-11): one thing the

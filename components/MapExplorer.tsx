@@ -808,6 +808,7 @@ export default function MapExplorer({ charms }: { charms: DesignView[] }) {
           view={panelView}
           onSelectRegion={selectRegion}
           onSelectPrefecture={selectPrefecture}
+          onSelectCharm={selectCharm}
         />
       </div>
     </section>
