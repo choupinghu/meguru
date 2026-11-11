@@ -116,6 +116,26 @@ function OverviewPanel({
   );
 }
 
+// Rows of boxes for a region of n prefectures, after the pip layouts of the
+// mahjong bamboo tiles: 5 is 2-1-2, 7 is 1-3-3. Anything else fills rows of
+// three, with the short row on top.
+function pipRows(n: number): number[] {
+  const fixed: Record<number, number[]> = {
+    1: [1],
+    2: [2],
+    3: [3],
+    4: [2, 2],
+    5: [2, 1, 2],
+    6: [3, 3],
+    7: [1, 3, 3],
+    8: [2, 3, 3],
+    9: [3, 3, 3],
+  };
+  if (fixed[n]) return fixed[n];
+  const rows = Array.from({ length: Math.floor(n / 3) }, () => 3);
+  return n % 3 ? [n % 3, ...rows] : rows;
+}
+
 function RegionPanel({
   view,
   onSelectPrefecture,
@@ -125,25 +145,38 @@ function RegionPanel({
 }) {
   // Every prefecture in the region as a box in the region's colour, kanji over
   // English (owner, 2026-11-11) -- the region-level counterpart of the All
-  // Japan bubbles. One with no charms yet is faded and cannot be picked. No
-  // pattern for now. The trail names the region and its button leads back,
-  // so no heading here.
+  // Japan bubbles. One with no charms yet is faded and cannot be picked. Each
+  // carries its prefecture's motif. The boxes sit like the pips on a mahjong
+  // bamboo tile (owner: "how 7 bamboo is equally spread out"): short rows are
+  // centred, never left hanging. The trail names the region and its button
+  // leads back, so no heading here.
   const region = REGIONS[view.region];
   const reached = new Set(view.reached);
-  const cols = region.codes.length === 1 ? 1 : region.codes.length <= 4 ? 2 : 3;
+  const rows = pipRows(region.codes.length);
+  const cols = Math.max(...rows);
+  // Each box spans two columns of a grid twice as wide as the longest row, so
+  // a shorter row can start half a box in and sit centred.
+  const place = rows.flatMap((n, r) =>
+    Array.from({ length: n }, (_, i) => ({
+      gridRow: r + 1,
+      gridColumn: `${cols - n + 1 + 2 * i} / span 2`,
+    })),
+  );
   return (
     <div className="overview">
-      <div className="reg-grid" style={{ "--cols": cols } as CSSProperties}>
-        {region.codes.map((code) => {
+      <div className="reg-grid" style={{ "--cols": cols * 2 } as CSSProperties}>
+        {region.codes.map((code, i) => {
           const name = PREFECTURES[code];
           return (
             <button
               key={code}
               type="button"
               className="reg-cell"
+              data-pref={code}
               disabled={!reached.has(code)}
               style={
                 {
+                  ...place[i],
                   "--rc": region.color,
                   "--rt":
                     textOnRegionColour(region.color) === "ink"
